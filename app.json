@@ -1,0 +1,25 @@
+{
+  "devtools_port": 9090,
+  "startup_app": {
+    "name": "Excel-API-Example",
+    "url": "http://localhost.mac/Excel-Example/index.html",
+    "uuid": "grid",
+    "applicationIcon": "http://openfin.github.io/snap-and-dock/openfin.ico",
+    "autoShow": true,
+    "defaultWidth": 250,
+    "defaultHeight": 150,
+    "defaultTop": 200,
+    "defaultLeft": 200
+  },
+  "runtime": {
+    "arguments": "",
+    "version": "v40"
+  },
+  "shortcut": {
+    "company": "OpenFin",
+    "description": "docking-manager-example",
+    "icon": "http://openfin.github.io/snap-and-dock/openfin.ico",
+    "name": "docking-manager-example"
+  }
+}
+
