@@ -29,7 +29,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function initTable(rowLength, columnLength){
 
-        var row = createRow(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]);
+        var row = createRow(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"], "cellHeader");
         var column = createColumn("");
         column.className = "rowNumber";
         row.insertBefore(column, row.childNodes[0]);
@@ -37,7 +37,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
         for(var i = 1; i <= rowLength; i++){
 
-            row = createRow(columnLength);
+            row = createRow(columnLength, "cell");
             column = createColumn(i);
             column.className = "rowNumber";
             row.insertBefore(column, row.childNodes[0]);
@@ -45,23 +45,23 @@ window.addEventListener("DOMContentLoaded", function(){
         }
     }
 
-    function createRow(data){
+    function createRow(data, cellClassName){
 
         var length = data.length? data.length: data;
         var row = document.createElement("tr");
 
         for(var i = 0; i < length; i++){
 
-            row.appendChild(createColumn(data[i]));
+            row.appendChild(createColumn(data[i], cellClassName));
         }
 
         return row;
     }
 
-    function createColumn(data){
+    function createColumn(data, cellClassName){
 
         var column = document.createElement("td");
-        column.className = "cell";
+        column.className = cellClassName;
         column.contentEditable = true;
         column.addEventListener("DOMCharacterDataModified", onDataChange);
         column.addEventListener("click", onCellClicked);
@@ -71,10 +71,26 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function selectCell(cell){
 
-        if(currentCell)currentCell.className = "cell";
+        if(currentCell){
+
+            currentCell.className = "cell";
+            updateCellNumberClass(currentCell, "rowNumber", "cellHeader");
+        }
+
         currentCell = cell;
         currentCell.className = "cellSelected";
         formulaInput.innerText = "Formula: " + cell.title;
+
+        updateCellNumberClass(cell, "rowNumberSelected", "cellHeaderSelected");
+    }
+
+    function updateCellNumberClass(cell, className, headerClassName){
+
+        var row = cell.parentNode;
+        var columnIndex = Array.prototype.indexOf.call(row.childNodes, cell);
+        var rowIndex = Array.prototype.indexOf.call(row.parentNode.childNodes, cell.parentNode);
+        tBody.childNodes[rowIndex].childNodes[0].className = className;
+        tHead.getElementsByTagName("tr")[0].getElementsByTagName("td")[columnIndex].className = headerClassName;
     }
 
     function onCellClicked(event){
