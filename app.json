@@ -6,10 +6,10 @@
     "uuid": "grid",
     "applicationIcon": "http://openfin.github.io/snap-and-dock/openfin.ico",
     "autoShow": true,
-    "defaultWidth": 250,
-    "defaultHeight": 150,
-    "defaultTop": 200,
-    "defaultLeft": 200
+    "defaultWidth": 760,
+    "defaultHeight": 704,
+    "defaultTop": 100,
+    "defaultLeft": 100
   },
   "runtime": {
     "arguments": "",
@@ -17,7 +17,7 @@
   },
   "shortcut": {
     "company": "OpenFin",
-    "description": "excel-api-example",
+    "description": "docking-manager-example",
     "icon": "http://openfin.github.io/snap-and-dock/openfin.ico",
     "name": "docking-manager-example"
   }

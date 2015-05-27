@@ -167,18 +167,37 @@
         }
         #sheets{
 
-
         }
         #formulaInput{
 
             width: 500px;
             border: 1px solid lightgray;
             height: 20px;
+            margin: 10px;;
             margin-bottom: 10px;;
             margin-top: 10px;
             padding: 5px;
             font-family: "Verdana", sans-serif;
             font-size: 10pt;
+        }
+
+        #status{
+
+            background-color: darkgreen;
+            color: white;
+            width: 100%;
+            margin-top: 5px;
+            padding: 5px;
+            font-family: "Verdana", sans-serif;
+            font-size: 8pt;
+            padding-left: 10px;
+        }
+
+        body{
+
+            overflow: hidden;
+            margin: 0px;
+
         }
     </style>
     <meta charset="UTF-8">
@@ -198,5 +217,6 @@
 
 </table>
 <div id="sheets"><button id="newSheetButton" title="New sheet" class="tab">New</button></div>
+<div id="status">Excel not connected</div>
 </body>
 </html>

@@ -57,6 +57,7 @@ fin.desktop.Excel = (function(){
          EventDispatcher.prototype.hasEventListener = function(type, callback){
 
             if(!this._callbacks[type]) return false;
+            if(!callback) return true;
             return (this._callbacks[type].indexOf(callback) >= 0)
          };
 
@@ -197,6 +198,10 @@ fin.desktop.Excel = (function(){
 
             switch(data.event){
 
+                case "connected":
+                    fin.desktop.Excel.dispatchEvent({type: data.event});
+                    break;
+
                 case "sheetChanged":
                     var sheets = worksheets[data.workbookName];
                     if(sheets[data.sheetName]){
@@ -215,6 +220,7 @@ fin.desktop.Excel = (function(){
                     var sheets = worksheets[data.workbookName];
 
                     if(sheets[data.sheetName]){
+
                         sheets[data.sheetName].dispatchEvent({type:data.event});
                     }
                     break;
@@ -230,11 +236,13 @@ fin.desktop.Excel = (function(){
 
                     var workbook = fin.desktop.Excel.getWorkbookByName(data.workbookName);
                     if(!worksheets[data.workbookName]) worksheets[data.workbookName] = {};
-                    var sheet = worksheets[data.workbookName][data.sheetName] = new ExcelWorksheet(data.sheetName, workbook);
+                    var sheets = worksheets[data.workbookName];
+                    var sheet = sheets[data.sheetName]? sheets[data.sheetName]: sheets[data.sheetName] = new ExcelWorksheet(data.sheetName, workbook);
                     workbook.dispatchEvent({type: data.event, worksheet: sheet});
                     break;
 
                 case "sheetRemoved":
+
                     var workbook = fin.desktop.Excel.getWorkbookByName(data.workbookName);
                     var sheet = worksheets[data.workbookName][data.sheetName];
                     delete worksheets[data.workbookName][data.sheetName];
@@ -332,13 +340,21 @@ fin.desktop.Excel = (function(){
                 case "addSheet":
 
                     if(!worksheets[data.workbookName]) worksheets[data.workbookName] = {};
-                    var worksheet = worksheets[data.workbookName][data.sheetName] = new ExcelWorksheet(data.sheetName, workbooks[data.workbookName]);
+                    var sheets = worksheets[data.workbookName][data.sheetName];
+                    var worksheet = sheets[data.sheetName]? sheets[data.sheetName] : sheets[data.sheetName] = new ExcelWorksheet(data.sheetName, workbooks[data.workbookName]);
+
                     if(callbacks[data.messageId]) {
 
                         callbacks[data.messageId](worksheet);
                         delete callbacks[messageId];
                     }
+
                     break;
+
+                case "getStatus":
+                    if(callbacks[data.messageId]) callbacks[data.messageId](data.status);
+                    break;
+
             }
 
         });
@@ -365,6 +381,14 @@ fin.desktop.Excel = (function(){
         var obj = {"messageId": messageId++, action: "addWorkbook"};
         fin.desktop.InterApplicationBus.publish("excelCall",obj);
 
+    };
+
+    Excel.prototype.getConnectionStatus = function(callback){
+
+        callbacks[messageId] = callback;
+
+        var obj = {"messageId": messageId++, action: "getStatus"};
+        fin.desktop.InterApplicationBus.publish("excelCall",obj);
     };
 
 
