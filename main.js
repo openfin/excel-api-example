@@ -4,6 +4,8 @@
 
 window.addEventListener("DOMContentLoaded", function(){
 
+    var rowLength = 27;
+    var columnLength = 12 ;
     var table = document.getElementById("excelExample");
     var tBody = table.getElementsByTagName("tbody")[0];
     var tHead = table.getElementsByTagName("thead")[0];
@@ -24,10 +26,23 @@ window.addEventListener("DOMContentLoaded", function(){
 
             case 78: // N
                 if(event.ctrlKey) fin.desktop.Excel.addWorkbook();
+            case 37: // LEFT
+                selectPreviousCell();
+                break;
+            case 38: // UP
+                selectCellAbove();
+                break;
+            case 39: // RIGHT
+                selectNextCell();
+                break;
+            case 40: //DOWN
+                selectCellBelow();
+                break;
+
         };
     });
 
-    function initTable(rowLength, columnLength){
+    function initTable(){
 
         var row = createRow(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"], "cellHeader", false);
         var column = createColumn("");
@@ -69,6 +84,7 @@ window.addEventListener("DOMContentLoaded", function(){
             column.contentEditable = true;
             //column.addEventListener("DOMCharacterDataModified", onDataChange);
             column.addEventListener("keydown", onDataChange);
+            column.addEventListener("blur", onDataChange);
             column.addEventListener("mousedown", onCellClicked);
         }
 
@@ -79,8 +95,6 @@ window.addEventListener("DOMContentLoaded", function(){
     function onCellClicked(event){
 
         selectCell(event.target);
-        var address = getAddress(event.target);
-        currentWorksheet.activateCell(address.offset);
     }
 
     function selectCell(cell){
@@ -94,8 +108,12 @@ window.addEventListener("DOMContentLoaded", function(){
         currentCell = cell;
         currentCell.className = "cellSelected";
         formulaInput.innerText = "Formula: " + cell.title;
+        cell.focus();
 
         updateCellNumberClass(cell, "rowNumberSelected", "cellHeaderSelected");
+
+        var address = getAddress(currentCell);
+        currentWorksheet.activateCell(address.offset);
     }
 
     function updateCellNumberClass(cell, className, headerClassName){
@@ -107,15 +125,54 @@ window.addEventListener("DOMContentLoaded", function(){
         tHead.getElementsByTagName("tr")[0].getElementsByTagName("td")[columnIndex].className = headerClassName;
     }
 
+    function selectCellBelow(){
+
+        if(!currentCell) return;
+        var info = getAddress(currentCell);
+        if(info.row >= rowLength) return;
+        var cell = tBody.childNodes[info.row].childNodes[info.column];
+        selectCell(cell);
+    }
+
+    function selectCellAbove(){
+
+        if(!currentCell) return;
+        var info = getAddress(currentCell);
+        if(info.row <= 1) return;
+        var cell = tBody.childNodes[info.row - 2].childNodes[info.column];
+        selectCell(cell);
+    }
+
+    function selectNextCell(){
+
+        if(!currentCell) return;
+        var info = getAddress(currentCell);
+        if(info.column >= columnLength) return;
+        var cell = tBody.childNodes[info.row - 1].childNodes[info.column + 1];
+        selectCell(cell);
+    }
+
+    function selectPreviousCell(){
+
+        if(!currentCell) return;
+        var info = getAddress(currentCell);
+        if(info.column <= 1) return;
+        var cell = tBody.childNodes[info.row - 1].childNodes[info.column - 1];
+        selectCell(cell);
+    }
+
     function onDataChange(event){
 
-        console.log(event.keyCode);
-        if(event.keyCode == 13) {
+        if(event.keyCode == 13 || event.type == "blur") {
 
             var update = getAddress(event.target);
             update.value = event.target.innerText;
             currentWorksheet.setCells([[update.value]], update.offset);
-            event.preventDefault();
+            if(event.type == "keydown"){
+
+                selectCellBelow();
+                event.preventDefault();
+            }
         }
     }
 
@@ -178,7 +235,7 @@ window.addEventListener("DOMContentLoaded", function(){
         }
         document.getElementById(sheet.name).className = "tabSelected";
         currentWorksheet = sheet;
-        currentWorksheet.getCells("A1", 12, 27, updateData);
+        currentWorksheet.getCells("A1", columnLength, rowLength, updateData);
     }
 
     function selectWorkbook(workbook){
