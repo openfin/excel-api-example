@@ -145,10 +145,8 @@ window.addEventListener("DOMContentLoaded", function(){
 
         function updateCell(cell, value, formula){
 
-            cell.removeEventListener("DOMCharacterDataModified", onDataChange);
             cell.innerText = value? value: "";
             cell.title = formula? formula: "";
-            cell.addEventListener("DOMCharacterDataModified", onDataChange);
         }
 
         function onSheetChanged(event){
