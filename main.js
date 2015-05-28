@@ -68,7 +68,6 @@ window.addEventListener("DOMContentLoaded", function(){
 
                 column.contentEditable = true;
                 //column.addEventListener("DOMCharacterDataModified", onDataChange);
-                column.addEventListener("keydown", onDataChange);
                 column.addEventListener("mousedown", onCellClicked);
             }
 
@@ -215,6 +214,8 @@ window.addEventListener("DOMContentLoaded", function(){
             workbook.addEventListener("sheetAdded", onWorksheetAdded);
             workbook.addEventListener("sheetRemoved", onWorksheetRemoved);
             addWorkbookTab(event.workbook.name);
+
+            if(workbooksContainer.style.display == "none") showWorkbooksContainer();
         }
 
         function onWorkbookRemoved(event){
@@ -226,6 +227,11 @@ window.addEventListener("DOMContentLoaded", function(){
             workbook.removeEventListener("sheetRemoved", onWorksheetRemoved);
 
             document.getElementById("workbookTabs").removeChild(document.getElementById(event.workbook.name));
+
+            if(document.getElementById("workbookTabs").childNodes.length < 2){
+
+                showNoWorkbooksMessage();
+            }
         }
 
         function onWorksheetAdded(event){
@@ -298,6 +304,32 @@ window.addEventListener("DOMContentLoaded", function(){
             document.getElementById("status").innerText = "Connected to Excel";
         }
 
+        function showNoWorkbooksMessage(){
+
+            fin.desktop.Window.getCurrent().animate({
+
+                size: {
+                    height: 195,
+                    duration: 500
+                }
+            });
+            noWorkbooks.style.display = "block";
+            workbooksContainer.style.display = "none";
+        }
+
+        function showWorkbooksContainer(){
+
+            workbooksContainer.style.display = "block";
+            noWorkbooks.style.display = "none";
+            fin.desktop.Window.getCurrent().animate({
+
+                size: {
+                    height: 830,
+                    duration: 500
+                }
+            });
+        }
+
         initTable(27, 12);
 
         fin.desktop.main(function(){
@@ -318,7 +350,14 @@ window.addEventListener("DOMContentLoaded", function(){
                     workbooks[i].addEventListener("sheetRemoved", onWorksheetRemoved);
                 };
 
-                if(workbooks.length)selectWorkbook(workbooks[0]);
+                if(workbooks.length){
+
+                    selectWorkbook(workbooks[0]);
+                    showWorkbooksContainer();
+                }
+                else {
+                    showNoWorkbooksMessage();
+                }
             });
         });
 

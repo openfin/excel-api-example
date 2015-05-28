@@ -191,6 +191,10 @@
             font-family: "Verdana", sans-serif;
             font-size: 8pt;
             padding-left: 10px;
+            bottom: 0px;
+
+            position: fixed;
+
         }
 
         body{
@@ -198,6 +202,53 @@
             overflow: hidden;
             margin: 0px;
 
+        }
+
+        #intro{
+
+            padding: 10px;
+
+        }
+        .introHeader{
+
+            font-family: Calibri, Helvetica, Arial;
+            color: green;
+            clear: right;
+            font-size: 20pt;
+            font-weight:lighter;
+            text-align: center;
+        }
+
+        .introDescription{
+
+            font-family: Calibri, Helvetica, Arial;
+            font-size: 11pt;
+            padding-top: 10px;
+            color: #282828;
+            text-align: center;
+        }
+
+        #noWorkbooks{
+
+            font-family: Calibri, Helvetica, Arial;
+            font-size: 11pt;
+            padding: 15px;
+            text-align: center;
+            color: #0e77ed;
+            display: none;
+        }
+
+        #workbooksContainer{
+
+            display: none;
+        }
+
+        .newWorkbook{
+
+            font-family: Calibri, Helvetica, Arial;
+            font-size: 11pt;
+            text-align: center;
+            color: #0e77ed;
         }
     </style>
     <meta charset="UTF-8">
@@ -207,16 +258,26 @@
 
 </head>
 <body>
-<div id="workbookTabs"><button class="workbookTab" title="New workbook (ctr+N)" id="newWorkbookButton" onclick="fin.desktop.Excel.addWorkbook()">New</button></div>
-<div class="greenBar"></div>
-<div id="formulaInput">Formula: </div>
-<table id="excelExample" cellspacing="0" cellpadding="2">
-    <thead>
-    </thead>
-    <tbody></tbody>
 
-</table>
-<div id="sheets"><button id="newSheetButton" title="New sheet" class="tab">New</button></div>
+<div id="intro">
+    <div class="introHeader">Welcom to Openfin&trade; Excel demo.</div>
+    <div class="introDescription">The purpose of this demo is to demonstrate Openfin's capabilities for communicating with Excel. </div>
+</div>
+
+<div id="noWorkbooks">No Workbooks found. Start with creating <a href="#" class="newWorkbook" onclick="fin.desktop.Excel.addWorkbook()"> New Workbook. </a> </div>
+
+<div id="workbooksContainer">
+
+    <div id="workbookTabs"><button class="workbookTab" title="New workbook (ctr+N)" id="newWorkbookButton" onclick="fin.desktop.Excel.addWorkbook()">New</button></div>
+    <div class="greenBar"></div>
+    <div id="formulaInput">Formula: </div>
+    <table id="excelExample" cellspacing="0" cellpadding="2">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+    <div id="sheets"><button id="newSheetButton" title="New sheet" class="tab">New</button></div>
+</div>
 <div id="status">Excel not connected</div>
+
 </body>
 </html>
