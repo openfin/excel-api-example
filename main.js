@@ -68,6 +68,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
                 column.contentEditable = true;
                 //column.addEventListener("DOMCharacterDataModified", onDataChange);
+                column.addEventListener("keydown", onDataChange);
                 column.addEventListener("mousedown", onCellClicked);
             }
 
