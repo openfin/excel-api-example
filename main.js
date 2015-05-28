@@ -299,11 +299,6 @@ window.addEventListener("DOMContentLoaded", function(){
             document.getElementById("workbookTabs").insertBefore(button, newWorkbookButton);
         }
 
-        function onExcelConnected(){
-
-            document.getElementById("status").innerText = "Connected to Excel";
-        }
-
         function showNoWorkbooksMessage(){
 
             fin.desktop.Window.getCurrent().animate({
@@ -340,7 +335,13 @@ window.addEventListener("DOMContentLoaded", function(){
             Excel.addEventListener("workbookAdded", onWorkbookAdded);
             Excel.addEventListener("workbookClosed", onWorkbookRemoved);
             Excel.addEventListener("connected", onExcelConnected);
-            Excel.getWorkbooks(function(workbooks){
+
+        });
+
+        function onExcelConnected(){
+
+            document.getElementById("status").innerText = "Connected to Excel";
+            fin.desktop.Excel.getWorkbooks(function(workbooks){
 
                 for(var i = 0; i < workbooks.length; i++){
 
@@ -359,7 +360,7 @@ window.addEventListener("DOMContentLoaded", function(){
                     showNoWorkbooksMessage();
                 }
             });
-        });
+        }
 
 });
 
