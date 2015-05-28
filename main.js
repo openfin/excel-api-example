@@ -202,7 +202,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function updateCell(cell, value, formula){
 
-        cell.innerText = value? value: "";
+        cell.innerText = value || value === 0? value: "";
         cell.title = formula? formula: "";
     }
 
