@@ -85,7 +85,8 @@ window.addEventListener("DOMContentLoaded", function(){
             //column.addEventListener("DOMCharacterDataModified", onDataChange);
             column.addEventListener("keydown", onDataChange);
             column.addEventListener("blur", onDataChange);
-            column.addEventListener("mousedown", onCellClicked);
+          //  column.addEventListener("mousedown", onCellClicked);
+            column.addEventListener("focus", selectCell);
         }
 
         if(data)column.innerText = data;
@@ -97,8 +98,9 @@ window.addEventListener("DOMContentLoaded", function(){
         selectCell(event.target);
     }
 
-    function selectCell(cell){
+    function selectCell(event){
 
+        var cell = event.target;
         if(currentCell){
 
             currentCell.className = "cell";
@@ -108,7 +110,6 @@ window.addEventListener("DOMContentLoaded", function(){
         currentCell = cell;
         currentCell.className = "cellSelected";
         formulaInput.innerText = "Formula: " + cell.title;
-        cell.focus();
 
         updateCellNumberClass(cell, "rowNumberSelected", "cellHeaderSelected");
 
@@ -131,7 +132,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.row >= rowLength) return;
         var cell = tBody.childNodes[info.row].childNodes[info.column];
-        selectCell(cell);
+        cell.focus();
     }
 
     function selectCellAbove(){
@@ -140,7 +141,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.row <= 1) return;
         var cell = tBody.childNodes[info.row - 2].childNodes[info.column];
-        selectCell(cell);
+        cell.focus();
     }
 
     function selectNextCell(){
@@ -149,7 +150,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.column >= columnLength) return;
         var cell = tBody.childNodes[info.row - 1].childNodes[info.column + 1];
-        selectCell(cell);
+        cell.focus();
     }
 
     function selectPreviousCell(){
@@ -158,7 +159,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.column <= 1) return;
         var cell = tBody.childNodes[info.row - 1].childNodes[info.column - 1];
-        selectCell(cell);
+        cell.focus();
     }
 
     function onDataChange(event){
@@ -215,7 +216,7 @@ window.addEventListener("DOMContentLoaded", function(){
     function onSelectionChanged(event){
 
         var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
-        selectCell(cell);
+        cell.focus();
     }
 
     function onSheetActivated(event){
