@@ -10,10 +10,13 @@ without any need to understand other technologies/ frameworks.
 [openfin installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://openfin.github.io/excel-api-example/app.json)
 
 2) Download the [add-in.zip](http://openfin.github.io/excel-api-example/add-in.zip)
-extract the zip and load the FinDesktopAddin.xll by double clicking it.
+extract the zip and load the FinDesktopAddin.xll (or FinDesktopAddin64.xll for 64bit Excel)
+by double clicking it.
 Once its loaded correctly you should see a message in status bar saying "Connected to Openfin", which means
 the add-in is loaded and working correctly.
 
 3) At this point you should be able to operate the Excel from either side (Demo App or Excel), and you should
 see it mirrored on the other side
+
+4) If you initially dont see workbooks in Openfin side, refresh the HTML page.
 
