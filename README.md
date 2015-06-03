@@ -18,5 +18,5 @@ the add-in is loaded and working correctly.
 3) At this point you should be able to operate the Excel from either side (Demo App or Excel), and you should
 see it mirrored on the other side
 
-4) If you initially dont see workbooks in Openfin side, refresh the HTML page.
+4) If you initially don't see workbooks on Openfin side, refresh the HTML page.
 
