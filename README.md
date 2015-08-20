@@ -20,3 +20,61 @@ see it mirrored on the other side
 
 4) If you initially don't see workbooks on Openfin side, refresh the HTML page.
 
+# API Documentation
+
+##fin.desktop.Excel:
+**methods:**
+```javascript
+init(); // this function is required to be executed before using the rest of the API
+getWorkbooks(callback); // an array of workbooks will be passed as an argument to the callback
+addWorkbook(); // creates a new workbook in Excel
+getWorkbookByName(name); // to use this function, you need to call getWorkbooks at least once.
+getConnectionStatus(callback); //  passes true to the callback if its connected to Excel
+addEventListener(type, listener);
+removeEventListener(type, listener);
+```
+**events:**
+```javascript
+"connected",  "workbookAdded", "workbookClosed" 
+```
+
+##fin.desktop.ExcelWorkbook:
+**properties:**
+```javascript
+name: String // name of the workbook
+```
+
+**methods:**
+```javascript
+getWorksheets(callback); // passes an array of worksheet objects to the callback.
+getWorksheetByName(name); //returns the worksheet object with the specified name.
+addWorksheet(callback); // creates a new worksheet and passes the worksheet object to the callback
+activate(); // activates or brings focus to the workbook
+```
+**events:**
+```javascript
+"sheetAdded", "sheetRemoved", "workbookActivated", "workbookDeactivated"
+```
+
+##fin.desktop.ExcelWorksheet:
+
+**properties:**
+```javascript
+name: String // name of the worksheet
+workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to.
+```
+**methods:**
+```javascript
+setCells(values, offset);// populates the cells with the values that is two dimensional array starting from the provided offset.
+getCells(start, offsetWidth, offsetHeight, callback); // passes a two dimensional array of cell values to the callback
+```
+**example:**
+```javascript
+sheet.getCells("A5", 5, 10, function(values){....}); the values are objects of following form {value: --, formula: --}
+activate(); // activates or brings focus to the worksheet.
+activateCell(cellAddress); // selects the given cell. cellAddress: (A1, A2 etc)
+```
+**events:** 
+```javascript
+"sheetChanged", "selectionChanged", "sheetActivated", "sheetDeactivated"
+```
