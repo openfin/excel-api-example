@@ -67,12 +67,12 @@ workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to
 ```javascript
 setCells(values, offset);// populates the cells with the values that is two dimensional array starting from the provided offset.
 getCells(start, offsetWidth, offsetHeight, callback); // passes a two dimensional array of cell values to the callback
+activate(); // activates or brings focus to the worksheet.
+activateCell(cellAddress); // selects the given cell. cellAddress: (A1, A2 etc)
 ```
 **example:**
 ```javascript
 sheet.getCells("A5", 5, 10, function(values){....}); the values are objects of following form {value: --, formula: --}
-activate(); // activates or brings focus to the worksheet.
-activateCell(cellAddress); // selects the given cell. cellAddress: (A1, A2 etc)
 ```
 **events:** 
 ```javascript
