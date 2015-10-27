@@ -167,6 +167,20 @@ fin.desktop.Excel = (function(){
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
+        ExcelWorksheet.prototype.getRow = function(start, width, callback){
+
+            callbacks[messageId] = callback;
+            var obj = {"messageId": messageId++, action: "getCellsRow", workbook: this.workbook.name, worksheet: this.name, start: start,  offsetWidth: width};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorksheet.prototype.getColumn = function(start, height, callback){
+
+            callbacks[messageId] = callback;
+            var obj = {"messageId": messageId++, action: "getCellsColumn", workbook: this.workbook.name, worksheet: this.name, start: start,  offsetHeight: height};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
         ExcelWorksheet.prototype.activate = function(){
 
             var obj = {"messageId": messageId++, action: "activateSheet", workbook: this.workbook.name, worksheet: this.name};
@@ -333,9 +347,12 @@ fin.desktop.Excel = (function(){
                     break;
 
                 case "getCells":
+                case "getCellsColumn":
+                case "getCellsRow":
 
                     if(callbacks[data.messageId]) callbacks[data.messageId](data.data);
                     break;
+
 
                 case "addSheet":
 
@@ -357,6 +374,24 @@ fin.desktop.Excel = (function(){
 
             }
 
+        });
+
+        fin.desktop.InterApplicationBus.subscribe("*", "excelCustomFunction", function(data) {
+
+            if(!window[data.functionName]){
+
+                console.error("function ", data.functionName, "is not defined.");
+                return;
+            }
+
+            var args = data.arguments.split(",");
+            for(var i = 0; i < args.length; i++){
+
+                var num = Number(args[i]);
+                if(!isNaN(num))args[i] = num;
+            }
+
+            window[data.functionName].apply(null, args);
         });
     };
 

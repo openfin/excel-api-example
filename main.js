@@ -2,6 +2,8 @@
  * Created by haseebriaz on 14/05/15.
  */
 
+
+var averageColumn, averageRow;
 window.addEventListener("DOMContentLoaded", function(){
 
     var rowLength = 27;
@@ -419,6 +421,37 @@ window.addEventListener("DOMContentLoaded", function(){
         });
     }
 
+    averageColumn = function(start, height, output){
+
+        currentWorksheet.getColumn(start, height, function(data){
+
+            var sum = 0;
+            for(var i = 0; i < data.length; i++){
+
+                sum += Number(data[i].value);
+            }
+
+            currentWorksheet.setCells([[sum/data.length]], output);
+        });
+    }
+
+    averageRow = function(start, width, output){
+
+        currentWorksheet.getRow(start, width, function(data){
+
+            var sum = 0;
+            for(var i = 0; i < data.length; i++){
+
+                sum += Number(data[i].value);
+            }
+
+            currentWorksheet.setCells([[sum/data.length]], output);
+        });
+    }
+
 });
+
+
+
 
 
