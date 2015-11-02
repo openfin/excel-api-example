@@ -23,7 +23,7 @@ see it mirrored on the other side
 
 # API Documentation
 
-The API is composition based object model. Where Excel is the top most level which has workbooks which have worksheets and worksheets have cells.
+The Excel API is composition based object model. Where Excel is the top most level which has workbooks which have worksheets and worksheets have cells.
 To use the API you will need to include ExcelAPI.js in your project and it will extend Openfin API with Excel API included.
 Once included you will be able to use following API calls.
 
@@ -77,28 +77,68 @@ removeEventListener("workbookAdded", handler);
 ```
 **events:**
 ```javascript
-"connected",  "workbookAdded", "workbookClosed" 
+"connected": is fired when excel connects to Openfin.
+"workbookAdded": is fired when a new workbook is added in excel (this includes adding workbooks using API).
+"workbookClosed": is fired when a workbook is closed.
 ```
 
 ##fin.desktop.ExcelWorkbook:
+Represents an Excel workbook.
+Note: New workbooks are not supposed to be created using new or Object.create().
+Workbook objects can only be retrieved using API calls like fin.desktop.Excel.getWorkbooks() fin.desktop.Excel.getWorkbookByName() and fin.desktop.Excel.addWorkbook() etc.
+
 **properties:**
 ```javascript
-name: String // name of the workbook
+name: String // name of the workbook that the object represents.
 ```
 
 **methods:**
 ```javascript
-getWorksheets(callback); // passes an array of worksheet objects to the callback.
-getWorksheetByName(name); //returns the worksheet object with the specified name.
-addWorksheet(callback); // creates a new worksheet and passes the worksheet object to the callback
-activate(); // activates or brings focus to the workbook
+/*
+getWorksheets(callback);
+Passes an array of worksheet objects to the callback.
+*/
+var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+workbook.getWorksheets(function(worksheets){...});
+
+/*
+getWorksheetByName(name);
+returns the worksheet object with the specified name.
+Note: you have to at least use getWorksheets() once before using this function.
+*/
+
+var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+var sheet = workbook.getWorksheetByName("sheet1");
+
+
+/*
+addWorksheet(callback);
+creates a new worksheet and passes the worksheet object to the callback
+*/
+var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+workbook.addWorksheet(function(sheet){...});
+
+/*
+activate();
+activates or brings focus to the workbook
+*/
+var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+workbook.activate();
+
+
 ```
 **events:**
 ```javascript
-"sheetAdded", "sheetRemoved", "workbookActivated", "workbookDeactivated"
+"sheetAdded": fired when a new sheet is added to the workbook
+"sheetRemoved": fired when a sheet is closed/removed
+"workbookActivated": fired when a workbook is activated/focused
+"workbookDeactivated": fired when a workbook si deactivated/blurred
 ```
 
 ##fin.desktop.ExcelWorksheet:
+Represents a worksheet in excel.
+Note: New sheets are not supposed to be created using new or Object.create().
+new sheets can be created only using workbook.addWorksheet() or existing sheet objects can be retrieved using workbook.getWorksheets() and workbook.getWorksheetByName();
 
 **properties:**
 ```javascript
@@ -107,16 +147,44 @@ workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to
 ```
 **methods:**
 ```javascript
-setCells(values, offset);// populates the cells with the values that is two dimensional array starting from the provided offset.
-getCells(start, offsetWidth, offsetHeight, callback); // passes a two dimensional array of cell values to the callback
-activate(); // activates or brings focus to the worksheet.
-activateCell(cellAddress); // selects the given cell. cellAddress: (A1, A2 etc)
+/*
+setCells(values, offset);
+Populates the cells with the values that is a two dimensional array(array of rows) starting from the provided offset.
+*/
+workbook.addWorksheet(function(sheet){
+
+   sheet.setCells([["a", "b", "c"], [1, 2, 3]], "A1");
+});
+
+/*
+getCells(start, offsetWidth, offsetHeight, callback);
+Passes a two dimensional array of objects that have following format {value: --, formula: --}
+*/
+var sheet = workbook.getSheetByName("sheet1");
+sheet.getCells("A1", 3, 2, function(cells){ // cell: {value: --, formula: --}});
+
+/*
+activate();
+activates or brings focus to the worksheet.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.activate();
+
+/*
+activateCell(cellAddress);
+selects the given cell. cellAddress: (A1, A2 etc)
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.activateCell("A1");
+
 ```
-**example:**
-```javascript
-sheet.getCells("A5", 5, 10, function(values){....}); the values are objects of following form {value: --, formula: --}
-```
+
 **events:** 
 ```javascript
-"sheetChanged", "selectionChanged", "sheetActivated", "sheetDeactivated"
+"sheetChanged": fired when any cell value in the sheet has changed.
+"selectionChanged": fired when a selection on the sheet has changed.
+"sheetActivated": fired when the sheet gets into focus.
+"sheetDeactivated": fired when the sheet gets out of focus due to a different sheet getting in focus.
 ```
