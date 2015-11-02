@@ -180,11 +180,26 @@ var sheet = workbook.getSheetByName("sheet1");
 sheet.activateCell("A1");
 
 ```
-
-**events:** 
+**events:**
 ```javascript
 "sheetChanged": fired when any cell value in the sheet has changed.
 "selectionChanged": fired when a selection on the sheet has changed.
 "sheetActivated": fired when the sheet gets into focus.
 "sheetDeactivated": fired when the sheet gets out of focus due to a different sheet getting in focus.
 ```
+
+##Custom Functions:
+Custom function allow you to call functions defined in your JavaScript app from Excel just like calling a Excel formula.
+e.g =CustomFunction("nameOfTheJSFunction", "comma,separated,arguments")
+the above will call a function in JavaScript app as following:  nameOfTheJSFunction("comma", "separated", "arguments");
+
+**example:**
+```javascript
+\\in JavaScript
+function averageColumn(start, height, resultDestination){
+    ....
+}
+```
+You could call above function defined in you JavaScript app by entering following formula in Excel
+=CustomFunction("averageColumn", "A1,7,A8")
+
