@@ -26,7 +26,9 @@ You can call a custom function by entering following in the formula bar:
 =CustomFunction("nameOfTheJSFunction", "comma,separated,arguments")
 the above function call will call a function in JavaScript app as following:  nameOfTheJSFunction("comma", "separated", "arguments");
 There are two sample functions included in the demo app for demonstration.
+
 To try the custom functions:
+
 1) Enter some numbers in a column formation.
 
 2) In any empty cell make the following call =CustomFunction("averageColumn", "startingCellAddress,columnHeight,resultDestination")
