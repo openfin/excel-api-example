@@ -21,7 +21,11 @@ see it mirrored on the other side
 4) If you initially don't see workbooks on Openfin side, refresh the HTML page.
 
 ## Custom Functions:
-The excel plugin also allows you to call custom JS functions from excel.
+The Excel plugin also allows you to call custom JS functions from excel.
+You can use them to do some complicated calculations using your connected app and feed the
+result back to Excel, or you can simply use them to register cells that you would like to be
+updated by your connected app.
+
 You can call a custom function by entering following in the formula bar:
 
 ```
