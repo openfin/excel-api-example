@@ -23,7 +23,10 @@ see it mirrored on the other side
 ## Custom Functions:
 The excel plugin also allows you to call custom JS functions from excel.
 You can call a custom function by entering following in the formula bar:
+
+```
 =CustomFunction("nameOfTheJSFunction", "comma,separated,arguments")
+```
 the above function call will call a function in JavaScript app as following:  nameOfTheJSFunction("comma", "separated", "arguments");
 There are two sample functions included in the demo app for demonstration.
 
