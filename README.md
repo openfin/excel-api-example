@@ -236,20 +236,3 @@ sheet.activateCell("A1");
 "sheetDeactivated": fired when the sheet gets out of focus due to a different sheet getting in focus.
 ```
 
-##Custom Functions:
-Custom function allows you to call functions defined in your JavaScript app from Excel just like calling an Excel formula.
-
-e.g =CustomFunction("nameOfTheJSFunction", "comma,separated,arguments")
-
-the above will call a function in JavaScript app as following:  nameOfTheJSFunction("comma", "separated", "arguments");
-
-**example:**
-```javascript
-\\in JavaScript
-function averageColumn(start, height, resultDestination){
-    ....
-}
-```
-You could call the above function defined in your JavaScript app by entering following formula in Excel
-=CustomFunction("averageColumn", "A1,7,A8")
-
