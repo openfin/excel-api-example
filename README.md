@@ -53,10 +53,15 @@ The above example will take the average of row values from A1 to G1 and update t
 
 4) You can also define your own custom functions on the fly and call them from excel.
 To try your own custom function you can open the JS console from the demo app and define a test function by typing in the console.
-e.g ```var test = function(){console.log("excel just called me with these arguments", arguments)}```
+e.g 
+
+```var test = function(){console.log("excel just called me with these arguments", arguments)}```
 
 5) Now go ahead and call your defined function from excel.
+
+```
 e.g =CustomFunction("test","a,b,c")
+```
 you will see following string printed out in the console. "excel just called me with these arguments ['a', 'b', 'c']"
 
 
