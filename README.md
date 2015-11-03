@@ -27,24 +27,33 @@ You can call a custom function by entering following in the formula bar:
 ```
 =CustomFunction("nameOfTheJSFunction", "comma,separated,arguments")
 ```
-the above function call will call a function in JavaScript app as following:  nameOfTheJSFunction("comma", "separated", "arguments");
+the above function call will call a function in JavaScript app as following:  
+
+```
+nameOfTheJSFunction("comma", "separated", "arguments");
+```
 There are two sample functions included in the demo app for demonstration.
 
 To try the custom functions:
 
 1) Enter some numbers in a column formation.
 
-2) In any empty cell make the following call =CustomFunction("averageColumn", "startingCellAddress,columnHeight,resultDestination")
+2) In any empty cell make the following call 
+```
+=CustomFunction("averageColumn", "startingCellAddress,columnHeight,resultDestination")
 e.g  =CustomFunction("averageColumn", "A1,7,A8")
+```
+
 the above example will call a function defined in JavaScript app (averageColumn("A1", 7, "A8"))
 and the defined JavaScript function will take the average of column values from A1 to A7 and update the result in cell A8.
 
-3) The second function is =CustomFunction("averageRow", "A1,7,H1")
-the above example will take the average of row values from A1 to G1 and update the cell at H1 with the result.
+3) The second function is =CustomFunction("averageRow", "A1,7,H1").
+
+The above example will take the average of row values from A1 to G1 and update the cell at H1 with the result.
 
 4) You can also define your own custom functions on the fly and call them from excel.
- To try your own custom function you can open the JS console from the demo app and define a test function by typing in the console.
-e.g var test = function(){console.log("excel just called me with these arguments", arguments)}
+To try your own custom function you can open the JS console from the demo app and define a test function by typing in the console.
+e.g ```var test = function(){console.log("excel just called me with these arguments", arguments)}```
 
 5) Now go ahead and call your defined function from excel.
 e.g =CustomFunction("test","a,b,c")
