@@ -129,10 +129,10 @@ removeEventListener("workbookAdded", handler);
 {type: "connected"};
 is fired when excel connects to Openfin.
 
-{type: "workbookAdded", data: {workbookName: "---"}};
+{type: "workbookAdded", workbook: ExcelWorkbook};
 is fired when a new workbook is added in excel (this includes adding workbooks using API).
 
-{type: "workbookClosed", data: {workbookName: "---"}};
+{type: "workbookClosed", workbook: ExcelWorkbook};
 is fired when a workbook is closed.
 ```
 
@@ -183,16 +183,16 @@ workbook.activate();
 ```
 **events:**
 ```javascript
-{type: "sheetAdded", data: {sheetName: "---", workbookName: "---"}};
+{type: "sheetAdded", worksheet: ExceWorksheet};
 fired when a new sheet is added to the workbook
 
-{type: "sheetRemoved", data: {sheetName: "---", workbookName: "---"}};
+{type: "sheetRemoved", worksheet: ExceWorksheet};
 fired when a sheet is closed/removed
 
-{type: "workbookActivated", data: {workbookName: "---"}};
+{type: "workbookActivated"};
 fired when a workbook is activated/focused
 
-{type: "workbookDeactivated", data: {workbookName: "---"}};
+{type: "workbookDeactivated"};
 fired when a workbook is deactivated/blurred
 ```
 
@@ -248,10 +248,10 @@ fired when any cell value in the sheet has changed.
 {type: "selectionChanged", data: {column: int, row: int, sheetName: "---", value: "---", workbookName: "---"}};
 fired when a selection on the sheet has changed.
 
-{type: "sheetActivated", data: {sheetName: "---", workbookName: "---"}};
+{type: "sheetActivated"};
 fired when the sheet gets into focus.
 
-{type: "sheetDeactivated", data: {sheetName: "---", workbookName: "---"}};
+{type: "sheetDeactivated"};
 fired when the sheet gets out of focus due to a different sheet getting in focus.
 
 ```
