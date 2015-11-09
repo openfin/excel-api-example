@@ -183,16 +183,16 @@ workbook.activate();
 ```
 **events:**
 ```javascript
-{type: "sheetAdded", worksheet: ExceWorksheet};
+{type: "sheetAdded", target: ExcelWorkbook, worksheet: ExceWorksheet};
 fired when a new sheet is added to the workbook
 
-{type: "sheetRemoved", worksheet: ExceWorksheet};
+{type: "sheetRemoved", target: ExcelWorkbook, worksheet: ExceWorksheet};
 fired when a sheet is closed/removed
 
-{type: "workbookActivated"};
+{type: "workbookActivated", target: ExcelWorkbook};
 fired when a workbook is activated/focused
 
-{type: "workbookDeactivated"};
+{type: "workbookDeactivated", target: ExcelWorkbook};
 fired when a workbook is deactivated/blurred
 ```
 
@@ -242,16 +242,16 @@ sheet.activateCell("A1");
 ```
 **events:**
 ```javascript
-{type: "sheetChanged", data: {column: int, row: int, formula: "---", sheetName: "---", value:"---", workbookName: "---"}};
+{type: "sheetChanged", target: ExcelWorksheet,  data: {column: int, row: int, formula: String, sheetName: String, value:String}};
 fired when any cell value in the sheet has changed.
 
-{type: "selectionChanged", data: {column: int, row: int, sheetName: "---", value: "---", workbookName: "---"}};
+{type: "selectionChanged", target: ExcelWorksheet, data: {column: int, row: int, value: String}};
 fired when a selection on the sheet has changed.
 
-{type: "sheetActivated"};
+{type: "sheetActivated", target: ExcelWorksheet};
 fired when the sheet gets into focus.
 
-{type: "sheetDeactivated"};
+{type: "sheetDeactivated", target: ExcelWorksheet};
 fired when the sheet gets out of focus due to a different sheet getting in focus.
 
 ```
