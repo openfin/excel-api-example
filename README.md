@@ -125,9 +125,10 @@ removeEventListener("workbookAdded", handler);
 ```
 **events:**
 ```javascript
+
 "connected": is fired when excel connects to Openfin.
-"workbookAdded": is fired when a new workbook is added in excel (this includes adding workbooks using API).
-"workbookClosed": is fired when a workbook is closed.
+"workbookAdded": {type: "workbookAdded", data: {workbookName: "---"}}; is fired when a new workbook is added in excel (this includes adding workbooks using API).
+"workbookClosed": {type: "workbookClosed", data: {workbookName: "---"}}; is fired when a workbook is closed.
 ```
 
 ##fin.desktop.ExcelWorkbook:
@@ -177,10 +178,10 @@ workbook.activate();
 ```
 **events:**
 ```javascript
-"sheetAdded": fired when a new sheet is added to the workbook
-"sheetRemoved": fired when a sheet is closed/removed
-"workbookActivated": fired when a workbook is activated/focused
-"workbookDeactivated": fired when a workbook si deactivated/blurred
+"sheetAdded": {type: "sheetAdded", data: {sheetName: "---", workbookName: "---"}}; fired when a new sheet is added to the workbook
+"sheetRemoved": {type: "sheetRemoved", data: {sheetName: "---", workbookName: "---"}}; fired when a sheet is closed/removed
+"workbookActivated": {type: "workbookActivated", data: {workbookName: "---"}};  fired when a workbook is activated/focused
+"workbookDeactivated": {type: "workbookDeactivated", data: {workbookName: "---"}}; fired when a workbook is deactivated/blurred
 ```
 
 ##fin.desktop.ExcelWorksheet:
@@ -226,13 +227,14 @@ selects the given cell. cellAddress: (A1, A2 etc)
 
 var sheet = workbook.getSheetByName("sheet1");
 sheet.activateCell("A1");
-
+{"column":6,"event":"selectionChanged","row":2,"sheetName":"Sheet1","value":null,"workbookName":"Book2"}
 ```
 **events:**
 ```javascript
-"sheetChanged": fired when any cell value in the sheet has changed.
-"selectionChanged": fired when a selection on the sheet has changed.
-"sheetActivated": fired when the sheet gets into focus.
-"sheetDeactivated": fired when the sheet gets out of focus due to a different sheet getting in focus.
+"sheetChanged":{type: "sheetChanged", data: {column: int, row: int, formula: "---", sheetName: "---", value:"---", workbookName: "---"}}; fired when any cell value in the sheet has changed.
+"selectionChanged":{type: "selectionChanged", data: {column: int, row: int, sheetName: "---", value: "---", workbookName: "---"}}; fired when a selection on the sheet has changed.
+"sheetActivated":{type: "sheetActivated", data: {sheetName: "---", workbookName: "---"}}; fired when the sheet gets into focus.
+"sheetDeactivated": {type: "sheetDeactivated", data: {sheetName: "---", workbookName: "---"}}; fired when the sheet gets out of focus due to a different sheet getting in focus.
+
 ```
 
