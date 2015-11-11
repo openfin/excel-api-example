@@ -128,19 +128,20 @@ removeEventListener("workbookAdded", handler);
 
 {type: "connected"};
 // is fired when excel connects to Openfin.
-//e.g
+//Example:
 fin.desktop.Excel.addEventListener("connected", function(){ console.log("Connected to Excel"); })
 
 {type: "workbookAdded", workbook: ExcelWorkbook};
 //is fired when a new workbook is added in excel (this includes adding workbooks using API).
-//e.g
-fin.desktop.Excel.addEventListener("workbookAdded", function(event){
-                                                                      console.log("New workbook added; Name:", event.workbook.name);
-                                                                   });
+//Example:
+fin.desktop.Excel.addEventListener("workbookAdded",
+function(event){
+    console.log("New workbook added; Name:", event.workbook.name);
+});
 
 {type: "workbookClosed", workbook: ExcelWorkbook};
 //is fired when a workbook is closed.
-//e.g
+//Example:
 fin.desktop.Excel.addEventListener("workbookClosed", function(event){
                                                                        console.log("Workbook closed; Name:", event.workbook.name);
                                                                     });
@@ -196,7 +197,7 @@ workbook.activate();
 ```javascript
 {type: "sheetAdded", target: ExcelWorkbook, worksheet: ExcelWorksheet};
 //fired when a new sheet is added to the workbook
-// e.g
+//Example:
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 workbook.addEventListener("sheetAdded", function(event){
                                                           console.log("New sheet", event.worksheet.name, "was added to the workbook", event.worksheet.workbook.name)
@@ -204,7 +205,7 @@ workbook.addEventListener("sheetAdded", function(event){
 
 {type: "sheetRemoved", target: ExcelWorkbook, worksheet: ExcelWorksheet};
 //fired when a sheet is closed/removed
-// e.g
+//Example:
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 workbook.addEventListener("sheetRemoved", function(event){
                                                             console.log("Sheet", event.worksheet.name, "was removed from workbook", event.worksheet.workbook.name)
@@ -212,7 +213,7 @@ workbook.addEventListener("sheetRemoved", function(event){
 
 {type: "workbookActivated", target: ExcelWorkbook};
 //fired when a workbook is activated/focused
-// e.g
+//Example:
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 workbook.addEventListener("workbookActivated", function(event){
                                                                 console.log("Workbook", event.target.name, "was activated");
@@ -220,7 +221,7 @@ workbook.addEventListener("workbookActivated", function(event){
 
 {type: "workbookDeactivated", target: ExcelWorkbook};
 //fired when a workbook is deactivated/blurred
-// e.g
+//Example:
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 workbook.addEventListener("workbookDeactivated", function(event){
                                                                 console.log("Workbook", event.target.name, "was deactivated");
@@ -276,7 +277,7 @@ sheet.activateCell("A1");
 ```javascript
 {type: "sheetChanged", target: ExcelWorksheet,  data: {column: int, row: int, formula: String, sheetName: String, value:String}};
 //fired when any cell value in the sheet has changed.
-//e.g
+//Example:
 var sheet = workbook.getSheetByName("sheet1");
 sheet.addEventListener("sheetChanged", function(event){
                                                         console.log("sheet values were changed. column:", event.data.column, "row:", event.data.row, "value:", event.data.value, "formula", event.data.formula);
@@ -284,7 +285,7 @@ sheet.addEventListener("sheetChanged", function(event){
 
 {type: "selectionChanged", target: ExcelWorksheet, data: {column: int, row: int, value: String}};
 //fired when a selection on the sheet has changed.
-//e.g
+//Example:
 var sheet = workbook.getSheetByName("sheet1");
 sheet.addEventListener("selectionChanged", function(event){
                                                             console.log("sheet selection was changed. column:", event.data.column, "row:", event.data.row, "value:", event.data.value);
@@ -292,7 +293,7 @@ sheet.addEventListener("selectionChanged", function(event){
 
 {type: "sheetActivated", target: ExcelWorksheet};
 //fired when the sheet gets into focus.
-//e.g
+//Example:
 var sheet = workbook.getSheetByName("sheet1");
 sheet.addEventListener("sheetActivated", function(event){
                                                             console.log("sheet activated. Sheet", event.target.name, "Workbook:", event.target.workbook.name);
@@ -300,7 +301,7 @@ sheet.addEventListener("sheetActivated", function(event){
 
 {type: "sheetDeactivated", target: ExcelWorksheet};
 //fired when the sheet gets out of focus due to a different sheet getting in focus.
-//e.g
+//Example:
 var sheet = workbook.getSheetByName("sheet1");
 sheet.addEventListener("sheetDeactivated", function(event){
                                                           console.log("sheet deactivated. Sheet", event.target.name, "Workbook:", event.target.workbook.name);
