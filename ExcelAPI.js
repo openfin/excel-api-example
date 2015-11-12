@@ -353,6 +353,24 @@ fin.desktop.Excel = (function(){
                     if(callbacks[data.messageId]) callbacks[data.messageId](data.data);
                     break;
 
+                case "addWorkbook":
+
+                    if(!workbooks[data.workbookName]) {
+
+                        var workbook = new ExcelWorkbook(data.workbook);
+                        workbooks[data.workbook] = workbook;
+                    } else {
+
+                        var workbook = workbooks[data.workbookName];
+                    }
+
+                    if(callbacks[data.messageId]) {
+
+                       callbacks[data.messageId](workbook);
+                       delete callbacks[messageId];
+                    }
+
+                    break;
 
                 case "addSheet":
 
@@ -411,8 +429,9 @@ fin.desktop.Excel = (function(){
         return workbooks[name];
     };
 
-    Excel.prototype.addWorkbook = function(){
+    Excel.prototype.addWorkbook = function(callback){
 
+        callbacks[messageId] = callback;
         var obj = {"messageId": messageId++, action: "addWorkbook"};
         fin.desktop.InterApplicationBus.publish("excelCall",obj);
 
