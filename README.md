@@ -256,6 +256,13 @@ workbook.addWorksheet(function(sheet){
 });
 
 /*
+setFilter(start, offsetWidth, offsetHeight, field, criteria1[, op, criteria2, visibleDropDown]);
+sets filter on selected range in a worksheet.
+*/
+var sheet = workbook.getSheetByName("sheet1");
+sheet.getCells("A1", 3, 2, function(cells){ // cell: {value: --, formula: --}});
+
+/*
 getCells(start, offsetWidth, offsetHeight, callback);
 Passes a two dimensional array of objects that have following format {value: --, formula: --}
 */

@@ -193,6 +193,12 @@ fin.desktop.Excel = (function(){
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
+        ExcelWorksheet.prototype.setFilter = function(start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown ){
+
+            var obj = {"messageId": messageId++, action: "setFilter", workbook: this.workbook.name, worksheet: this.name, start: start,  offsetWidth: offsetWidth, offsetHeight: offsetHeight, field: field, criteria1: criteria1, op: op, criteria2: criteria2, visibleDropDown: visibleDropDown};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
         return ExcelWorksheet;
     })(EventDispatcher);
     //// worksheet
