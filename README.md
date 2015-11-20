@@ -256,11 +256,29 @@ workbook.addWorksheet(function(sheet){
 });
 
 /*
-setFilter(start, offsetWidth, offsetHeight, field, criteria1[, op, criteria2, visibleDropDown]);
+setFilter(start, offsetWidth, offsetHeight, field, criteria1[, operator, criteria2, visibleDropDown]);
 sets filter on selected range in a worksheet.
+
+arguments:
+start: starting address of the range. e.g "A1"
+offsetWidth: width of the range.
+offsetHeight: height of the range.
+field: integer representing the field number. starts with 1.
+criteria1: The criteria (a string; for example, "101"). Use "=" to find blank fields, or use "<>" to find nonblank fields. If this argument is omitted, the criteria is All. If Operator is xlTop10Items, Criteria1 specifies the number of items (for example, "10").
+operator: Optional. Can be one of the following:
+          and
+          bottom10items
+          bottom10percent
+          or
+          top10items
+          top10percent
+criteria2: Optional. The second criteria (a string). Used with Criteria1 and Operator to construct compound criteria.
+visibleDropDown: Optional. true to display the AutoFilter drop-down arrow for the filtered field; false to hide the AutoFilter drop-down arrow for the filtered field. true by default.
+
 */
 var sheet = workbook.getSheetByName("sheet1");
-sheet.getCells("A1", 3, 2, function(cells){ // cell: {value: --, formula: --}});
+sheet.setCells([["Column1", "Column2"], ["TRUE", "1"], ["TRUE", "2"],["FALSE", ""]], "A1");
+sheet.setFilter("A1", 2, 4, 1, "TRUE");
 
 /*
 getCells(start, offsetWidth, offsetHeight, callback);
