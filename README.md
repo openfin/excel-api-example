@@ -93,10 +93,16 @@ Retrieves currently opened workbooks from excel and passes an array of workbook 
 fin.desktop.Excel.getWorkbooks(function(workbooks){...});
 
 /*
-addWorkbook();
+addWorkbook(callback);
 creates a new workbook in Excel
 */
-fin.desktop.Excel.addWorkbook();
+fin.desktop.Excel.addWorkbook(function(workbook){...});
+
+/*
+openWorkbook(path, callback);
+opens workbook from the specified path and passes the workbook object to the callback
+*/
+fin.desktop.Excel.openWorkbook(function(workbook){...});
 
 /*
 getWorkbookByName(name);
@@ -191,6 +197,21 @@ activates or brings focus to the workbook
 */
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 workbook.activate();
+
+/*
+save();
+Saves the changes to the workbook.
+*/
+var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+workbook.save();
+
+/*
+close();
+Closes the workbook.
+*/
+var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+workbook.close();
+
 
 
 ```
