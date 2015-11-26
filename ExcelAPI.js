@@ -130,6 +130,18 @@ fin.desktop.Excel = (function(){
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
+        ExcelWorkbook.prototype.save = function(){
+
+            var obj = {"messageId": messageId++, action: "saveWorkbook", workbook: this.name};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorkbook.prototype.close = function(){
+
+            var obj = {"messageId": messageId++, action: "closeWorkbook", workbook: this.name};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
         return ExcelWorkbook;
     })(EventDispatcher);
 
@@ -360,6 +372,7 @@ fin.desktop.Excel = (function(){
                     break;
 
                 case "addWorkbook":
+                case "openWorkbook":
 
                     if(!workbooks[data.workbookName]) {
 
@@ -375,8 +388,6 @@ fin.desktop.Excel = (function(){
                        callbacks[data.messageId](workbook);
                        delete callbacks[messageId];
                     }
-
-                    break;
 
                 case "addSheet":
 
@@ -440,7 +451,13 @@ fin.desktop.Excel = (function(){
         callbacks[messageId] = callback;
         var obj = {"messageId": messageId++, action: "addWorkbook"};
         fin.desktop.InterApplicationBus.publish("excelCall",obj);
+    };
 
+    Excel.prototype.openWorkbook = function(path, callback){
+
+        callbacks[messageId] = callback;
+        var obj = {"messageId": messageId++, action: "openWorkbook", path: path};
+        fin.desktop.InterApplicationBus.publish("excelCall",obj);
     };
 
     Excel.prototype.getConnectionStatus = function(callback){
@@ -450,7 +467,6 @@ fin.desktop.Excel = (function(){
         var obj = {"messageId": messageId++, action: "getStatus"};
         fin.desktop.InterApplicationBus.publish("excelCall",obj);
     };
-
 
     return new Excel();
 })();
