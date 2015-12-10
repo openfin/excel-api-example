@@ -10,7 +10,7 @@ without any need to understand other technologies/ frameworks.
 [openfin installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://openfin.github.io/excel-api-example/app.json)
 
 2) Download the [add-in.zip](http://openfin.github.io/excel-api-example/add-in.zip)
-, extract the zip to disk (do not simply open it in place)and load the FinDesktopAddin.xll 
+, extract the zip to disk (do not simply open it in place) and load the FinDesktopAddin.xll 
 (or FinDesktopAddin64.xll for 64bit Excel) by double clicking it.
 Once its loaded correctly you should see a message in status bar saying "Connected to Openfin", which means
 the add-in is loaded and working correctly.
