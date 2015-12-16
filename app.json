@@ -2,7 +2,10 @@
   "devtools_port": 9090,
   "startup_app": {
     "name": "Excel-API-Example",
-    "url": "http://localhost.mac/Excel-Example/index.html",
+    "__url": "http://localhost.mac/Excel-Example/index.html",
+    "url": "http://localhost:5040/",
+
+
     "uuid": "grid",
     "applicationIcon": "http://openfin.github.io/snap-and-dock/openfin.ico",
     "autoShow": true,
@@ -13,7 +16,7 @@
   },
   "runtime": {
     "arguments": "",
-    "version": "v40"
+    "version": "stable"
   },
   "shortcut": {
     "company": "OpenFin",
@@ -22,4 +25,3 @@
     "name": "excel-api-example"
   }
 }
-
