@@ -35,7 +35,6 @@ fin.desktop.Excel = (function(){
          EventDispatcher.prototype.addEventListener = function(type, callback){
 
             if(this.hasEventListener(type, callback)){
-
                 return;
             }
 
