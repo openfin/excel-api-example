@@ -20,6 +20,31 @@ see it mirrored on the other side
 
 4) If you initially don't see workbooks on Openfin side, refresh the HTML page.
 
+##How to run locally, for development
+For development purposes you may wish to clone this repository and run on a local computer. OpenFin is currently only Windows compatible, but may be run on a Virtual Machine on Mac. 
+
+Node must be installed ( [https://nodejs.org/en/](https://nodejs.org/en/) ).
+
+Clone the repositry and, in the Command Prompt, navigate into the 'excel-api-example' directory created.
+
+In the Command Prompt run:
+
+```
+$ npm install
+```
+Once the Node packages have installed, in the same 'excel-api-example' directory, run:
+
+```
+$ node server
+```
+This will start a simple Express server at http://localhost:5040.
+
+Install the local app via this url:
+
+[openfin excel-localhost installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://localhost:5040/app.json) 
+
+The Node server must be running at http://localhost:5040 for you to be able to run the app locally.
+   
 ## Custom Functions:
 The Excel plugin also allows you to call custom JS functions from excel.
 You can use them to do some complicated calculations using your connected app and feed the

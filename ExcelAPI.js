@@ -421,7 +421,7 @@ fin.desktop.Excel = (function(){
             var args = data.arguments.split(",");
             for(var i = 0; i < args.length; i++){
 
-                var num = Number(args[i]);
+                var num = args[i] !== "" ?  Number(args[i]) : null;
                 if(!isNaN(num))args[i] = num;
             }
 

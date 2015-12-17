@@ -449,6 +449,10 @@ window.addEventListener("DOMContentLoaded", function(){
         });
     }
 
+    checkNullValues = function(start, width, output){
+        console.log("Checking null values... ", arguments);
+    }
+
 });
 
 
