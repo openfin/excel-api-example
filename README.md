@@ -348,6 +348,32 @@ selects the given cell. cellAddress: (A1, A2 etc)
 
 var sheet = workbook.getSheetByName("sheet1");
 sheet.activateCell("A1");
+
+/*
+clearAllCells();
+clears all the cell values and formatting in the worksheet.
+*/
+
+/*
+
+formatRange(start, offsetWidth, offsetHeight, format);
+formats the specified range.
+var sheet = workbook.getSheetByName("sheet1");
+sheet.formatRange("A1",  5, 10, {
+                                    border: {color:"0,0,0,1", style: "continuous"}, //dash, dashDot, dashDotDot, dot, double, none, slantDashDot
+                                    border-right: {color:"0,0,0,1", style: "continuous"},
+                                    border-left: {color:"0,0,0,1", style: "continuous"},
+                                    border-top: {color:"0,0,0,1", style: "continuous"},
+                                    border-bottom: {color:"0,0,0,1", style: "continuous"},
+                                    horizontalLines: {color:"255,255,255,1", style: "none"}, // horizontal lines between cells
+                                    verticalLines: {color:"255,255,255,1", style: "none"}, // vertical lines between cell rows
+                                    font: {color: "100,100,100,1", size: 12, bold: true, italic: true, name: "Verdana"},
+                                    mergeCells: true, // merges the given range into one big cell
+                                    shrinkToFit: true // the text will shrink to fit the cell
+                                });
+
+
+*/
 ```
 **events:**
 ```javascript

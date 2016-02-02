@@ -35,6 +35,7 @@ fin.desktop.Excel = (function(){
          EventDispatcher.prototype.addEventListener = function(type, callback){
 
             if(this.hasEventListener(type, callback)){
+
                 return;
             }
 
@@ -204,9 +205,36 @@ fin.desktop.Excel = (function(){
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
+        ExcelWorksheet.prototype.addButton = function(name, caption, cellAddress){
+
+            var obj = {"messageId": messageId++, action: "addButton", workbook: this.workbook.name, worksheet: this.name, address: cellAddress, buttonName: name, buttonCaption: caption};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
         ExcelWorksheet.prototype.setFilter = function(start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown ){
 
             var obj = {"messageId": messageId++, action: "setFilter", workbook: this.workbook.name, worksheet: this.name, start: start,  offsetWidth: offsetWidth, offsetHeight: offsetHeight, field: field, criteria1: criteria1, op: op, criteria2: criteria2, visibleDropDown: visibleDropDown};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorksheet.prototype.formatRange = function(start, offsetWidth, offsetHeight, format, callback){
+
+            callbacks[messageId] = callback;
+            var obj = {"messageId": messageId++, action: "formatRange", workbook: this.workbook.name, worksheet: this.name, start: start,  offsetWidth: offsetWidth, offsetHeight: offsetHeight, format: format};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorksheet.prototype.clearAllCells = function(callback){
+
+            callbacks[messageId] = callback;
+            var obj = {"messageId": messageId++, action: "clearAllCells", workbook: this.workbook.name, worksheet: this.name};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorksheet.prototype.clearFormats = function(callback){
+
+            callbacks[messageId] = callback;
+            var obj = {"messageId": messageId++, action: "clearFormats", workbook: this.workbook.name, worksheet: this.name};
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
@@ -421,7 +449,7 @@ fin.desktop.Excel = (function(){
             var args = data.arguments.split(",");
             for(var i = 0; i < args.length; i++){
 
-                var num = args[i] !== "" ?  Number(args[i]) : null;
+                var num = Number(args[i]);
                 if(!isNaN(num))args[i] = num;
             }
 
