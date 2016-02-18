@@ -238,7 +238,27 @@ fin.desktop.Excel = (function(){
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
+        ExcelWorksheet.prototype.setCellName = function(cellAddress, cellName){
+
+            var obj = {"messageId": messageId++, action: "setCellName", workbook: this.workbook.name, worksheet: this.name, address: cellAddress, cellName: cellName};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorksheet.prototype.calculate = function(cellAddress, cellName){
+
+            var obj = {"messageId": messageId++, action: "calculateSheet", workbook: this.workbook.name, worksheet: this.name};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorksheet.prototype.getCellByName = function(cellName, callback){
+
+            callbacks[messageId] = callback;
+            var obj = {"messageId": messageId++, action: "getCellByName", workbook: this.workbook.name, worksheet: this.name, cellName: cellName};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
         return ExcelWorksheet;
+
     })(EventDispatcher);
     //// worksheet
 
@@ -313,6 +333,10 @@ fin.desktop.Excel = (function(){
                     var workbook = new ExcelWorkbook(data.workbookName);
                     workbooks[data.workbookName] = workbook;
                     fin.desktop.Excel.dispatchEvent({type: data.event, workbook: workbook});
+                    break;
+                case "afterCalculation":
+
+                    fin.desktop.Excel.dispatchEvent({type: data.event});
                     break;
 
                 case "workbookDeactivated":
@@ -391,6 +415,7 @@ fin.desktop.Excel = (function(){
 
                     break;
 
+
                 case "getCells":
                 case "getCellsColumn":
                 case "getCellsRow":
@@ -433,6 +458,10 @@ fin.desktop.Excel = (function(){
                 case "getStatus":
                     if(callbacks[data.messageId]) callbacks[data.messageId](data.status);
                     break;
+                case "getCalculationMode":
+                case "getCellByName":
+                    if(callbacks[data.messageId]) callbacks[data.messageId](data);
+
 
             }
 
@@ -492,6 +521,21 @@ fin.desktop.Excel = (function(){
         callbacks[messageId] = callback;
 
         var obj = {"messageId": messageId++, action: "getStatus"};
+        fin.desktop.InterApplicationBus.publish("excelCall",obj);
+    };
+
+    Excel.prototype.getCalculationMode = function(callback){
+
+        console.log(callback)
+        callbacks[messageId] = callback;
+        var obj = {"messageId": messageId++, action: "getCalculationMode"};
+        fin.desktop.InterApplicationBus.publish("excelCall",obj);
+    };
+
+    Excel.prototype.calculateAll = function(callback){
+
+        callbacks[messageId] = callback;
+        var obj = {"messageId": messageId++, action: "calculateFull"};
         fin.desktop.InterApplicationBus.publish("excelCall",obj);
     };
 
