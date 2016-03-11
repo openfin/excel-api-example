@@ -22,63 +22,63 @@ fin.desktop.Excel = (function(){
 
     // EventDispatcher
 
-     var EventDispatcher = (function(){
+    var EventDispatcher = (function(){
 
 
-         function EventDispatcher(){
+        function EventDispatcher(){
 
-             this._callbacks = {};
-         }
+            this._callbacks = {};
+        }
 
-         EventDispatcher.prototype._callbacks = null;
+        EventDispatcher.prototype._callbacks = null;
 
-         EventDispatcher.prototype.addEventListener = function(type, callback){
+        EventDispatcher.prototype.addEventListener = function(type, callback){
 
             if(this.hasEventListener(type, callback)){
 
                 return;
             }
 
-             if(!this._callbacks[type]) this._callbacks[type] = [];
-             this._callbacks[type].push(callback);
-         };
+            if(!this._callbacks[type]) this._callbacks[type] = [];
+            this._callbacks[type].push(callback);
+        };
 
-         EventDispatcher.prototype.removeEventListener = function(type, callback){
+        EventDispatcher.prototype.removeEventListener = function(type, callback){
 
-             if(!this.hasEventListener(type, callback)){
+            if(!this.hasEventListener(type, callback)){
 
-                 return;
-             }
+                return;
+            }
 
-             var callbacks = this._callbacks[type];
-             callbacks.splice(callbacks.indexOf(callback), 1);
-         };
+            var callbacks = this._callbacks[type];
+            callbacks.splice(callbacks.indexOf(callback), 1);
+        };
 
-         EventDispatcher.prototype.hasEventListener = function(type, callback){
+        EventDispatcher.prototype.hasEventListener = function(type, callback){
 
             if(!this._callbacks[type]) return false;
             if(!callback) return true;
             return (this._callbacks[type].indexOf(callback) >= 0)
-         };
+        };
 
-         EventDispatcher.prototype.dispatchEvent = function(event){
+        EventDispatcher.prototype.dispatchEvent = function(event){
 
-             if(!this._callbacks[event.type]) {
+            if(!this._callbacks[event.type]) {
 
-                 return;
-             }
+                return;
+            }
 
-             var callbacks = this._callbacks[event.type];
-             event.target = this;
+            var callbacks = this._callbacks[event.type];
+            event.target = this;
 
-             for(var i = 0; i < callbacks.length; i++){
+            for(var i = 0; i < callbacks.length; i++){
 
-                 callbacks[i](event);
-             }
-         };
+                callbacks[i](event);
+            }
+        };
 
-         return EventDispatcher;
-     })();
+        return EventDispatcher;
+    })();
     // EventDispatcher
 
 
@@ -244,7 +244,7 @@ fin.desktop.Excel = (function(){
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
-        ExcelWorksheet.prototype.calculate = function(cellAddress, cellName){
+        ExcelWorksheet.prototype.calculate = function(){
 
             var obj = {"messageId": messageId++, action: "calculateSheet", workbook: this.workbook.name, worksheet: this.name};
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
@@ -254,6 +254,12 @@ fin.desktop.Excel = (function(){
 
             callbacks[messageId] = callback;
             var obj = {"messageId": messageId++, action: "getCellByName", workbook: this.workbook.name, worksheet: this.name, cellName: cellName};
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+
+        ExcelWorksheet.prototype.protect = function(password){
+
+            var obj = {"messageId": messageId++, action: "protectSheet", workbook: this.workbook.name, worksheet: this.name, password: password? password: null};
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
 
@@ -283,14 +289,26 @@ fin.desktop.Excel = (function(){
 
                 case "sheetChanged":
                     var sheets = worksheets[data.workbookName];
-                    if(sheets[data.sheetName]){
+                    if(sheets && sheets[data.sheetName]){
                         sheets[data.sheetName].dispatchEvent({type:data.event, data: data});
+                    }
+                    break;
+
+                case "sheetRenamed":
+                    var sheets = worksheets[data.workbookName];
+                    if(sheets && sheets[data.sheetName]){
+                        var sheet = sheets[data.sheetName];
+                        sheets[data.sheetName] = null;
+                        sheet.name = data.newName;
+                        console.log(sheet)
+                        sheets[data.newName] = sheet;
+                        sheet.dispatchEvent({type:data.event, data: data});
                     }
                     break;
 
                 case "selectionChanged":
                     var sheets = worksheets[data.workbookName];
-                    if(sheets[data.sheetName]){
+                    if(sheets && sheets[data.sheetName]){
                         sheets[data.sheetName].dispatchEvent({type:data.event, data: data});
                     }
                     break;
@@ -298,7 +316,7 @@ fin.desktop.Excel = (function(){
                 case "sheetActivated":
                     var sheets = worksheets[data.workbookName];
 
-                    if(sheets[data.sheetName]){
+                    if(sheets && sheets[data.sheetName]){
 
                         sheets[data.sheetName].dispatchEvent({type:data.event});
                     }
@@ -306,7 +324,7 @@ fin.desktop.Excel = (function(){
 
                 case "sheetDeactivated":
                     var sheets = worksheets[data.workbookName];
-                    if(sheets[data.sheetName]){
+                    if(sheets && sheets[data.sheetName]){
                         sheets[data.sheetName].dispatchEvent({type:data.event});
                     }
                     break;
@@ -334,6 +352,7 @@ fin.desktop.Excel = (function(){
                     workbooks[data.workbookName] = workbook;
                     fin.desktop.Excel.dispatchEvent({type: data.event, workbook: workbook});
                     break;
+
                 case "afterCalculation":
 
                     fin.desktop.Excel.dispatchEvent({type: data.event});
@@ -403,7 +422,7 @@ fin.desktop.Excel = (function(){
                             worksheets[data.workbook] = {};
                         }
 
-                         worksheet = worksheets[data.workbook][worksheetNames[i]]? worksheets[data.workbook][worksheetNames[i]] : worksheets[data.workbook][worksheetNames[i]] = new ExcelWorksheet(worksheetNames[i], workbooks[data.workbook]);
+                        worksheet = worksheets[data.workbook][worksheetNames[i]]? worksheets[data.workbook][worksheetNames[i]] : worksheets[data.workbook][worksheetNames[i]] = new ExcelWorksheet(worksheetNames[i], workbooks[data.workbook]);
                         _worksheets.push(worksheet);
                     }
 
@@ -437,8 +456,8 @@ fin.desktop.Excel = (function(){
 
                     if(callbacks[data.messageId]) {
 
-                       callbacks[data.messageId](workbook);
-                       delete callbacks[messageId];
+                        callbacks[data.messageId](workbook);
+                        delete callbacks[messageId];
                     }
 
                 case "addSheet":
@@ -526,7 +545,6 @@ fin.desktop.Excel = (function(){
 
     Excel.prototype.getCalculationMode = function(callback){
 
-        console.log(callback)
         callbacks[messageId] = callback;
         var obj = {"messageId": messageId++, action: "getCalculationMode"};
         fin.desktop.InterApplicationBus.publish("excelCall",obj);

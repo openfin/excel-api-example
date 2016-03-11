@@ -2,8 +2,6 @@
  * Created by haseebriaz on 14/05/15.
  */
 
-
-var averageColumn, averageRow;
 window.addEventListener("DOMContentLoaded", function(){
 
     var rowLength = 27;
@@ -87,8 +85,7 @@ window.addEventListener("DOMContentLoaded", function(){
             //column.addEventListener("DOMCharacterDataModified", onDataChange);
             column.addEventListener("keydown", onDataChange);
             column.addEventListener("blur", onDataChange);
-          //  column.addEventListener("mousedown", onCellClicked);
-            column.addEventListener("focus", selectCell);
+            column.addEventListener("mousedown", onCellClicked);
         }
 
         if(data)column.innerText = data;
@@ -100,9 +97,8 @@ window.addEventListener("DOMContentLoaded", function(){
         selectCell(event.target);
     }
 
-    function selectCell(event){
+    function selectCell(cell){
 
-        var cell = event.target;
         if(currentCell){
 
             currentCell.className = "cell";
@@ -112,6 +108,7 @@ window.addEventListener("DOMContentLoaded", function(){
         currentCell = cell;
         currentCell.className = "cellSelected";
         formulaInput.innerText = "Formula: " + cell.title;
+        cell.focus();
 
         updateCellNumberClass(cell, "rowNumberSelected", "cellHeaderSelected");
 
@@ -134,7 +131,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.row >= rowLength) return;
         var cell = tBody.childNodes[info.row].childNodes[info.column];
-        cell.focus();
+        selectCell(cell);
     }
 
     function selectCellAbove(){
@@ -143,7 +140,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.row <= 1) return;
         var cell = tBody.childNodes[info.row - 2].childNodes[info.column];
-        cell.focus();
+        selectCell(cell);
     }
 
     function selectNextCell(){
@@ -152,7 +149,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.column >= columnLength) return;
         var cell = tBody.childNodes[info.row - 1].childNodes[info.column + 1];
-        cell.focus();
+        selectCell(cell);
     }
 
     function selectPreviousCell(){
@@ -161,7 +158,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.column <= 1) return;
         var cell = tBody.childNodes[info.row - 1].childNodes[info.column - 1];
-        cell.focus();
+        selectCell(cell);
     }
 
     function onDataChange(event){
@@ -205,7 +202,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function updateCell(cell, value, formula){
 
-        cell.innerText = value || value === 0? value: "";
+        cell.innerText = value? value: "";
         cell.title = formula? formula: "";
     }
 
@@ -218,7 +215,7 @@ window.addEventListener("DOMContentLoaded", function(){
     function onSelectionChanged(event){
 
         var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
-        cell.focus();
+        selectCell(cell);
     }
 
     function onSheetActivated(event){
@@ -421,41 +418,6 @@ window.addEventListener("DOMContentLoaded", function(){
         });
     }
 
-    averageColumn = function(start, height, output){
-
-        currentWorksheet.getColumn(start, height, function(data){
-
-            var sum = 0;
-            for(var i = 0; i < data.length; i++){
-
-                sum += Number(data[i].value);
-            }
-
-            currentWorksheet.setCells([[sum/data.length]], output);
-        });
-    }
-
-    averageRow = function(start, width, output){
-
-        currentWorksheet.getRow(start, width, function(data){
-
-            var sum = 0;
-            for(var i = 0; i < data.length; i++){
-
-                sum += Number(data[i].value);
-            }
-
-            currentWorksheet.setCells([[sum/data.length]], output);
-        });
-    }
-
-    checkNullValues = function(start, width, output){
-        console.log("Checking null values... ", arguments);
-    }
-
 });
-
-
-
 
 
