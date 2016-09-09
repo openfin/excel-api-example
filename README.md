@@ -412,10 +412,10 @@ sheet.protect();
 
 /*
 
-formatRange(start, offsetWidth, offsetHeight, format);
+formatRange(rangeCode, format);
 formats the specified range.
 var sheet = workbook.getSheetByName("sheet1");
-sheet.formatRange("A1",  5, 10, {
+sheet.formatRange("A1:E:10", {
                                     border: {color:"0,0,0,1", style: "continuous"}, //dash, dashDot, dashDotDot, dot, double, none, slantDashDot
                                     border-right: {color:"0,0,0,1", style: "continuous"},
                                     border-left: {color:"0,0,0,1", style: "continuous"},
