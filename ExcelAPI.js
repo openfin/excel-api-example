@@ -148,14 +148,34 @@ fin.desktop.Excel = (function () {
             var obj = { "messageId": messageId++, action: "formatRange", workbook: this.workbook.name, worksheet: this.name, rangeCode: rangeCode, format: format };
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
+        ExcelWorksheet.prototype.clearRange = function (rangeCode, callback) {
+            callbacks[messageId] = callback;
+            var obj = { "messageId": messageId++, action: "clearRange", workbook: this.workbook.name, worksheet: this.name, rangeCode: rangeCode };
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+        ExcelWorksheet.prototype.clearRangeContents = function (rangeCode, callback) {
+            callbacks[messageId] = callback;
+            var obj = { "messageId": messageId++, action: "clearRangeContents", workbook: this.workbook.name, worksheet: this.name, rangeCode: rangeCode };
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+        ExcelWorksheet.prototype.clearRangeFormats = function (rangeCode, callback) {
+            callbacks[messageId] = callback;
+            var obj = { "messageId": messageId++, action: "clearRangeFormats", workbook: this.workbook.name, worksheet: this.name, rangeCode: rangeCode };
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
         ExcelWorksheet.prototype.clearAllCells = function (callback) {
             callbacks[messageId] = callback;
             var obj = { "messageId": messageId++, action: "clearAllCells", workbook: this.workbook.name, worksheet: this.name };
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
-        ExcelWorksheet.prototype.clearFormats = function (callback) {
+        ExcelWorksheet.prototype.clearAllCellContents = function (callback) {
             callbacks[messageId] = callback;
-            var obj = { "messageId": messageId++, action: "clearFormats", workbook: this.workbook.name, worksheet: this.name };
+            var obj = { "messageId": messageId++, action: "clearAllCellContents", workbook: this.workbook.name, worksheet: this.name };
+            fin.desktop.InterApplicationBus.publish("excelCall", obj);
+        };
+        ExcelWorksheet.prototype.clearAllCellFormats = function (callback) {
+            callbacks[messageId] = callback;
+            var obj = { "messageId": messageId++, action: "clearAllCellFormats", workbook: this.workbook.name, worksheet: this.name };
             fin.desktop.InterApplicationBus.publish("excelCall", obj);
         };
         ExcelWorksheet.prototype.setCellName = function (cellAddress, cellName) {
