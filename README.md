@@ -378,6 +378,46 @@ var sheet = workbook.getSheetByName("sheet1");
 sheet.clearAllCells();
 
 /*
+clearAllCellContents();
+clears all the cell values in the worksheet.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearAllCellContents();
+
+/*
+clearAllCellFormats();
+clears all the cell formatting in the worksheet.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearAllCellFormats();
+
+/*
+clearRange();
+clears all the cell values and formatting in the specified range.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearRange();
+
+/*
+clearRangeContents();
+clears all the cell values in the specified range.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearRangeContents();
+
+/*
+clearRangeFormats();
+clears all the cell formatting in the specified range.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearRangeFormats();
+
+/*
 setCellName(cellAddress, cellName);
 sets a name for the cell which can be referenced to get values or in formulas
 */
@@ -412,10 +452,10 @@ sheet.protect();
 
 /*
 
-formatRange(start, offsetWidth, offsetHeight, format);
+formatRange(rangeCode, format);
 formats the specified range.
 var sheet = workbook.getSheetByName("sheet1");
-sheet.formatRange("A1",  5, 10, {
+sheet.formatRange("A1:E:10", {
                                     border: {color:"0,0,0,1", style: "continuous"}, //dash, dashDot, dashDotDot, dot, double, none, slantDashDot
                                     border-right: {color:"0,0,0,1", style: "continuous"},
                                     border-left: {color:"0,0,0,1", style: "continuous"},
