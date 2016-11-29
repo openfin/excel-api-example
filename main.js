@@ -393,6 +393,7 @@ window.addEventListener("DOMContentLoaded", function(){
         Excel.init();
         Excel.getConnectionStatus(onExcelConnected);
         Excel.addEventListener("workbookAdded", onWorkbookAdded);
+        Excel.addEventListener("workbookOpened", onWorkbookAdded);
         Excel.addEventListener("workbookClosed", onWorkbookRemoved);
         Excel.addEventListener("connected", onExcelConnected);
 
