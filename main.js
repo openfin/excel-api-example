@@ -2,21 +2,24 @@
  * Created by haseebriaz on 14/05/15.
  */
 
-
-var averageColumn, averageRow;
 window.addEventListener("DOMContentLoaded", function(){
 
     var rowLength = 27;
-    var columnLength = 12 ;
+    var columnLength = 12;
     var table = document.getElementById("excelExample");
     var tBody = table.getElementsByTagName("tbody")[0];
     var tHead = table.getElementsByTagName("thead")[0];
     var newWorkbookButton = document.getElementById("newWorkbookButton");
     var newWorksheetButton = document.getElementById("newSheetButton");
-    newWorksheetButton.addEventListener("click", function(){
 
+    newWorkbookButton.addEventListener("click", function () {
+        fin.desktop.Excel.addWorkbook();
+    });
+
+    newWorksheetButton.addEventListener("click", function () {
         currentWorkbook.addWorksheet();
     });
+    
     var currentWorksheet = null;
     var currentWorkbook = null;
     var currentCell = null;
@@ -27,7 +30,8 @@ window.addEventListener("DOMContentLoaded", function(){
         switch(event.keyCode){
 
             case 78: // N
-                if(event.ctrlKey) fin.desktop.Excel.addWorkbook();
+                if (event.ctrlKey) fin.desktop.Excel.addWorkbook();
+                break;
             case 37: // LEFT
                 selectPreviousCell();
                 break;
@@ -40,8 +44,7 @@ window.addEventListener("DOMContentLoaded", function(){
             case 40: //DOWN
                 selectCellBelow();
                 break;
-
-        };
+        }
     });
 
     function initTable(){
@@ -87,8 +90,7 @@ window.addEventListener("DOMContentLoaded", function(){
             //column.addEventListener("DOMCharacterDataModified", onDataChange);
             column.addEventListener("keydown", onDataChange);
             column.addEventListener("blur", onDataChange);
-          //  column.addEventListener("mousedown", onCellClicked);
-            column.addEventListener("focus", selectCell);
+            column.addEventListener("mousedown", onCellClicked);
         }
 
         if(data)column.innerText = data;
@@ -100,9 +102,8 @@ window.addEventListener("DOMContentLoaded", function(){
         selectCell(event.target);
     }
 
-    function selectCell(event){
+    function selectCell(cell){
 
-        var cell = event.target;
         if(currentCell){
 
             currentCell.className = "cell";
@@ -112,6 +113,7 @@ window.addEventListener("DOMContentLoaded", function(){
         currentCell = cell;
         currentCell.className = "cellSelected";
         formulaInput.innerText = "Formula: " + cell.title;
+        cell.focus();
 
         updateCellNumberClass(cell, "rowNumberSelected", "cellHeaderSelected");
 
@@ -134,7 +136,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.row >= rowLength) return;
         var cell = tBody.childNodes[info.row].childNodes[info.column];
-        cell.focus();
+        selectCell(cell);
     }
 
     function selectCellAbove(){
@@ -143,7 +145,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.row <= 1) return;
         var cell = tBody.childNodes[info.row - 2].childNodes[info.column];
-        cell.focus();
+        selectCell(cell);
     }
 
     function selectNextCell(){
@@ -152,7 +154,7 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.column >= columnLength) return;
         var cell = tBody.childNodes[info.row - 1].childNodes[info.column + 1];
-        cell.focus();
+        selectCell(cell);
     }
 
     function selectPreviousCell(){
@@ -161,17 +163,17 @@ window.addEventListener("DOMContentLoaded", function(){
         var info = getAddress(currentCell);
         if(info.column <= 1) return;
         var cell = tBody.childNodes[info.row - 1].childNodes[info.column - 1];
-        cell.focus();
+        selectCell(cell);
     }
 
     function onDataChange(event){
 
-        if(event.keyCode == 13 || event.type == "blur") {
+        if(event.keyCode === 13 || event.type === "blur") {
 
             var update = getAddress(event.target);
             update.value = event.target.innerText;
             currentWorksheet.setCells([[update.value]], update.offset);
-            if(event.type == "keydown"){
+            if(event.type === "keydown"){
 
                 selectCellBelow();
                 event.preventDefault();
@@ -205,7 +207,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function updateCell(cell, value, formula){
 
-        cell.innerText = value || value === 0? value: "";
+        cell.innerText = value? value: "";
         cell.title = formula? formula: "";
     }
 
@@ -216,9 +218,8 @@ window.addEventListener("DOMContentLoaded", function(){
     }
 
     function onSelectionChanged(event){
-
         var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
-        cell.focus();
+        selectCell(cell);
     }
 
     function onSheetActivated(event){
@@ -228,7 +229,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function selectWorksheet(sheet){
 
-        if(currentWorksheet == sheet) {
+        if(currentWorksheet === sheet) {
             return;
         }
 
@@ -257,7 +258,7 @@ window.addEventListener("DOMContentLoaded", function(){
     function onWorkbookTabClicked(event){
 
         var workbook = fin.desktop.Excel.getWorkbookByName(event.target.innerText);
-        if(currentWorkbook == workbook) return;
+        if(currentWorkbook === workbook) return;
         workbook.activate();
     }
 
@@ -274,7 +275,7 @@ window.addEventListener("DOMContentLoaded", function(){
         workbook.addEventListener("sheetRemoved", onWorksheetRemoved);
         addWorkbookTab(event.workbook.name);
 
-        if(workbooksContainer.style.display == "none") showWorkbooksContainer();
+        if(workbooksContainer.style.display === "none") showWorkbooksContainer();
     }
 
     function onWorkbookRemoved(event){
@@ -316,13 +317,13 @@ window.addEventListener("DOMContentLoaded", function(){
     function onSheetButtonClicked(event){
 
         var sheet = currentWorkbook.getWorksheetByName(event.target.innerText);
-        if(currentWorksheet == sheet) return;
+        if(currentWorksheet === sheet) return;
         sheet.activate();
     }
 
     function onWorksheetRemoved(event){
 
-        if(event.worksheet.workbook == currentWorkbook){
+        if(event.worksheet.workbook === currentWorkbook){
 
             event.worksheet.removeEventListener("sheetChanged", onSheetChanged);
             event.worksheet.removeEventListener("selectionChanged", onSelectionChanged);
@@ -392,9 +393,11 @@ window.addEventListener("DOMContentLoaded", function(){
         Excel.init();
         Excel.getConnectionStatus(onExcelConnected);
         Excel.addEventListener("workbookAdded", onWorkbookAdded);
+        Excel.addEventListener("workbookOpened", onWorkbookAdded);
         Excel.addEventListener("workbookClosed", onWorkbookRemoved);
         Excel.addEventListener("connected", onExcelConnected);
 
+        installAddIn();
     });
 
     function onExcelConnected(){
@@ -408,7 +411,7 @@ window.addEventListener("DOMContentLoaded", function(){
                 workbooks[i].addEventListener("workbookActivated", onWorkbookActivated);
                 workbooks[i].addEventListener("sheetAdded", onWorksheetAdded);
                 workbooks[i].addEventListener("sheetRemoved", onWorksheetRemoved);
-            };
+            }
 
             if(workbooks.length){
 
@@ -421,41 +424,22 @@ window.addEventListener("DOMContentLoaded", function(){
         });
     }
 
-    averageColumn = function(start, height, output){
+    function installAddIn() {
+        fin.desktop.System.launchExternalProcess({
+            alias: 'excel-api-addin',
+            target: 'InstallAddIn.vbs',
+            listener: function (args) {
+                console.log('Installer script completed!');
 
-        currentWorksheet.getColumn(start, height, function(data){
-
-            var sum = 0;
-            for(var i = 0; i < data.length; i++){
-
-                sum += Number(data[i].value);
+                if (args.exitCode == 0) {
+                    fin.desktop.System.launchExternalProcess({
+                        target: '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin\\OpenFin.ExcelApi-AddIn.xll'
+                    });
+                }
             }
-
-            currentWorksheet.setCells([[sum/data.length]], output);
         });
-    }
-
-    averageRow = function(start, width, output){
-
-        currentWorksheet.getRow(start, width, function(data){
-
-            var sum = 0;
-            for(var i = 0; i < data.length; i++){
-
-                sum += Number(data[i].value);
-            }
-
-            currentWorksheet.setCells([[sum/data.length]], output);
-        });
-    }
-
-    checkNullValues = function(start, width, output){
-        console.log("Checking null values... ", arguments);
     }
 
 });
-
-
-
 
 

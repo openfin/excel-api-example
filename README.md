@@ -143,13 +143,25 @@ Passes true to the callback if its connected to Excel
 fin.desktop.Excel.getConnectionStatus(function(isConnected){...});
 
 /*
+getCalculationMode(callback);
+Passes calculation mode information to the callback if its connected to Excel
+*/
+fin.desktop.Excel.getCalculationMode(function(info){...});
+
+/*
+calculateAll();
+forces calculation on all sheets
+*/
+fin.desktop.Excel.calculateAll();
+
+/*
 addEventListener(type, listener);
 Adds event handler to handle events from Excel
 */
 fin.desktop.Excel.addEventListener("workbookAdded", function(event){...})
 
 /*
-addEventListener(type, listener);
+removeEventListener(type, listener);
 removes an attached event handler from Excel
 */
 removeEventListener("workbookAdded", handler);
@@ -176,6 +188,14 @@ function(event){
 fin.desktop.Excel.addEventListener("workbookClosed",
 function(event){
     console.log("Workbook closed; Name:", event.workbook.name);
+});
+
+{type: "afterCalculation"};
+//is fired when calculation is complete on any sheet.
+//Example:
+fin.desktop.Excel.addEventListener("afterCalculation",
+function(event){
+    console.log("calculation is complete.";
 });
 
 ```
@@ -354,12 +374,88 @@ clearAllCells();
 clears all the cell values and formatting in the worksheet.
 */
 
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearAllCells();
+
+/*
+clearAllCellContents();
+clears all the cell values in the worksheet.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearAllCellContents();
+
+/*
+clearAllCellFormats();
+clears all the cell formatting in the worksheet.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearAllCellFormats();
+
+/*
+clearRange();
+clears all the cell values and formatting in the specified range.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearRange();
+
+/*
+clearRangeContents();
+clears all the cell values in the specified range.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearRangeContents();
+
+/*
+clearRangeFormats();
+clears all the cell formatting in the specified range.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.clearRangeFormats();
+
+/*
+setCellName(cellAddress, cellName);
+sets a name for the cell which can be referenced to get values or in formulas
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.setCellName("A1", "TheCellName");
+
+/*
+calculate();
+forces calculation on the sheet.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.calculate();
+
+
+/*
+getCellByName(name, callback);
+returns cell info of the cell with the name provided.
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.getCellByName("TheCellName", function(cellInfo){...});
+
+/*
+protect();
+makes all cells in the sheet read only, except the ones marked as locked:false
+*/
+
+var sheet = workbook.getSheetByName("sheet1");
+sheet.protect();
+
 /*
 
-formatRange(start, offsetWidth, offsetHeight, format);
+formatRange(rangeCode, format);
 formats the specified range.
 var sheet = workbook.getSheetByName("sheet1");
-sheet.formatRange("A1",  5, 10, {
+sheet.formatRange("A1:E:10", {
                                     border: {color:"0,0,0,1", style: "continuous"}, //dash, dashDot, dashDotDot, dot, double, none, slantDashDot
                                     border-right: {color:"0,0,0,1", style: "continuous"},
                                     border-left: {color:"0,0,0,1", style: "continuous"},
@@ -369,11 +465,14 @@ sheet.formatRange("A1",  5, 10, {
                                     verticalLines: {color:"255,255,255,1", style: "none"}, // vertical lines between cell rows
                                     font: {color: "100,100,100,1", size: 12, bold: true, italic: true, name: "Verdana"},
                                     mergeCells: true, // merges the given range into one big cell
-                                    shrinkToFit: true // the text will shrink to fit the cell
+                                    shrinkToFit: true, // the text will shrink to fit the cell
+                                    locked: false // specifies if the cell is readonly or not in protect mode, default is true
                                 });
 
 
 */
+
+
 ```
 **events:**
 ```javascript
@@ -411,6 +510,16 @@ var sheet = workbook.getSheetByName("sheet1");
 sheet.addEventListener("sheetDeactivated",
 function(event){
     console.log("sheet deactivated. Sheet", event.target.name, "Workbook:", event.target.workbook.name);
+});
+
+{type: "sheetRenamed", target: ExcelWorksheet};
+//fired when the sheet is renamed.
+//Example:
+var sheet = workbook.getSheetByName("sheet1");
+sheet.addEventListener("sheetRenamed",
+function(event){
+    console.log("sheet", event.data.sheetName, "was renamed to: ", event.data.newName
+    );
 });
 
 ```

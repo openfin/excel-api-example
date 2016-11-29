@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Excel integration for OpenFin",
   "main": "main.js",
-  "dependencies": {},
+  "dependencies": {
+    "openfin-cli": "*"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
