@@ -4,46 +4,33 @@ This repo demonstrates the usage of JavaScript Excel API provided by Openfin.
 Note: This demo is intentionally coded in plain JavaScript so that its easy to follow,
 without any need to understand other technologies/ frameworks.
 
-# How to run the demo
+# How to Run the Demo
 
 1) Download and run the installer.
 [openfin installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://openfin.github.io/excel-api-example/app.json)
 
-2) Download the [add-in.zip](http://openfin.github.io/excel-api-example/add-in.zip)
-, extract the zip to disk (do not simply open it in place) and load the FinDesktopAddin.xll 
-(or FinDesktopAddin64.xll for 64bit Excel) by double clicking it.
-Once its loaded correctly you should see a message in status bar saying "Connected to Openfin", which means
-the add-in is loaded and working correctly.
-
-3) At this point you should be able to interact with Excel(create workbooks, worksheets, update cells etc) from either side and you should
-see it mirrored on the other side
+2) After the installer runs, the OpenFin application should launch and automatically start Excel. At this point you should be able to interact with eith either application (create workbooks, worksheets, update cells, etc.) and see it mirrored on the other side.
 
 4) If you initially don't see workbooks on Openfin side, refresh the HTML page.
 
-##How to run locally, for development
-For development purposes you may wish to clone this repository and run on a local computer. OpenFin is currently only Windows compatible, but may be run on a Virtual Machine on Mac. 
+##How to Run Locally, for Development
+For development purposes you may wish to clone this repository and run on a local computer. The Excel Add-In is only compatible with Excel for Windows.
 
-Node must be installed ( [https://nodejs.org/en/](https://nodejs.org/en/) ).
+Pre-requisite: Node and NPM must be installed ( [https://nodejs.org/en/](https://nodejs.org/en/) ).
 
 Clone the repositry and, in the Command Prompt, navigate into the 'excel-api-example' directory created.
 
 In the Command Prompt run:
 
 ```
-$ npm install
+> npm install
 ```
 Once the Node packages have installed, in the same 'excel-api-example' directory, run:
 
 ```
-$ node server
+> npm start
 ```
-This will start a simple Express server at http://localhost:5040.
-
-Install the local app via this url:
-
-[openfin excel-localhost installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://localhost:5040/app.json) 
-
-The Node server must be running at http://localhost:5040 for you to be able to run the app locally.
+This will start a simple HTTP server on port 8080 and launch the OpenFin App automatically.
    
 ## Custom Functions:
 The Excel plugin also allows you to call custom JS functions from excel.
