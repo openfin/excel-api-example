@@ -260,6 +260,7 @@ fin.desktop.Excel = (function () {
                     workbook.dispatchEvent({ type: data.event, worksheet: sheet });
                     break;
                 case "workbookAdded":
+                case "workbookOpened":
                     var workbook = new ExcelWorkbook(data.workbookName);
                     workbooks[data.workbookName] = workbook;
                     fin.desktop.Excel.dispatchEvent({ type: data.event, workbook: workbook });
