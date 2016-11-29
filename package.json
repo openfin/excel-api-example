@@ -4,7 +4,7 @@
   "description": "Excel integration for OpenFin",
   "main": "main.js",
   "dependencies": {
-    "express": "^4.13.4"
+    "openfin-cli": "*"
   },
   "devDependencies": {},
   "scripts": {

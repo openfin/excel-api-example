@@ -5,16 +5,21 @@
 window.addEventListener("DOMContentLoaded", function(){
 
     var rowLength = 27;
-    var columnLength = 12 ;
+    var columnLength = 12;
     var table = document.getElementById("excelExample");
     var tBody = table.getElementsByTagName("tbody")[0];
     var tHead = table.getElementsByTagName("thead")[0];
     var newWorkbookButton = document.getElementById("newWorkbookButton");
     var newWorksheetButton = document.getElementById("newSheetButton");
-    newWorksheetButton.addEventListener("click", function(){
 
+    newWorkbookButton.addEventListener("click", function () {
+        fin.desktop.Excel.addWorkbook();
+    });
+
+    newWorksheetButton.addEventListener("click", function () {
         currentWorkbook.addWorksheet();
     });
+    
     var currentWorksheet = null;
     var currentWorkbook = null;
     var currentCell = null;
@@ -25,7 +30,8 @@ window.addEventListener("DOMContentLoaded", function(){
         switch(event.keyCode){
 
             case 78: // N
-                if(event.ctrlKey) fin.desktop.Excel.addWorkbook();
+                if (event.ctrlKey) fin.desktop.Excel.addWorkbook();
+                break;
             case 37: // LEFT
                 selectPreviousCell();
                 break;
@@ -38,8 +44,7 @@ window.addEventListener("DOMContentLoaded", function(){
             case 40: //DOWN
                 selectCellBelow();
                 break;
-
-        };
+        }
     });
 
     function initTable(){
@@ -163,12 +168,12 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function onDataChange(event){
 
-        if(event.keyCode == 13 || event.type == "blur") {
+        if(event.keyCode === 13 || event.type === "blur") {
 
             var update = getAddress(event.target);
             update.value = event.target.innerText;
             currentWorksheet.setCells([[update.value]], update.offset);
-            if(event.type == "keydown"){
+            if(event.type === "keydown"){
 
                 selectCellBelow();
                 event.preventDefault();
@@ -213,7 +218,6 @@ window.addEventListener("DOMContentLoaded", function(){
     }
 
     function onSelectionChanged(event){
-
         var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
         selectCell(cell);
     }
@@ -225,7 +229,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function selectWorksheet(sheet){
 
-        if(currentWorksheet == sheet) {
+        if(currentWorksheet === sheet) {
             return;
         }
 
@@ -254,7 +258,7 @@ window.addEventListener("DOMContentLoaded", function(){
     function onWorkbookTabClicked(event){
 
         var workbook = fin.desktop.Excel.getWorkbookByName(event.target.innerText);
-        if(currentWorkbook == workbook) return;
+        if(currentWorkbook === workbook) return;
         workbook.activate();
     }
 
@@ -271,7 +275,7 @@ window.addEventListener("DOMContentLoaded", function(){
         workbook.addEventListener("sheetRemoved", onWorksheetRemoved);
         addWorkbookTab(event.workbook.name);
 
-        if(workbooksContainer.style.display == "none") showWorkbooksContainer();
+        if(workbooksContainer.style.display === "none") showWorkbooksContainer();
     }
 
     function onWorkbookRemoved(event){
@@ -313,13 +317,13 @@ window.addEventListener("DOMContentLoaded", function(){
     function onSheetButtonClicked(event){
 
         var sheet = currentWorkbook.getWorksheetByName(event.target.innerText);
-        if(currentWorksheet == sheet) return;
+        if(currentWorksheet === sheet) return;
         sheet.activate();
     }
 
     function onWorksheetRemoved(event){
 
-        if(event.worksheet.workbook == currentWorkbook){
+        if(event.worksheet.workbook === currentWorkbook){
 
             event.worksheet.removeEventListener("sheetChanged", onSheetChanged);
             event.worksheet.removeEventListener("selectionChanged", onSelectionChanged);
@@ -392,6 +396,7 @@ window.addEventListener("DOMContentLoaded", function(){
         Excel.addEventListener("workbookClosed", onWorkbookRemoved);
         Excel.addEventListener("connected", onExcelConnected);
 
+        installAddIn();
     });
 
     function onExcelConnected(){
@@ -405,7 +410,7 @@ window.addEventListener("DOMContentLoaded", function(){
                 workbooks[i].addEventListener("workbookActivated", onWorkbookActivated);
                 workbooks[i].addEventListener("sheetAdded", onWorksheetAdded);
                 workbooks[i].addEventListener("sheetRemoved", onWorksheetRemoved);
-            };
+            }
 
             if(workbooks.length){
 
@@ -414,6 +419,22 @@ window.addEventListener("DOMContentLoaded", function(){
             }
             else {
                 showNoWorkbooksMessage();
+            }
+        });
+    }
+
+    function installAddIn() {
+        fin.desktop.System.launchExternalProcess({
+            alias: 'excel-api-addin',
+            target: 'InstallAddIn.vbs',
+            listener: function (args) {
+                console.log('Installer script completed!');
+
+                if (args.exitCode == 0) {
+                    fin.desktop.System.launchExternalProcess({
+                        target: '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin\\OpenFin.ExcelApi-AddIn.xll'
+                    });
+                }
             }
         });
     }
