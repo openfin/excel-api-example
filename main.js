@@ -425,15 +425,17 @@ window.addEventListener("DOMContentLoaded", function(){
     }
 
     function installAddIn() {
+        var installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
+
         fin.desktop.System.launchExternalProcess({
             alias: 'excel-api-addin',
-            target: 'InstallAddIn.vbs',
+            target: 'OpenFin.ExcelApi.Installer.exe',
+            arguments: '-d "' + installFolder + '"',
             listener: function (args) {
                 console.log('Installer script completed!');
-
                 if (args.exitCode == 0) {
                     fin.desktop.System.launchExternalProcess({
-                        target: '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin\\OpenFin.ExcelApi-AddIn.xll'
+                        target: installFolder + '\\OpenFin.ExcelApi-AddIn.xll'
                     });
                 }
             }

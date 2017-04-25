@@ -66,18 +66,19 @@ var fin;
                 fin.desktop.InterApplicationBus.publish("excelCall", message);
                 RpcDispatcher.messageId++;
             };
-            RpcDispatcher.messageId = 1;
-            RpcDispatcher.callbacks = {};
             return RpcDispatcher;
         }());
+        RpcDispatcher.messageId = 1;
+        RpcDispatcher.callbacks = {};
         // RpcDispatcher
         // workbook
         var ExcelWorkbook = (function (_super) {
             __extends(ExcelWorkbook, _super);
             function ExcelWorkbook(application, name) {
-                _super.call(this);
-                this.application = application;
-                this.name = name;
+                var _this = _super.call(this) || this;
+                _this.application = application;
+                _this.name = name;
+                return _this;
             }
             ExcelWorkbook.prototype.getDefaultMessage = function () {
                 return {
@@ -124,9 +125,10 @@ var fin;
         var ExcelWorksheet = (function (_super) {
             __extends(ExcelWorksheet, _super);
             function ExcelWorksheet(name, workbook) {
-                _super.call(this);
-                this.name = name;
-                this.workbook = workbook;
+                var _this = _super.call(this) || this;
+                _this.name = name;
+                _this.workbook = workbook;
+                return _this;
             }
             ExcelWorksheet.prototype.getDefaultMessage = function () {
                 return {
@@ -236,11 +238,10 @@ var fin;
         var Excel = (function (_super) {
             __extends(Excel, _super);
             function Excel() {
-                var _this = this;
-                _super.call(this);
-                this.workbooks = {};
-                this.worksheets = {};
-                this.processExcelEvent = function (data) {
+                var _this = _super.call(this) || this;
+                _this.workbooks = {};
+                _this.worksheets = {};
+                _this.processExcelEvent = function (data) {
                     switch (data.event) {
                         case "connected":
                             _this.dispatchEvent({ type: data.event });
@@ -317,7 +318,7 @@ var fin;
                             break;
                     }
                 };
-                this.processExcelResult = function (data) {
+                _this.processExcelResult = function (data) {
                     var callbackData = {};
                     switch (data.action) {
                         case "getWorkbooks":
@@ -380,7 +381,7 @@ var fin;
                         delete RpcDispatcher.callbacks[data.messageId];
                     }
                 };
-                this.processExcelCustomFunction = function (data) {
+                _this.processExcelCustomFunction = function (data) {
                     if (!window[data.functionName]) {
                         console.error("function ", data.functionName, "is not defined.");
                         return;
@@ -393,6 +394,7 @@ var fin;
                     }
                     window[data.functionName].apply(null, args);
                 };
+                return _this;
             }
             Excel.prototype.init = function () {
                 fin.desktop.InterApplicationBus.subscribe("*", "excelEvent", this.processExcelEvent);
