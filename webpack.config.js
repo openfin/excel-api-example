@@ -1,5 +1,5 @@
 ﻿module.exports = {
-    entry: './main.js',
+    entry: './src/main.js',
     output: {
         filename: 'excel-api-example.js'
     },

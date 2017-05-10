@@ -2,7 +2,7 @@
  * Created by haseebriaz on 14/05/15.
  */
 
-fin.desktop.Excel = require('./ExcelApi.js').default;
+fin.desktop.Excel = require('./ExcelApplication.js').default;
 
 window.addEventListener("DOMContentLoaded", function(){
 
