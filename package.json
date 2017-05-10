@@ -4,13 +4,16 @@
   "description": "Excel integration for OpenFin",
   "main": "main.js",
   "dependencies": {
-    "openfin-cli": "*",
-    "http-server": "*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "openfin-cli": "*",
+    "http-server": "*",
+    "webpack": "^2.5.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "start node node_modules\\http-server\\bin\\http-server & node node_modules\\openfin-cli\\cli.js -l -c dev-app.json"
+    "start": "start node node_modules\\http-server\\bin\\http-server & node node_modules\\openfin-cli\\cli.js -l -c dev-app.json",
+    "webpack":  "webpack"
   },
   "repository": {
     "type": "git",

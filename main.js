@@ -2,6 +2,8 @@
  * Created by haseebriaz on 14/05/15.
  */
 
+fin.desktop.Excel = require('./ExcelApi.js').default;
+
 window.addEventListener("DOMContentLoaded", function(){
 
     var rowLength = 27;
@@ -433,7 +435,7 @@ window.addEventListener("DOMContentLoaded", function(){
             arguments: '-d "' + installFolder + '"',
             listener: function (args) {
                 console.log('Installer script completed!');
-                if (args.exitCode == 0) {
+                if (args.exitCode === 0) {
                     fin.desktop.System.launchExternalProcess({
                         target: installFolder + '\\OpenFin.ExcelApi-AddIn.xll'
                     });
@@ -443,5 +445,3 @@ window.addEventListener("DOMContentLoaded", function(){
     }
 
 });
-
-
