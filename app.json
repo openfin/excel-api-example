@@ -1,9 +1,9 @@
 {
     "startup_app": {
         "name": "Excel-API-Example",
-        "url": "http://openfin.github.io/excel-api-example/",
+        "url": "http://openfin.github.io/excel-api-example/web/",
         "uuid": "grid",
-        "applicationIcon": "http://openfin.github.io/excel-api-example/openfin.ico",
+        "applicationIcon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
         "autoShow": true,
         "defaultWidth": 760,
         "defaultHeight": 704,
@@ -15,16 +15,16 @@
         "arguments": "",
         "version": "stable"
     },
-    "splashScreenImage": "http://openfin.github.io/excel-api-example/splash_excel.png",
+    "splashScreenImage": "http://openfin.github.io/excel-api-example/web/splash_excel.png",
     "shortcut": {
         "company": "OpenFin",
         "description": "excel-api-example",
-        "icon": "http://openfin.github.io/snap-and-dock/openfin.ico",
+        "icon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
         "name": "excel-api-example"
     },
     "appAssets": [
         {
-            "src": "http://openfin.github.io/excel-api-example/add-in.zip",
+            "src": "http://openfin.github.io/excel-api-example/web/add-in.zip",
             "alias": "excel-api-addin",
             "version": "1.0.1"
         }
