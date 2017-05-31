@@ -4,14 +4,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var RpcDispatcher_1 = require("./RpcDispatcher");
+var RpcDispatcher_1 = require('./RpcDispatcher');
 var ExcelWorkbook = (function (_super) {
     __extends(ExcelWorkbook, _super);
     function ExcelWorkbook(application, name) {
-        var _this = _super.call(this) || this;
-        _this.application = application;
-        _this.name = name;
-        return _this;
+        _super.call(this);
+        this.application = application;
+        this.name = name;
     }
     ExcelWorkbook.prototype.getDefaultMessage = function () {
         return {
