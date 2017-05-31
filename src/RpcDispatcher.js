@@ -57,9 +57,9 @@ var RpcDispatcher = (function () {
         fin.desktop.InterApplicationBus.publish("excelCall", message);
         RpcDispatcher.messageId++;
     };
+    RpcDispatcher.messageId = 1;
+    RpcDispatcher.callbacks = {};
     return RpcDispatcher;
 }());
-RpcDispatcher.messageId = 1;
-RpcDispatcher.callbacks = {};
 exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map

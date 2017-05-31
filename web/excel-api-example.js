@@ -130,10 +130,10 @@ var RpcDispatcher = (function () {
         fin.desktop.InterApplicationBus.publish("excelCall", message);
         RpcDispatcher.messageId++;
     };
+    RpcDispatcher.messageId = 1;
+    RpcDispatcher.callbacks = {};
     return RpcDispatcher;
 }());
-RpcDispatcher.messageId = 1;
-RpcDispatcher.callbacks = {};
 exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map
 
@@ -154,10 +154,11 @@ var ExcelWorksheet_1 = __webpack_require__(3);
 var Excel = (function (_super) {
     __extends(Excel, _super);
     function Excel() {
-        var _this = _super.call(this) || this;
-        _this.workbooks = {};
-        _this.worksheets = {};
-        _this.processExcelEvent = function (data) {
+        var _this = this;
+        _super.call(this);
+        this.workbooks = {};
+        this.worksheets = {};
+        this.processExcelEvent = function (data) {
             switch (data.event) {
                 case "connected":
                     _this.dispatchEvent({ type: data.event });
@@ -234,7 +235,7 @@ var Excel = (function (_super) {
                     break;
             }
         };
-        _this.processExcelResult = function (data) {
+        this.processExcelResult = function (data) {
             var callbackData = {};
             switch (data.action) {
                 case "getWorkbooks":
@@ -297,7 +298,7 @@ var Excel = (function (_super) {
                 delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
             }
         };
-        _this.processExcelCustomFunction = function (data) {
+        this.processExcelCustomFunction = function (data) {
             if (!window[data.functionName]) {
                 console.error("function ", data.functionName, "is not defined.");
                 return;
@@ -310,7 +311,6 @@ var Excel = (function (_super) {
             }
             window[data.functionName].apply(null, args);
         };
-        return _this;
     }
     Excel.prototype.init = function () {
         fin.desktop.InterApplicationBus.subscribe("*", "excelEvent", this.processExcelEvent);
@@ -381,10 +381,9 @@ var RpcDispatcher_1 = __webpack_require__(0);
 var ExcelWorkbook = (function (_super) {
     __extends(ExcelWorkbook, _super);
     function ExcelWorkbook(application, name) {
-        var _this = _super.call(this) || this;
-        _this.application = application;
-        _this.name = name;
-        return _this;
+        _super.call(this);
+        this.application = application;
+        this.name = name;
     }
     ExcelWorkbook.prototype.getDefaultMessage = function () {
         return {
@@ -444,10 +443,9 @@ var RpcDispatcher_1 = __webpack_require__(0);
 var ExcelWorksheet = (function (_super) {
     __extends(ExcelWorksheet, _super);
     function ExcelWorksheet(name, workbook) {
-        var _this = _super.call(this) || this;
-        _this.name = name;
-        _this.workbook = workbook;
-        return _this;
+        _super.call(this);
+        this.name = name;
+        this.workbook = workbook;
     }
     ExcelWorksheet.prototype.getDefaultMessage = function () {
         return {

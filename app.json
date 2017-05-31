@@ -1,32 +1,32 @@
 {
-    "startup_app": {
-        "name": "Excel-API-Example",
-        "url": "http://openfin.github.io/excel-api-example/web/",
-        "uuid": "grid",
-        "applicationIcon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
-        "autoShow": true,
-        "defaultWidth": 760,
-        "defaultHeight": 704,
-        "defaultTop": 100,
-        "defaultLeft": 100,
-        "frame": true
-    },
-    "runtime": {
-        "arguments": "",
-        "version": "stable"
-    },
-    "splashScreenImage": "http://openfin.github.io/excel-api-example/web/splash_excel.png",
-    "shortcut": {
-        "company": "OpenFin",
-        "description": "excel-api-example",
-        "icon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
-        "name": "excel-api-example"
-    },
-    "appAssets": [
-        {
-            "src": "http://openfin.github.io/excel-api-example/web/add-in.zip",
-            "alias": "excel-api-addin",
-            "version": "1.0.1"
-        }
-    ]
+  "startup_app": {
+    "name": "Excel-API-Example",
+    "url": "http://openfin.github.io/excel-api-example/web/",
+    "uuid": "grid",
+    "applicationIcon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
+    "autoShow": true,
+    "defaultWidth": 760,
+    "defaultHeight": 704,
+    "defaultTop": 100,
+    "defaultLeft": 100,
+    "frame": true
+  },
+  "runtime": {
+    "arguments": "",
+    "version": "stable"
+  },
+  "splashScreenImage": "http://openfin.github.io/excel-api-example/web/splash_excel.png",
+  "shortcut": {
+    "company": "OpenFin",
+    "description": "excel-api-example",
+    "icon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
+    "name": "excel-api-example"
+  },
+  "appAssets": [
+    {
+      "src": "http://openfin.github.io/excel-api-example/web/add-in.zip",
+      "alias": "excel-api-addin",
+      "version": "1.2.0"
+    }
+  ]
 }

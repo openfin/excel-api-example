@@ -4,16 +4,17 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var RpcDispatcher_1 = require("./RpcDispatcher");
-var ExcelWorkbook_1 = require("./ExcelWorkbook");
-var ExcelWorksheet_1 = require("./ExcelWorksheet");
+var RpcDispatcher_1 = require('./RpcDispatcher');
+var ExcelWorkbook_1 = require('./ExcelWorkbook');
+var ExcelWorksheet_1 = require('./ExcelWorksheet');
 var Excel = (function (_super) {
     __extends(Excel, _super);
     function Excel() {
-        var _this = _super.call(this) || this;
-        _this.workbooks = {};
-        _this.worksheets = {};
-        _this.processExcelEvent = function (data) {
+        var _this = this;
+        _super.call(this);
+        this.workbooks = {};
+        this.worksheets = {};
+        this.processExcelEvent = function (data) {
             switch (data.event) {
                 case "connected":
                     _this.dispatchEvent({ type: data.event });
@@ -90,7 +91,7 @@ var Excel = (function (_super) {
                     break;
             }
         };
-        _this.processExcelResult = function (data) {
+        this.processExcelResult = function (data) {
             var callbackData = {};
             switch (data.action) {
                 case "getWorkbooks":
@@ -153,7 +154,7 @@ var Excel = (function (_super) {
                 delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
             }
         };
-        _this.processExcelCustomFunction = function (data) {
+        this.processExcelCustomFunction = function (data) {
             if (!window[data.functionName]) {
                 console.error("function ", data.functionName, "is not defined.");
                 return;
@@ -166,7 +167,6 @@ var Excel = (function (_super) {
             }
             window[data.functionName].apply(null, args);
         };
-        return _this;
     }
     Excel.prototype.init = function () {
         fin.desktop.InterApplicationBus.subscribe("*", "excelEvent", this.processExcelEvent);
