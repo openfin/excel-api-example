@@ -104,7 +104,7 @@ window.addEventListener("DOMContentLoaded", function(){
         selectCell(event.target);
     }
 
-    function selectCell(cell){
+    function selectCell(cell, preventDefault){
 
         if(currentCell){
 
@@ -120,7 +120,10 @@ window.addEventListener("DOMContentLoaded", function(){
         updateCellNumberClass(cell, "rowNumberSelected", "cellHeaderSelected");
 
         var address = getAddress(currentCell);
-        currentWorksheet.activateCell(address.offset);
+
+        if (!preventDefault) {
+            currentWorksheet.activateCell(address.offset);
+        }
     }
 
     function updateCellNumberClass(cell, className, headerClassName){
@@ -221,7 +224,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
     function onSelectionChanged(event){
         var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
-        selectCell(cell);
+        selectCell(cell, true);
     }
 
     function onSheetActivated(event){
