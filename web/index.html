@@ -228,7 +228,7 @@
             text-align: center;
         }
 
-        #noWorkbooks{
+        .noWorkbooks{
 
             font-family: Calibri, Helvetica, Arial;
             font-size: 11pt;
@@ -238,17 +238,17 @@
             display: none;
         }
 
-        #workbooksContainer{
-
-            display: none;
-        }
-
-        .newWorkbook{
+        .noWorkbooks a{
 
             font-family: Calibri, Helvetica, Arial;
             font-size: 11pt;
             text-align: center;
             color: #0e77ed;
+        }
+
+        .workbooksContainer{
+
+            display: none;
         }
     </style>
     <meta charset="UTF-8">
@@ -263,9 +263,15 @@
     <div class="introDescription">The purpose of this demo is to demonstrate Openfin's capabilities for communicating with Excel. </div>
 </div>
 
-<div id="noWorkbooks">No Workbooks found. Start with creating <a href="#" class="newWorkbook" onclick="fin.desktop.Excel.addWorkbook()"> New Workbook. </a> </div>
+<div id="noConnection" class="noWorkbooks">
+    Excel not connected. Start by <a href="#" onclick="installAddIn()">launching Excel.</a>
+</div>
 
-<div id="workbooksContainer">
+<div id="noWorkbooks" class="noWorkbooks">
+    No Workbooks found. Start with creating <a href="#" onclick="fin.desktop.Excel.addWorkbook()"> New Workbook. </a>
+</div>
+
+<div id="workbooksContainer" class="workbooksContainer">
 
     <div id="workbookTabs"><button class="workbookTab" title="New workbook (ctr+N)" id="newWorkbookButton">New</button></div>
     <div class="greenBar"></div>
@@ -276,6 +282,7 @@
     </table>
     <div id="sheets"><button id="newSheetButton" title="New sheet" class="tab">New</button></div>
 </div>
+
 <div id="status">Excel not connected</div>
 
 </body>
