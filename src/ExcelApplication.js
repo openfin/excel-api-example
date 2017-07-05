@@ -14,9 +14,11 @@ var Excel = (function (_super) {
         _super.call(this);
         this.workbooks = {};
         this.worksheets = {};
-        this.processExcelEvent = function (data) {
+        this.processExcelEvent = function (data, uuid) {
             switch (data.event) {
                 case "connected":
+                    _this.connected = true;
+                    _this.monitorDisconnect(uuid);
                     _this.dispatchEvent({ type: data.event });
                     break;
                 case "sheetChanged":
@@ -173,6 +175,13 @@ var Excel = (function (_super) {
         fin.desktop.InterApplicationBus.subscribe("*", "excelResult", this.processExcelResult);
         fin.desktop.InterApplicationBus.subscribe("*", "excelCustomFunction", this.processExcelCustomFunction);
     };
+    Excel.prototype.monitorDisconnect = function (uuid) {
+        var _this = this;
+        fin.desktop.ExternalApplication.wrap(uuid).addEventListener('disconnected', function () {
+            _this.connected = false;
+            _this.dispatchEvent({ type: 'disconnected' });
+        });
+    };
     Excel.prototype.getWorkbooks = function (callback) {
         this.invokeRemote("getWorkbooks", null, callback);
     };
@@ -191,7 +200,7 @@ var Excel = (function (_super) {
         this.invokeRemote("openWorkbook", { path: path }, callback);
     };
     Excel.prototype.getConnectionStatus = function (callback) {
-        this.invokeRemote("getStatus", null, callback);
+        callback(this.connected);
     };
     Excel.prototype.getCalculationMode = function (callback) {
         this.invokeRemote("getCalculationMode", null, callback);
