@@ -1,10 +1,11 @@
 # excel-api-example
 This repo demonstrates the usage of JavaScript Excel API provided by Openfin.
 
-Note: This demo is intentionally coded in plain JavaScript so that its easy to follow,
-without any need to understand other technologies/ frameworks.
+Note: This main source code for this demo is intentionally coded in plain JavaScript so that its easy to follow, without any need to understand other technologies/ frameworks. The API libraries are generated from TypeScript, and the end-product utilizes webpack to achieve a single-file web application.
 
 # How to Run the Demo
+
+## Quick Start
 
 1) Download and run the installer.
 [openfin installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://openfin.github.io/excel-api-example/app.json)
@@ -13,82 +14,92 @@ without any need to understand other technologies/ frameworks.
 
 4) If you initially don't see workbooks on Openfin side, refresh the HTML page.
 
-##How to Run Locally, for Development
+## Modifying and Building Locally
+
 For development purposes you may wish to clone this repository and run on a local computer. The Excel Add-In is only compatible with Excel for Windows.
 
 Pre-requisite: Node and NPM must be installed ( [https://nodejs.org/en/](https://nodejs.org/en/) ).
 
-Clone the repositry and, in the Command Prompt, navigate into the 'excel-api-example' directory created.
+Clone the repository and, in the Command Prompt, navigate into the _excel-api-example_ directory created.
 
 In the Command Prompt run:
 
 ```
 > npm install
 ```
-Once the Node packages have installed, in the same 'excel-api-example' directory, run:
+Once the Node packages have installed, it is now possible to make modifications to files in the _excel-api-example\src_ folder and rebuild the project by running:
+
+```
+> npm run webpack
+```
+
+After rebuilding, start the application by running:
 
 ```
 > npm start
 ```
 This will start a simple HTTP server on port 8080 and launch the OpenFin App automatically.
-   
+
+# Getting Started
+
+## Writing to and Reading from a Spreadsheet:
+
+After a connection has been established between Excel and the OpenFin application, pushing data to a spreadsheet and reading back the calculated values can be performed as follows:
+
+```
+fin.desktop.Excel.getWoorkbooks();
+
+var sheet1 = fin.desktop.Excel.getWorkbookByName('Book1').getWorksheetByName('Sheet1');
+
+// A little fun with Pythagorean triples:
+sheet1.setCells([
+  ["A", "B", "C"],
+  [  3,   4, "=SQRT(A2^2+B2^2)"],
+  [  5,  12, "=SQRT(A3^2+B3^2)"],
+  [  8,  15, "=SQRT(A4^2+B4^2)"],
+], "A1");
+
+// Write the computed values to console:
+sheet1.getCells("C2", 0, 2, cells => {
+  console.log(cells[0][0].value);
+  console.log(cells[1][0].value);
+  console.log(cells[2][0].value);
+});
+
+```
+
+## Subscribing to Events:
+
+Monitoring various application, workbook, and sheet events are done via the `addEventListener` functions on their respective objects. For example:
+
+```
+sheet1.getCells("C2", 0, 2, cells => {
+  var lastValue = cells[0][0].value;
+  
+  fin.desktop.Excel.addEventListener('afterCalculation', () => {
+    sheet1.getCells("C2", 0, 2, cells => {
+      if(cells[0][0].value !== lastValue) {
+        console.log('Value Changed!');
+      }
+
+      lastValue = cells[0][0].value;
+    });
+  });
+})
+```
+
 ## Custom Functions:
-The Excel plugin also allows you to call custom JS functions from excel.
-You can use them to do some complicated calculations using your connected app and feed the
-result back to Excel, or you can simply use them to register cells that you would like to be
-updated by your connected app.
 
-You can call a custom function by entering following in the formula bar:
+_Coming back in the next release._
 
-```
-=CustomFunction("nameOfTheJSFunction", "comma,separated,arguments")
-```
-the above function call will call a function in JavaScript app as following:  
-
-```
-nameOfTheJSFunction("comma", "separated", "arguments");
-```
-There are two sample functions included in the demo app for demonstration.
-
-To try the custom functions:
-
-1) Enter some numbers in a column formation.
-
-2) In any empty cell make the following call 
-```
-=CustomFunction("averageColumn", "startingCellAddress,columnHeight,resultDestination")
-e.g  =CustomFunction("averageColumn", "A1,7,A8")
-```
-
-the above example will call a function defined in JavaScript app (averageColumn("A1", 7, "A8"))
-and the defined JavaScript function will take the average of column values from A1 to A7 and update the result in cell A8.
-
-3) The second function is =CustomFunction("averageRow", "A1,7,H1").
-
-The above example will take the average of row values from A1 to G1 and update the cell at H1 with the result.
-
-4) You can also define your own custom functions on the fly and call them from excel.
-To try your own custom function you can open the JS console from the demo app and define a test function by typing in the console.
-e.g 
-
-```var test = function(){console.log("excel just called me with these arguments", arguments)}```
-
-5) Now go ahead and call your defined function from excel.
-
-```
-e.g =CustomFunction("test","a,b,c")
-```
-you will see following string printed out in the console. "excel just called me with these arguments ['a', 'b', 'c']"
-
-
-# API Documentation
+# Full API Documentation
 
 The Excel API is composition based object model. Where Excel is the top most level which has workbooks which have worksheets and worksheets have cells.
 To use the API you will need to include ExcelAPI.js in your project and it will extend Openfin API with Excel API included.
 Once included you will be able to use following API calls.
 
 
-##fin.desktop.Excel:
+## fin.desktop.Excel:
 **methods:**
 
 ``` javascript
@@ -187,7 +198,7 @@ function(event){
 
 ```
 
-##fin.desktop.ExcelWorkbook:
+## fin.desktop.ExcelWorkbook:
 Represents an Excel workbook.
 Note: New workbooks are not supposed to be created using new or Object.create().
 Workbook objects can only be retrieved using API calls like fin.desktop.Excel.getWorkbooks() fin.desktop.Excel.getWorkbookByName() and fin.desktop.Excel.addWorkbook() etc.
@@ -287,8 +298,8 @@ function(event){
 
 ```
 
-##fin.desktop.ExcelWorksheet:
-Represents a worksheet in excel.
+## fin.desktop.ExcelWorksheet:
+Represents a worksheet in Excel.
 Note: New sheets are not supposed to be created using new or Object.create().
 new sheets can be created only using workbook.addWorksheet() or existing sheet objects can be retrieved using workbook.getWorksheets() and workbook.getWorksheetByName();
 
