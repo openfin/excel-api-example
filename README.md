@@ -99,7 +99,7 @@ To use the API you will need to include ExcelAPI.js in your project and it will 
 Once included you will be able to use following API calls.
 
 
-##fin.desktop.Excel:
+## fin.desktop.Excel:
 **methods:**
 
 ``` javascript
@@ -198,7 +198,7 @@ function(event){
 
 ```
 
-##fin.desktop.ExcelWorkbook:
+## fin.desktop.ExcelWorkbook:
 Represents an Excel workbook.
 Note: New workbooks are not supposed to be created using new or Object.create().
 Workbook objects can only be retrieved using API calls like fin.desktop.Excel.getWorkbooks() fin.desktop.Excel.getWorkbookByName() and fin.desktop.Excel.addWorkbook() etc.
@@ -298,8 +298,8 @@ function(event){
 
 ```
 
-##fin.desktop.ExcelWorksheet:
-Represents a worksheet in excel.
+## fin.desktop.ExcelWorksheet:
+Represents a worksheet in Excel.
 Note: New sheets are not supposed to be created using new or Object.create().
 new sheets can be created only using workbook.addWorksheet() or existing sheet objects can be retrieved using workbook.getWorksheets() and workbook.getWorksheetByName();
 
