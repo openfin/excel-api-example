@@ -1,10 +1,11 @@
 # excel-api-example
 This repo demonstrates the usage of JavaScript Excel API provided by Openfin.
 
-Note: This demo is intentionally coded in plain JavaScript so that its easy to follow,
-without any need to understand other technologies/ frameworks.
+Note: This main source code for this demo is intentionally coded in plain JavaScript so that its easy to follow, without any need to understand other technologies/ frameworks. The API libraries are generated from TypeScript, and the end-product utilizes webpack to achieve a single-file web application.
 
 # How to Run the Demo
+
+## Quick Start
 
 1) Download and run the installer.
 [openfin installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://openfin.github.io/excel-api-example/app.json)
@@ -13,7 +14,8 @@ without any need to understand other technologies/ frameworks.
 
 4) If you initially don't see workbooks on Openfin side, refresh the HTML page.
 
-##How to Run Locally, for Development
+## Modifying and Building Locally
+
 For development purposes you may wish to clone this repository and run on a local computer. The Excel Add-In is only compatible with Excel for Windows.
 
 Pre-requisite: Node and NPM must be installed ( [https://nodejs.org/en/](https://nodejs.org/en/) ).
@@ -31,8 +33,19 @@ Once the Node packages have installed, in the same 'excel-api-example' directory
 > npm start
 ```
 This will start a simple HTTP server on port 8080 and launch the OpenFin App automatically.
-   
+
+# Getting Started
+
+## Reading and Writing to a Spreadsheet:
+
+
+
+## Subscribing to Events:
+
+
+
 ## Custom Functions:
+
 The Excel plugin also allows you to call custom JS functions from excel.
 You can use them to do some complicated calculations using your connected app and feed the
 result back to Excel, or you can simply use them to register cells that you would like to be
