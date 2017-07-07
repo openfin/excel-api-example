@@ -20,14 +20,20 @@ For development purposes you may wish to clone this repository and run on a loca
 
 Pre-requisite: Node and NPM must be installed ( [https://nodejs.org/en/](https://nodejs.org/en/) ).
 
-Clone the repositry and, in the Command Prompt, navigate into the 'excel-api-example' directory created.
+Clone the repository and, in the Command Prompt, navigate into the _excel-api-example_ directory created.
 
 In the Command Prompt run:
 
 ```
 > npm install
 ```
-Once the Node packages have installed, in the same 'excel-api-example' directory, run:
+Once the Node packages have installed, it is now possible to make modifications to files in the _excel-api-example\src_ folder and rebuild the project by running:
+
+```
+> npm run webpack
+```
+
+After rebuilding, start the application by running:
 
 ```
 > npm start
