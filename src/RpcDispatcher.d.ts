@@ -11,5 +11,7 @@ export declare abstract class RpcDispatcher implements EventTarget {
     private hasEventListener(type, listener);
     dispatchEvent(event: any): boolean;
     getDefaultMessage(): any;
-    protected invokeRemote(functionName: string, data?: any, callback?: Function): void;
+    protected invokeExcelCall(functionName: string, data?: any, callback?: Function): void;
+    protected invokeServiceCall(functionName: string, data?: any, callback?: Function): void;
+    private invokeRemoteCall(topic, functionName, data?, callback?);
 }

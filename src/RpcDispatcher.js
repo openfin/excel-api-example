@@ -1,9 +1,9 @@
 "use strict";
-var RpcDispatcher = (function () {
-    function RpcDispatcher() {
+class RpcDispatcher {
+    constructor() {
         this.listeners = {};
     }
-    RpcDispatcher.prototype.addEventListener = function (type, listener) {
+    addEventListener(type, listener) {
         if (this.hasEventListener(type, listener)) {
             return;
         }
@@ -11,15 +11,15 @@ var RpcDispatcher = (function () {
             this.listeners[type] = [];
         }
         this.listeners[type].push(listener);
-    };
-    RpcDispatcher.prototype.removeEventListener = function (type, listener) {
+    }
+    removeEventListener(type, listener) {
         if (!this.hasEventListener(type, listener)) {
             return;
         }
         var callbacksOfType = this.listeners[type];
         callbacksOfType.splice(callbacksOfType.indexOf(listener), 1);
-    };
-    RpcDispatcher.prototype.hasEventListener = function (type, listener) {
+    }
+    hasEventListener(type, listener) {
         if (!this.listeners[type]) {
             return false;
         }
@@ -27,8 +27,8 @@ var RpcDispatcher = (function () {
             return true;
         }
         return (this.listeners[type].indexOf(listener) >= 0);
-    };
-    RpcDispatcher.prototype.dispatchEvent = function (event) {
+    }
+    dispatchEvent(event) {
         event.target = this;
         if (!this.listeners[event.type]) {
             return false;
@@ -38,28 +38,29 @@ var RpcDispatcher = (function () {
             callbacks[i](event);
         }
         return event.defaultPrevented;
-    };
-    RpcDispatcher.prototype.getDefaultMessage = function () {
+    }
+    getDefaultMessage() {
         return {};
-    };
-    RpcDispatcher.prototype.invokeRemote = function (functionName, data, callback) {
+    }
+    invokeExcelCall(functionName, data, callback) {
+        this.invokeRemoteCall('excelCall', functionName, data, callback);
+    }
+    invokeServiceCall(functionName, data, callback) {
+        this.invokeRemoteCall('excelServiceCall', functionName, data, callback);
+    }
+    invokeRemoteCall(topic, functionName, data, callback) {
         var message = this.getDefaultMessage();
         message.messageId = RpcDispatcher.messageId;
         message.action = functionName;
-        if (data) {
-            for (var key in data) {
-                message[key] = data[key];
-            }
-        }
+        Object.assign(message, data);
         if (callback) {
             RpcDispatcher.callbacks[RpcDispatcher.messageId] = callback;
         }
-        fin.desktop.InterApplicationBus.publish("excelCall", message);
+        fin.desktop.InterApplicationBus.publish(topic, message);
         RpcDispatcher.messageId++;
-    };
-    RpcDispatcher.messageId = 1;
-    RpcDispatcher.callbacks = {};
-    return RpcDispatcher;
-}());
+    }
+}
+RpcDispatcher.messageId = 1;
+RpcDispatcher.callbacks = {};
 exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map
