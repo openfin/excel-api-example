@@ -14,7 +14,7 @@
   },
   "runtime": {
     "arguments": "",
-    "version": "stable"
+    "version": "6.*"
   },
   "splashScreenImage": "http://localhost:8080/web/splash_excel.png",
   "shortcut": {
@@ -27,7 +27,7 @@
     {
       "src": "http://localhost:8080/web/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "forceDownload": true
     }
   ]

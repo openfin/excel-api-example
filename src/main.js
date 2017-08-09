@@ -428,6 +428,8 @@ window.addEventListener("DOMContentLoaded", function () {
 
     function installAddIn() {
         var installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
+        var servicePath = 'OpenFin.ExcelService.exe';
+        var addInPath = 'OpenFin.ExcelApi-AddIn.xll';
 
         var statusElement = document.getElementById("status");
 
@@ -437,18 +439,70 @@ window.addEventListener("DOMContentLoaded", function () {
 
         statusElement.innerText = "Connecting...";
 
-        fin.desktop.System.launchExternalProcess({
-            alias: 'excel-api-addin',
-            target: 'OpenFin.ExcelApi.Installer.exe',
-            arguments: '-d "' + installFolder + '"',
-            listener: function (args) {
-                console.log('Installer script completed!');
-                if (args.exitCode === 0) {
-                    fin.desktop.System.launchExternalProcess({
-                        target: installFolder + '\\OpenFin.ExcelApi-AddIn.xll'
-                    });
+        Promise.resolve()
+            .then(() => deployAddIn(servicePath, installFolder))
+            .then(() => startExcelService(servicePath, installFolder))
+            .then(() => registerAddIn(servicePath, installFolder))
+            .then(launchExcel)
+            .catch(err => console.log(err));
+    }
+
+    function deployAddIn(servicePath, installFolder) {
+        return new Promise((resolve, reject) => {
+            fin.desktop.System.launchExternalProcess({
+                alias: 'excel-api-addin',
+                target: servicePath,
+                arguments: '-d "' + installFolder + '"',
+                listener: function (args) {
+                    console.log('Installer script completed! ' + args.exitCode);
+                    // (args.exitCode === 0) {
+                        resolve();
+                    //} else {
+                    //    reject('Error deploying Add-In');
+                    //}
                 }
-            }
+            });
+        });
+    }
+
+    function registerAddIn(servicePath, installFolder) {
+        return new Promise((resolve, reject) => {
+            fin.desktop.Excel.install(ack => {
+                if (ack.success) {
+                    resolve();
+                } else {
+                    reject();
+                }
+            });
+        });
+    }
+
+    function startExcelService(servicePath, installFolder) {
+        return new Promise((resolve, reject) => {
+            var onServiceStarted = () => {
+                console.log('Service Started');
+                fin.desktop.Excel.removeEventListener('excelServiceStarted', onServiceStarted);
+                resolve();
+            };
+
+            chrome.desktop.getDetails(function (details) {
+                fin.desktop.Excel.addEventListener('excelServiceStarted', onServiceStarted);
+
+                fin.desktop.System.launchExternalProcess({
+                    target: installFolder + '\\OpenFin.ExcelService.exe',
+                    arguments: '-p ' + details.port
+                }, process => {
+                    console.log('Service Launced');
+                }, error => {
+                    reject('Error starting Excel service');
+                });
+            });
+        });
+    }
+
+    function launchExcel() {
+        return new Promise((resolve, reject) => {
+            fin.desktop.Excel.run(resolve);
         });
     }
 
