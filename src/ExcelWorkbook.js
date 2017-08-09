@@ -1,5 +1,5 @@
 "use strict";
-const RpcDispatcher_1 = require("./RpcDispatcher");
+const RpcDispatcher_1 = require('./RpcDispatcher');
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
         super();

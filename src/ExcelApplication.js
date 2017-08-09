@@ -1,7 +1,7 @@
 "use strict";
-const RpcDispatcher_1 = require("./RpcDispatcher");
-const ExcelWorkbook_1 = require("./ExcelWorkbook");
-const ExcelWorksheet_1 = require("./ExcelWorksheet");
+const RpcDispatcher_1 = require('./RpcDispatcher');
+const ExcelWorkbook_1 = require('./ExcelWorkbook');
+const ExcelWorksheet_1 = require('./ExcelWorksheet');
 class Excel extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
         super();
