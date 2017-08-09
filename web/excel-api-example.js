@@ -72,11 +72,11 @@
 
 "use strict";
 
-var RpcDispatcher = (function () {
-    function RpcDispatcher() {
+class RpcDispatcher {
+    constructor() {
         this.listeners = {};
     }
-    RpcDispatcher.prototype.addEventListener = function (type, listener) {
+    addEventListener(type, listener) {
         if (this.hasEventListener(type, listener)) {
             return;
         }
@@ -84,15 +84,15 @@ var RpcDispatcher = (function () {
             this.listeners[type] = [];
         }
         this.listeners[type].push(listener);
-    };
-    RpcDispatcher.prototype.removeEventListener = function (type, listener) {
+    }
+    removeEventListener(type, listener) {
         if (!this.hasEventListener(type, listener)) {
             return;
         }
         var callbacksOfType = this.listeners[type];
         callbacksOfType.splice(callbacksOfType.indexOf(listener), 1);
-    };
-    RpcDispatcher.prototype.hasEventListener = function (type, listener) {
+    }
+    hasEventListener(type, listener) {
         if (!this.listeners[type]) {
             return false;
         }
@@ -100,8 +100,8 @@ var RpcDispatcher = (function () {
             return true;
         }
         return (this.listeners[type].indexOf(listener) >= 0);
-    };
-    RpcDispatcher.prototype.dispatchEvent = function (event) {
+    }
+    dispatchEvent(event) {
         event.target = this;
         if (!this.listeners[event.type]) {
             return false;
@@ -111,29 +111,30 @@ var RpcDispatcher = (function () {
             callbacks[i](event);
         }
         return event.defaultPrevented;
-    };
-    RpcDispatcher.prototype.getDefaultMessage = function () {
+    }
+    getDefaultMessage() {
         return {};
-    };
-    RpcDispatcher.prototype.invokeRemote = function (functionName, data, callback) {
+    }
+    invokeExcelCall(functionName, data, callback) {
+        this.invokeRemoteCall('excelCall', functionName, data, callback);
+    }
+    invokeServiceCall(functionName, data, callback) {
+        this.invokeRemoteCall('excelServiceCall', functionName, data, callback);
+    }
+    invokeRemoteCall(topic, functionName, data, callback) {
         var message = this.getDefaultMessage();
         message.messageId = RpcDispatcher.messageId;
         message.action = functionName;
-        if (data) {
-            for (var key in data) {
-                message[key] = data[key];
-            }
-        }
+        Object.assign(message, data);
         if (callback) {
             RpcDispatcher.callbacks[RpcDispatcher.messageId] = callback;
         }
-        fin.desktop.InterApplicationBus.publish("excelCall", message);
+        fin.desktop.InterApplicationBus.publish(topic, message);
         RpcDispatcher.messageId++;
-    };
-    RpcDispatcher.messageId = 1;
-    RpcDispatcher.callbacks = {};
-    return RpcDispatcher;
-}());
+    }
+}
+RpcDispatcher.messageId = 1;
+RpcDispatcher.callbacks = {};
 exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map
 
@@ -143,36 +144,29 @@ exports.RpcDispatcher = RpcDispatcher;
 
 "use strict";
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var RpcDispatcher_1 = __webpack_require__(0);
-var ExcelWorkbook_1 = __webpack_require__(2);
-var ExcelWorksheet_1 = __webpack_require__(3);
-var Excel = (function (_super) {
-    __extends(Excel, _super);
-    function Excel() {
-        var _this = this;
-        _super.call(this);
+const RpcDispatcher_1 = __webpack_require__(0);
+const ExcelWorkbook_1 = __webpack_require__(2);
+const ExcelWorksheet_1 = __webpack_require__(3);
+class Excel extends RpcDispatcher_1.RpcDispatcher {
+    constructor() {
+        super();
         this.workbooks = {};
         this.worksheets = {};
-        this.processExcelEvent = function (data, uuid) {
+        this.processExcelEvent = (data, uuid) => {
             switch (data.event) {
                 case "connected":
-                    _this.connected = true;
-                    _this.monitorDisconnect(uuid);
-                    _this.dispatchEvent({ type: data.event });
+                    this.connected = true;
+                    this.monitorDisconnect(uuid);
+                    this.dispatchEvent({ type: data.event });
                     break;
                 case "sheetChanged":
-                    var sheets = _this.worksheets[data.workbookName];
+                    var sheets = this.worksheets[data.workbookName];
                     if (sheets && sheets[data.sheetName]) {
                         sheets[data.sheetName].dispatchEvent({ type: data.event, data: data });
                     }
                     break;
                 case "sheetRenamed":
-                    var sheets = _this.worksheets[data.workbookName];
+                    var sheets = this.worksheets[data.workbookName];
                     if (sheets && sheets[data.sheetName]) {
                         var sheet = sheets[data.sheetName];
                         sheets[data.sheetName] = null;
@@ -182,62 +176,65 @@ var Excel = (function (_super) {
                     }
                     break;
                 case "selectionChanged":
-                    var sheets = _this.worksheets[data.workbookName];
+                    var sheets = this.worksheets[data.workbookName];
                     if (sheets && sheets[data.sheetName]) {
                         sheets[data.sheetName].dispatchEvent({ type: data.event, data: data });
                     }
                     break;
                 case "sheetActivated":
-                    var sheets = _this.worksheets[data.workbookName];
+                    var sheets = this.worksheets[data.workbookName];
                     if (sheets && sheets[data.sheetName]) {
                         sheets[data.sheetName].dispatchEvent({ type: data.event });
                     }
                     break;
                 case "sheetDeactivated":
-                    var sheets = _this.worksheets[data.workbookName];
+                    var sheets = this.worksheets[data.workbookName];
                     if (sheets && sheets[data.sheetName]) {
                         sheets[data.sheetName].dispatchEvent({ type: data.event });
                     }
                     break;
                 case "sheetAdded":
-                    var workbook = _this.getWorkbookByName(data.workbookName);
-                    if (!_this.worksheets[data.workbookName])
-                        _this.worksheets[data.workbookName] = {};
-                    var sheets = _this.worksheets[data.workbookName];
+                    var workbook = this.getWorkbookByName(data.workbookName);
+                    if (!this.worksheets[data.workbookName])
+                        this.worksheets[data.workbookName] = {};
+                    var sheets = this.worksheets[data.workbookName];
                     var sheet = sheets[data.sheetName] ? sheets[data.sheetName] : sheets[data.sheetName] = new ExcelWorksheet_1.ExcelWorksheet(data.sheetName, workbook);
                     workbook.dispatchEvent({ type: data.event, worksheet: sheet.toObject() });
                     break;
                 case "sheetRemoved":
-                    var workbook = _this.getWorkbookByName(data.workbookName);
-                    var sheet = _this.worksheets[data.workbookName][data.sheetName];
-                    delete _this.worksheets[data.workbookName][data.sheetName];
+                    var workbook = this.getWorkbookByName(data.workbookName);
+                    var sheet = this.worksheets[data.workbookName][data.sheetName];
+                    delete this.worksheets[data.workbookName][data.sheetName];
                     workbook.dispatchEvent({ type: data.event, worksheet: sheet.toObject() });
                     break;
                 case "workbookAdded":
                 case "workbookOpened":
-                    var workbook = new ExcelWorkbook_1.ExcelWorkbook(_this, data.workbookName);
-                    _this.workbooks[data.workbookName] = workbook;
-                    _this.dispatchEvent({ type: data.event, workbook: workbook.toObject() });
+                    var workbook = new ExcelWorkbook_1.ExcelWorkbook(this, data.workbookName);
+                    this.workbooks[data.workbookName] = workbook;
+                    this.dispatchEvent({ type: data.event, workbook: workbook.toObject() });
                     break;
                 case "afterCalculation":
-                    _this.dispatchEvent({ type: data.event });
+                    this.dispatchEvent({ type: data.event });
                     break;
                 case "workbookDeactivated":
                 case "workbookActivated":
-                    var workbook = _this.getWorkbookByName(data.workbookName);
+                    var workbook = this.getWorkbookByName(data.workbookName);
                     if (workbook)
                         workbook.dispatchEvent({ type: data.event });
                     break;
                 case "workbookClosed":
-                    var workbook = _this.getWorkbookByName(data.workbookName);
-                    delete _this.workbooks[data.workbookName];
-                    delete _this.worksheets[data.workbookName];
+                    var workbook = this.getWorkbookByName(data.workbookName);
+                    delete this.workbooks[data.workbookName];
+                    delete this.worksheets[data.workbookName];
                     workbook.dispatchEvent({ type: data.event });
-                    _this.dispatchEvent({ type: data.event, workbook: workbook.toObject() });
+                    this.dispatchEvent({ type: data.event, workbook: workbook.toObject() });
+                    break;
+                default:
+                    this.dispatchEvent({ type: data.event });
                     break;
             }
         };
-        this.processExcelResult = function (data) {
+        this.processExcelResult = (data) => {
             var callbackData = {};
             switch (data.action) {
                 case "getWorkbooks":
@@ -245,25 +242,25 @@ var Excel = (function (_super) {
                     var _workbooks = [];
                     for (var i = 0; i < workbookNames.length; i++) {
                         var name = workbookNames[i];
-                        if (!_this.workbooks[name]) {
-                            _this.workbooks[name] = new ExcelWorkbook_1.ExcelWorkbook(_this, name);
+                        if (!this.workbooks[name]) {
+                            this.workbooks[name] = new ExcelWorkbook_1.ExcelWorkbook(this, name);
                         }
-                        _workbooks.push(_this.workbooks[name]);
+                        _workbooks.push(this.workbooks[name]);
                     }
-                    callbackData = _workbooks.map(function (wb) { return wb.toObject(); });
+                    callbackData = _workbooks.map(wb => wb.toObject());
                     break;
                 case "getWorksheets":
                     var worksheetNames = data.data;
                     var _worksheets = [];
                     var worksheet = null;
                     for (var i = 0; i < worksheetNames.length; i++) {
-                        if (!_this.worksheets[data.workbook]) {
-                            _this.worksheets[data.workbook] = {};
+                        if (!this.worksheets[data.workbook]) {
+                            this.worksheets[data.workbook] = {};
                         }
-                        worksheet = _this.worksheets[data.workbook][worksheetNames[i]] ? _this.worksheets[data.workbook][worksheetNames[i]] : _this.worksheets[data.workbook][worksheetNames[i]] = new ExcelWorksheet_1.ExcelWorksheet(worksheetNames[i], _this.workbooks[data.workbook]);
+                        worksheet = this.worksheets[data.workbook][worksheetNames[i]] ? this.worksheets[data.workbook][worksheetNames[i]] : this.worksheets[data.workbook][worksheetNames[i]] = new ExcelWorksheet_1.ExcelWorksheet(worksheetNames[i], this.workbooks[data.workbook]);
                         _worksheets.push(worksheet);
                     }
-                    callbackData = _worksheets.map(function (ws) { return ws.toObject(); });
+                    callbackData = _worksheets.map(ws => ws.toObject());
                     break;
                 case "getCells":
                 case "getCellsColumn":
@@ -272,19 +269,19 @@ var Excel = (function (_super) {
                     break;
                 case "addWorkbook":
                 case "openWorkbook":
-                    if (!_this.workbooks[data.workbookName]) {
-                        var workbook = new ExcelWorkbook_1.ExcelWorkbook(_this, data.workbook);
-                        _this.workbooks[data.workbook] = workbook;
+                    if (!this.workbooks[data.workbookName]) {
+                        var workbook = new ExcelWorkbook_1.ExcelWorkbook(this, data.workbook);
+                        this.workbooks[data.workbook] = workbook;
                     }
                     else {
-                        var workbook = _this.workbooks[data.workbookName];
+                        var workbook = this.workbooks[data.workbookName];
                     }
                     callbackData = workbook.toObject();
                 case "addSheet":
-                    if (!_this.worksheets[data.workbookName])
-                        _this.worksheets[data.workbookName] = {};
-                    var sheets = _this.worksheets[data.workbookName];
-                    var worksheet = sheets[data.sheetName] ? sheets[data.sheetName] : sheets[data.sheetName] = new ExcelWorksheet_1.ExcelWorksheet(data.sheetName, _this.workbooks[data.workbookName]);
+                    if (!this.worksheets[data.workbookName])
+                        this.worksheets[data.workbookName] = {};
+                    var sheets = this.worksheets[data.workbookName];
+                    var worksheet = sheets[data.sheetName] ? sheets[data.sheetName] : sheets[data.sheetName] = new ExcelWorksheet_1.ExcelWorksheet(data.sheetName, this.workbooks[data.workbookName]);
                     callbackData = worksheet.toObject();
                     break;
                 case "getStatus":
@@ -300,60 +297,70 @@ var Excel = (function (_super) {
                 delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
             }
         };
-        this.processExcelCustomFunction = function (data) {
-            if (!window[data.functionName]) {
-                console.error("function ", data.functionName, "is not defined.");
-                return;
+        this.processExcelServiceResult = (data) => {
+            if (RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId]) {
+                RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId](data.result);
+                delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
             }
-            var args = data.arguments.split(",");
-            for (var i = 0; i < args.length; i++) {
-                var num = Number(args[i]);
-                if (!isNaN(num))
-                    args[i] = num;
-            }
-            window[data.functionName].apply(null, args);
         };
     }
-    Excel.prototype.init = function () {
+    init() {
         fin.desktop.InterApplicationBus.subscribe("*", "excelEvent", this.processExcelEvent);
         fin.desktop.InterApplicationBus.subscribe("*", "excelResult", this.processExcelResult);
-        fin.desktop.InterApplicationBus.subscribe("*", "excelCustomFunction", this.processExcelCustomFunction);
-    };
-    Excel.prototype.monitorDisconnect = function (uuid) {
-        var _this = this;
-        fin.desktop.ExternalApplication.wrap(uuid).addEventListener('disconnected', function () {
-            _this.connected = false;
-            _this.dispatchEvent({ type: 'disconnected' });
+        fin.desktop.InterApplicationBus.subscribe("*", "excelServiceCallResult", this.processExcelServiceResult);
+    }
+    monitorDisconnect(uuid) {
+        fin.desktop.ExternalApplication.wrap(uuid).addEventListener('disconnected', () => {
+            this.connected = false;
+            this.dispatchEvent({ type: 'disconnected' });
         });
-    };
-    Excel.prototype.getWorkbooks = function (callback) {
-        this.invokeRemote("getWorkbooks", null, callback);
-    };
-    Excel.prototype.getWorkbookByName = function (name) {
+    }
+    run(callback) {
+        if (this.connected) {
+            callback();
+        }
+        else {
+            var connectedCallback = () => {
+                this.removeEventListener('connected', connectedCallback);
+                callback();
+            };
+            this.addEventListener('connected', connectedCallback);
+            fin.desktop.System.launchExternalProcess({ target: 'excel' });
+        }
+    }
+    install(callback) {
+        this.invokeServiceCall("install", null, callback);
+    }
+    getInstallationStatus(callback) {
+        this.invokeServiceCall("getInstallationStatus", null, callback);
+    }
+    getWorkbooks(callback) {
+        this.invokeExcelCall("getWorkbooks", null, callback);
+    }
+    getWorkbookByName(name) {
         return this.workbooks[name];
-    };
-    Excel.prototype.getWorksheetByName = function (workbookName, worksheetName) {
+    }
+    getWorksheetByName(workbookName, worksheetName) {
         if (this.worksheets[workbookName])
             return this.worksheets[workbookName][worksheetName] ? this.worksheets[workbookName][worksheetName] : null;
         return null;
-    };
-    Excel.prototype.addWorkbook = function (callback) {
-        this.invokeRemote("addWorkbook", null, callback);
-    };
-    Excel.prototype.openWorkbook = function (path, callback) {
-        this.invokeRemote("openWorkbook", { path: path }, callback);
-    };
-    Excel.prototype.getConnectionStatus = function (callback) {
+    }
+    addWorkbook(callback) {
+        this.invokeExcelCall("addWorkbook", null, callback);
+    }
+    openWorkbook(path, callback) {
+        this.invokeExcelCall("openWorkbook", { path: path }, callback);
+    }
+    getConnectionStatus(callback) {
         callback(this.connected);
-    };
-    Excel.prototype.getCalculationMode = function (callback) {
-        this.invokeRemote("getCalculationMode", null, callback);
-    };
-    Excel.prototype.calculateAll = function (callback) {
-        this.invokeRemote("calculateFull", null, callback);
-    };
-    Excel.prototype.toObject = function () {
-        var _this = this;
+    }
+    getCalculationMode(callback) {
+        this.invokeExcelCall("getCalculationMode", null, callback);
+    }
+    calculateAll(callback) {
+        this.invokeExcelCall("calculateFull", null, callback);
+    }
+    toObject() {
         return {
             addEventListener: this.addEventListener.bind(this),
             dispatchEvent: this.dispatchEvent.bind(this),
@@ -362,14 +369,13 @@ var Excel = (function (_super) {
             calculateAll: this.calculateAll.bind(this),
             getCalculationMode: this.getCalculationMode.bind(this),
             getConnectionStatus: this.getConnectionStatus.bind(this),
-            getWorkbookByName: function (name) { return _this.getWorkbookByName(name).toObject(); },
+            getWorkbookByName: name => this.getWorkbookByName(name).toObject(),
             getWorkbooks: this.getWorkbooks.bind(this),
             init: this.init.bind(this),
             openWorkbook: this.openWorkbook.bind(this)
         };
-    };
-    return Excel;
-}(RpcDispatcher_1.RpcDispatcher));
+    }
+}
 exports.Excel = Excel;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new Excel();
@@ -381,44 +387,37 @@ exports.default = new Excel();
 
 "use strict";
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var RpcDispatcher_1 = __webpack_require__(0);
-var ExcelWorkbook = (function (_super) {
-    __extends(ExcelWorkbook, _super);
-    function ExcelWorkbook(application, name) {
-        _super.call(this);
+const RpcDispatcher_1 = __webpack_require__(0);
+class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
+    constructor(application, name) {
+        super();
         this.application = application;
         this.name = name;
     }
-    ExcelWorkbook.prototype.getDefaultMessage = function () {
+    getDefaultMessage() {
         return {
             workbook: this.name
         };
-    };
-    ExcelWorkbook.prototype.getWorksheets = function (callback) {
-        this.invokeRemote("getWorksheets", null, callback);
-    };
-    ExcelWorkbook.prototype.getWorksheetByName = function (name) {
+    }
+    getWorksheets(callback) {
+        this.invokeExcelCall("getWorksheets", null, callback);
+    }
+    getWorksheetByName(name) {
         return this.application.getWorksheetByName(this.name, name);
-    };
-    ExcelWorkbook.prototype.addWorksheet = function (callback) {
-        this.invokeRemote("addSheet", null, callback);
-    };
-    ExcelWorkbook.prototype.activate = function () {
-        this.invokeRemote("activateWorkbook");
-    };
-    ExcelWorkbook.prototype.save = function () {
-        this.invokeRemote("saveWorkbook");
-    };
-    ExcelWorkbook.prototype.close = function () {
-        this.invokeRemote("closeWorkbook");
-    };
-    ExcelWorkbook.prototype.toObject = function () {
-        var _this = this;
+    }
+    addWorksheet(callback) {
+        this.invokeExcelCall("addSheet", null, callback);
+    }
+    activate() {
+        this.invokeExcelCall("activateWorkbook");
+    }
+    save() {
+        this.invokeExcelCall("saveWorkbook");
+    }
+    close() {
+        this.invokeExcelCall("closeWorkbook");
+    }
+    toObject() {
         return {
             addEventListener: this.addEventListener.bind(this),
             dispatchEvent: this.dispatchEvent.bind(this),
@@ -427,13 +426,12 @@ var ExcelWorkbook = (function (_super) {
             activate: this.activate.bind(this),
             addWorksheet: this.addWorksheet.bind(this),
             close: this.close.bind(this),
-            getWorksheetByName: function (name) { return _this.getWorksheetByName(name).toObject(); },
+            getWorksheetByName: name => this.getWorksheetByName(name).toObject(),
             getWorksheets: this.getWorksheets.bind(this),
             save: this.save.bind(this)
         };
-    };
-    return ExcelWorkbook;
-}(RpcDispatcher_1.RpcDispatcher));
+    }
+}
 exports.ExcelWorkbook = ExcelWorkbook;
 //# sourceMappingURL=ExcelWorkbook.js.map
 
@@ -443,50 +441,44 @@ exports.ExcelWorkbook = ExcelWorkbook;
 
 "use strict";
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var RpcDispatcher_1 = __webpack_require__(0);
-var ExcelWorksheet = (function (_super) {
-    __extends(ExcelWorksheet, _super);
-    function ExcelWorksheet(name, workbook) {
-        _super.call(this);
+const RpcDispatcher_1 = __webpack_require__(0);
+class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
+    constructor(name, workbook) {
+        super();
         this.name = name;
         this.workbook = workbook;
     }
-    ExcelWorksheet.prototype.getDefaultMessage = function () {
+    getDefaultMessage() {
         return {
             workbook: this.workbook.name,
             worksheet: this.name
         };
-    };
-    ExcelWorksheet.prototype.setCells = function (values, offset) {
+    }
+    setCells(values, offset) {
         if (!offset)
             offset = "A1";
-        this.invokeRemote("setCells", { offset: offset, values: values });
-    };
-    ExcelWorksheet.prototype.getCells = function (start, offsetWidth, offsetHeight, callback) {
-        this.invokeRemote("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
-    };
-    ExcelWorksheet.prototype.getRow = function (start, width, callback) {
-        this.invokeRemote("getCellsRow", { start: start, offsetWidth: width }, callback);
-    };
-    ExcelWorksheet.prototype.getColumn = function (start, offsetHeight, callback) {
-        this.invokeRemote("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
-    };
-    ExcelWorksheet.prototype.activate = function () {
-        this.invokeRemote("activateSheet");
-    };
-    ExcelWorksheet.prototype.activateCell = function (cellAddress) {
-        this.invokeRemote("activateCell", { address: cellAddress });
-    };
-    ExcelWorksheet.prototype.addButton = function (name, caption, cellAddress) {
-        this.invokeRemote("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
-    };
-    ExcelWorksheet.prototype.setFilter = function (start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown) {
-        this.invokeRemote("setFilter", {
+        this.invokeExcelCall("setCells", { offset: offset, values: values });
+    }
+    getCells(start, offsetWidth, offsetHeight, callback) {
+        this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
+    }
+    getRow(start, width, callback) {
+        this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
+    }
+    getColumn(start, offsetHeight, callback) {
+        this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
+    }
+    activate() {
+        this.invokeExcelCall("activateSheet");
+    }
+    activateCell(cellAddress) {
+        this.invokeExcelCall("activateCell", { address: cellAddress });
+    }
+    addButton(name, caption, cellAddress) {
+        this.invokeExcelCall("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
+    }
+    setFilter(start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown) {
+        this.invokeExcelCall("setFilter", {
             start: start,
             offsetWidth: offsetWidth,
             offsetHeight: offsetHeight,
@@ -496,41 +488,41 @@ var ExcelWorksheet = (function (_super) {
             criteria2: criteria2,
             visibleDropDown: visibleDropDown
         });
-    };
-    ExcelWorksheet.prototype.formatRange = function (rangeCode, format, callback) {
-        this.invokeRemote("formatRange", { rangeCode: rangeCode, format: format }, callback);
-    };
-    ExcelWorksheet.prototype.clearRange = function (rangeCode, callback) {
-        this.invokeRemote("clearRange", { rangeCode: rangeCode }, callback);
-    };
-    ExcelWorksheet.prototype.clearRangeContents = function (rangeCode, callback) {
-        this.invokeRemote("clearRangeContents", { rangeCode: rangeCode }, callback);
-    };
-    ExcelWorksheet.prototype.clearRangeFormats = function (rangeCode, callback) {
-        this.invokeRemote("clearRangeFormats", { rangeCode: rangeCode }, callback);
-    };
-    ExcelWorksheet.prototype.clearAllCells = function (callback) {
-        this.invokeRemote("clearAllCells", null, callback);
-    };
-    ExcelWorksheet.prototype.clearAllCellContents = function (callback) {
-        this.invokeRemote("clearAllCellContents", null, callback);
-    };
-    ExcelWorksheet.prototype.clearAllCellFormats = function (callback) {
-        this.invokeRemote("clearAllCellFormats", null, callback);
-    };
-    ExcelWorksheet.prototype.setCellName = function (cellAddress, cellName) {
-        this.invokeRemote("setCellName", { address: cellAddress, cellName: cellName });
-    };
-    ExcelWorksheet.prototype.calculate = function () {
-        this.invokeRemote("calculateSheet");
-    };
-    ExcelWorksheet.prototype.getCellByName = function (cellName, callback) {
-        this.invokeRemote("getCellByName", { cellName: cellName }, callback);
-    };
-    ExcelWorksheet.prototype.protect = function (password) {
-        this.invokeRemote("protectSheet", { password: password ? password : null });
-    };
-    ExcelWorksheet.prototype.toObject = function () {
+    }
+    formatRange(rangeCode, format, callback) {
+        this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format }, callback);
+    }
+    clearRange(rangeCode, callback) {
+        this.invokeExcelCall("clearRange", { rangeCode: rangeCode }, callback);
+    }
+    clearRangeContents(rangeCode, callback) {
+        this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode }, callback);
+    }
+    clearRangeFormats(rangeCode, callback) {
+        this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode }, callback);
+    }
+    clearAllCells(callback) {
+        this.invokeExcelCall("clearAllCells", null, callback);
+    }
+    clearAllCellContents(callback) {
+        this.invokeExcelCall("clearAllCellContents", null, callback);
+    }
+    clearAllCellFormats(callback) {
+        this.invokeExcelCall("clearAllCellFormats", null, callback);
+    }
+    setCellName(cellAddress, cellName) {
+        this.invokeExcelCall("setCellName", { address: cellAddress, cellName: cellName });
+    }
+    calculate() {
+        this.invokeExcelCall("calculateSheet");
+    }
+    getCellByName(cellName, callback) {
+        this.invokeExcelCall("getCellByName", { cellName: cellName }, callback);
+    }
+    protect(password) {
+        this.invokeExcelCall("protectSheet", { password: password ? password : null });
+    }
+    toObject() {
         return {
             addEventListener: this.addEventListener.bind(this),
             dispatchEvent: this.dispatchEvent.bind(this),
@@ -556,9 +548,8 @@ var ExcelWorksheet = (function (_super) {
             setCells: this.setCells.bind(this),
             setFilter: this.setFilter.bind(this)
         };
-    };
-    return ExcelWorksheet;
-}(RpcDispatcher_1.RpcDispatcher));
+    }
+}
 exports.ExcelWorksheet = ExcelWorksheet;
 //# sourceMappingURL=ExcelWorksheet.js.map
 
@@ -996,6 +987,8 @@ window.addEventListener("DOMContentLoaded", function () {
 
     function installAddIn() {
         var installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
+        var servicePath = 'OpenFin.ExcelService.exe';
+        var addInPath = 'OpenFin.ExcelApi-AddIn.xll';
 
         var statusElement = document.getElementById("status");
 
@@ -1005,18 +998,70 @@ window.addEventListener("DOMContentLoaded", function () {
 
         statusElement.innerText = "Connecting...";
 
-        fin.desktop.System.launchExternalProcess({
-            alias: 'excel-api-addin',
-            target: 'OpenFin.ExcelApi.Installer.exe',
-            arguments: '-d "' + installFolder + '"',
-            listener: function (args) {
-                console.log('Installer script completed!');
-                if (args.exitCode === 0) {
-                    fin.desktop.System.launchExternalProcess({
-                        target: installFolder + '\\OpenFin.ExcelApi-AddIn.xll'
-                    });
+        Promise.resolve()
+            .then(() => deployAddIn(servicePath, installFolder))
+            .then(() => startExcelService(servicePath, installFolder))
+            .then(() => registerAddIn(servicePath, installFolder))
+            .then(launchExcel)
+            .catch(err => console.log(err));
+    }
+
+    function deployAddIn(servicePath, installFolder) {
+        return new Promise((resolve, reject) => {
+            fin.desktop.System.launchExternalProcess({
+                alias: 'excel-api-addin',
+                target: servicePath,
+                arguments: '-d "' + installFolder + '"',
+                listener: function (args) {
+                    console.log('Installer script completed! ' + args.exitCode);
+                    // (args.exitCode === 0) {
+                        resolve();
+                    //} else {
+                    //    reject('Error deploying Add-In');
+                    //}
                 }
-            }
+            });
+        });
+    }
+
+    function registerAddIn(servicePath, installFolder) {
+        return new Promise((resolve, reject) => {
+            fin.desktop.Excel.install(ack => {
+                if (ack.success) {
+                    resolve();
+                } else {
+                    reject();
+                }
+            });
+        });
+    }
+
+    function startExcelService(servicePath, installFolder) {
+        return new Promise((resolve, reject) => {
+            var onServiceStarted = () => {
+                console.log('Service Started');
+                fin.desktop.Excel.removeEventListener('excelServiceStarted', onServiceStarted);
+                resolve();
+            };
+
+            chrome.desktop.getDetails(function (details) {
+                fin.desktop.Excel.addEventListener('excelServiceStarted', onServiceStarted);
+
+                fin.desktop.System.launchExternalProcess({
+                    target: installFolder + '\\OpenFin.ExcelService.exe',
+                    arguments: '-p ' + details.port
+                }, process => {
+                    console.log('Service Launced');
+                }, error => {
+                    reject('Error starting Excel service');
+                });
+            });
+        });
+    }
+
+    function launchExcel() {
+        return new Promise((resolve, reject) => {
+            fin.desktop.Excel.run(resolve);
         });
     }
 
