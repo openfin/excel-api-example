@@ -13,7 +13,7 @@
   },
   "runtime": {
     "arguments": "",
-    "version": "6.*"
+    "version": "stable"
   },
   "splashScreenImage": "http://openfin.github.io/excel-api-example/web/splash_excel.png",
   "shortcut": {
@@ -26,7 +26,7 @@
     {
       "src": "http://openfin.github.io/excel-api-example/web/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "0.0.0"
+      "version": "1.3.0"
     }
   ]
 }
