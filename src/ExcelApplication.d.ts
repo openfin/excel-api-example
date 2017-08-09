@@ -10,11 +10,16 @@ export declare class Excel extends RpcDispatcher {
             [worksheetName: string]: ExcelWorksheet;
         };
     };
+    connected: boolean;
     constructor();
     init(): void;
-    processExcelEvent: (data: any) => void;
+    processExcelEvent: (data: any, uuid: string) => void;
     processExcelResult: (data: any) => void;
-    processExcelCustomFunction: (data: any) => void;
+    processExcelServiceResult: (data: any) => void;
+    monitorDisconnect(uuid: string): void;
+    run(callback: Function): void;
+    install(callback: Function): void;
+    getInstallationStatus(callback: Function): void;
     getWorkbooks(callback: Function): void;
     getWorkbookByName(name: string): ExcelWorkbook;
     getWorksheetByName(workbookName: string, worksheetName: string): ExcelWorksheet;

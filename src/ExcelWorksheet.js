@@ -1,48 +1,42 @@
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var RpcDispatcher_1 = require('./RpcDispatcher');
-var ExcelWorksheet = (function (_super) {
-    __extends(ExcelWorksheet, _super);
-    function ExcelWorksheet(name, workbook) {
-        _super.call(this);
+const RpcDispatcher_1 = require("./RpcDispatcher");
+class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
+    constructor(name, workbook) {
+        super();
         this.name = name;
         this.workbook = workbook;
     }
-    ExcelWorksheet.prototype.getDefaultMessage = function () {
+    getDefaultMessage() {
         return {
             workbook: this.workbook.name,
             worksheet: this.name
         };
-    };
-    ExcelWorksheet.prototype.setCells = function (values, offset) {
+    }
+    setCells(values, offset) {
         if (!offset)
             offset = "A1";
-        this.invokeRemote("setCells", { offset: offset, values: values });
-    };
-    ExcelWorksheet.prototype.getCells = function (start, offsetWidth, offsetHeight, callback) {
-        this.invokeRemote("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
-    };
-    ExcelWorksheet.prototype.getRow = function (start, width, callback) {
-        this.invokeRemote("getCellsRow", { start: start, offsetWidth: width }, callback);
-    };
-    ExcelWorksheet.prototype.getColumn = function (start, offsetHeight, callback) {
-        this.invokeRemote("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
-    };
-    ExcelWorksheet.prototype.activate = function () {
-        this.invokeRemote("activateSheet");
-    };
-    ExcelWorksheet.prototype.activateCell = function (cellAddress) {
-        this.invokeRemote("activateCell", { address: cellAddress });
-    };
-    ExcelWorksheet.prototype.addButton = function (name, caption, cellAddress) {
-        this.invokeRemote("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
-    };
-    ExcelWorksheet.prototype.setFilter = function (start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown) {
-        this.invokeRemote("setFilter", {
+        this.invokeExcelCall("setCells", { offset: offset, values: values });
+    }
+    getCells(start, offsetWidth, offsetHeight, callback) {
+        this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
+    }
+    getRow(start, width, callback) {
+        this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
+    }
+    getColumn(start, offsetHeight, callback) {
+        this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
+    }
+    activate() {
+        this.invokeExcelCall("activateSheet");
+    }
+    activateCell(cellAddress) {
+        this.invokeExcelCall("activateCell", { address: cellAddress });
+    }
+    addButton(name, caption, cellAddress) {
+        this.invokeExcelCall("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
+    }
+    setFilter(start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown) {
+        this.invokeExcelCall("setFilter", {
             start: start,
             offsetWidth: offsetWidth,
             offsetHeight: offsetHeight,
@@ -52,41 +46,41 @@ var ExcelWorksheet = (function (_super) {
             criteria2: criteria2,
             visibleDropDown: visibleDropDown
         });
-    };
-    ExcelWorksheet.prototype.formatRange = function (rangeCode, format, callback) {
-        this.invokeRemote("formatRange", { rangeCode: rangeCode, format: format }, callback);
-    };
-    ExcelWorksheet.prototype.clearRange = function (rangeCode, callback) {
-        this.invokeRemote("clearRange", { rangeCode: rangeCode }, callback);
-    };
-    ExcelWorksheet.prototype.clearRangeContents = function (rangeCode, callback) {
-        this.invokeRemote("clearRangeContents", { rangeCode: rangeCode }, callback);
-    };
-    ExcelWorksheet.prototype.clearRangeFormats = function (rangeCode, callback) {
-        this.invokeRemote("clearRangeFormats", { rangeCode: rangeCode }, callback);
-    };
-    ExcelWorksheet.prototype.clearAllCells = function (callback) {
-        this.invokeRemote("clearAllCells", null, callback);
-    };
-    ExcelWorksheet.prototype.clearAllCellContents = function (callback) {
-        this.invokeRemote("clearAllCellContents", null, callback);
-    };
-    ExcelWorksheet.prototype.clearAllCellFormats = function (callback) {
-        this.invokeRemote("clearAllCellFormats", null, callback);
-    };
-    ExcelWorksheet.prototype.setCellName = function (cellAddress, cellName) {
-        this.invokeRemote("setCellName", { address: cellAddress, cellName: cellName });
-    };
-    ExcelWorksheet.prototype.calculate = function () {
-        this.invokeRemote("calculateSheet");
-    };
-    ExcelWorksheet.prototype.getCellByName = function (cellName, callback) {
-        this.invokeRemote("getCellByName", { cellName: cellName }, callback);
-    };
-    ExcelWorksheet.prototype.protect = function (password) {
-        this.invokeRemote("protectSheet", { password: password ? password : null });
-    };
-    ExcelWorksheet.prototype.toObject = function () {
+    }
+    formatRange(rangeCode, format, callback) {
+        this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format }, callback);
+    }
+    clearRange(rangeCode, callback) {
+        this.invokeExcelCall("clearRange", { rangeCode: rangeCode }, callback);
+    }
+    clearRangeContents(rangeCode, callback) {
+        this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode }, callback);
+    }
+    clearRangeFormats(rangeCode, callback) {
+        this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode }, callback);
+    }
+    clearAllCells(callback) {
+        this.invokeExcelCall("clearAllCells", null, callback);
+    }
+    clearAllCellContents(callback) {
+        this.invokeExcelCall("clearAllCellContents", null, callback);
+    }
+    clearAllCellFormats(callback) {
+        this.invokeExcelCall("clearAllCellFormats", null, callback);
+    }
+    setCellName(cellAddress, cellName) {
+        this.invokeExcelCall("setCellName", { address: cellAddress, cellName: cellName });
+    }
+    calculate() {
+        this.invokeExcelCall("calculateSheet");
+    }
+    getCellByName(cellName, callback) {
+        this.invokeExcelCall("getCellByName", { cellName: cellName }, callback);
+    }
+    protect(password) {
+        this.invokeExcelCall("protectSheet", { password: password ? password : null });
+    }
+    toObject() {
         return {
             addEventListener: this.addEventListener.bind(this),
             dispatchEvent: this.dispatchEvent.bind(this),
@@ -112,8 +106,7 @@ var ExcelWorksheet = (function (_super) {
             setCells: this.setCells.bind(this),
             setFilter: this.setFilter.bind(this)
         };
-    };
-    return ExcelWorksheet;
-}(RpcDispatcher_1.RpcDispatcher));
+    }
+}
 exports.ExcelWorksheet = ExcelWorksheet;
 //# sourceMappingURL=ExcelWorksheet.js.map
