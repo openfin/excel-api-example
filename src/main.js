@@ -478,23 +478,36 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function startExcelService(servicePath, installFolder) {
+        var serviceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
+
         return new Promise((resolve, reject) => {
-            var onServiceStarted = () => {
-                console.log('Service Started');
-                fin.desktop.Excel.removeEventListener('excelServiceStarted', onServiceStarted);
-                resolve();
-            };
+            fin.desktop.System.getAllExternalApplications(extApps => {
+                var excelServiceIndex = extApps.findIndex(extApp => extApp.uuid === serviceUuid);
 
-            chrome.desktop.getDetails(function (details) {
-                fin.desktop.Excel.addEventListener('excelServiceStarted', onServiceStarted);
+                if (excelServiceIndex >= 0) {
+                    console.log('Service Already Running');
+                    resolve();
+                    return;
+                }
 
-                fin.desktop.System.launchExternalProcess({
-                    target: installFolder + '\\OpenFin.ExcelService.exe',
-                    arguments: '-p ' + details.port
-                }, process => {
-                    console.log('Service Launced');
-                }, error => {
-                    reject('Error starting Excel service');
+                var onServiceStarted = () => {
+                    console.log('Service Started');
+                    fin.desktop.Excel.removeEventListener('excelServiceStarted', onServiceStarted);
+                    resolve();
+                };
+
+                chrome.desktop.getDetails(function (details) {
+                    fin.desktop.Excel.addEventListener('excelServiceStarted', onServiceStarted);
+
+                    fin.desktop.System.launchExternalProcess({
+                        target: installFolder + '\\OpenFin.ExcelService.exe',
+                        arguments: '-p ' + details.port,
+                        uuid: serviceUuid,
+                    }, process => {
+                        console.log('Service Launced: ' + process.uuid);
+                    }, error => {
+                        reject('Error starting Excel service');
+                    });
                 });
             });
         });
