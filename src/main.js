@@ -398,7 +398,7 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function onExcelConnected() {
-        console.log("Excel Connected: " + fin.desktop.Excel.legacyApi.instanceUuid);
+        console.log("Excel Connected: " + fin.desktop.Excel.legacyApi.connectionUuid);
         document.getElementById("status").innerText = "Connected to Excel";
 
         fin.desktop.Excel.instance.removeEventListener("excelConnected", onExcelConnected);
@@ -408,7 +408,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
         var onExcelDisconnected = function () {
-            console.log("Excel Disconnected: " + legacyApi.instanceUuid);
+            console.log("Excel Disconnected: " + legacyApi.connectionUuid);
 
             fin.desktop.Excel.instance.removeEventListener("excelDisconnected", onExcelDisconnected);
             legacyApi.removeEventListener("workbookAdded", onWorkbookAdded);
