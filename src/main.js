@@ -2,7 +2,7 @@
  * Created by haseebriaz on 14/05/15.
  */
 
-fin.desktop.Excel = require('./ExcelApplication.js').default;
+fin.desktop.Excel = require('./ExcelApi.js').LegacyApi;
 
 window.addEventListener("DOMContentLoaded", function () {
 
@@ -397,13 +397,41 @@ window.addEventListener("DOMContentLoaded", function () {
         document.getElementById("workbookTabs").insertBefore(button, newWorkbookButton);
     }
 
-    function onExcelConnected(event) {
-
+    function onExcelConnected() {
+        console.log("Excel Connected: " + fin.desktop.Excel.legacyApi.instanceUuid);
         document.getElementById("status").innerText = "Connected to Excel";
-        fin.desktop.Excel.getWorkbooks(function (workbooks) {
 
+        fin.desktop.Excel.instance.removeEventListener("excelConnected", onExcelConnected);
+
+        // Grab a snapshot of the current instance, it can change!
+        var legacyApi = fin.desktop.Excel.legacyApi;
+
+
+        var onExcelDisconnected = function () {
+            console.log("Excel Disconnected: " + legacyApi.instanceUuid);
+
+            fin.desktop.Excel.instance.removeEventListener("excelDisconnected", onExcelDisconnected);
+            legacyApi.removeEventListener("workbookAdded", onWorkbookAdded);
+            legacyApi.removeEventListener("workbookOpened", onWorkbookAdded);
+            legacyApi.removeEventListener("workbookClosed", onWorkbookRemoved);
+
+            if (fin.desktop.Excel.legacyApi) {
+                onExcelConnected();
+            } else {
+                document.getElementById("status").innerText = "Excel not connected";
+
+                fin.desktop.Excel.instance.addEventListener("excelConnected", onExcelConnected);
+                setDisplayContainer(noConnectionContainer);
+            }
+        }
+
+        fin.desktop.Excel.instance.addEventListener("excelDisconnected", onExcelDisconnected);
+        fin.desktop.Excel.addEventListener("workbookAdded", onWorkbookAdded);
+        fin.desktop.Excel.addEventListener("workbookOpened", onWorkbookAdded);
+        fin.desktop.Excel.addEventListener("workbookClosed", onWorkbookRemoved);
+
+        fin.desktop.Excel.getWorkbooks(workbooks => {
             for (var i = 0; i < workbooks.length; i++) {
-
                 addWorkbookTab(workbooks[i].name);
                 workbooks[i].addEventListener("workbookActivated", onWorkbookActivated);
                 workbooks[i].addEventListener("sheetAdded", onWorksheetAdded);
@@ -411,7 +439,6 @@ window.addEventListener("DOMContentLoaded", function () {
             }
 
             if (workbooks.length) {
-
                 selectWorkbook(workbooks[0]);
                 setDisplayContainer(workbooksContainer);
             }
@@ -421,10 +448,6 @@ window.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function onExcelDisconnected(event) {
-        document.getElementById("status").innerText = "Excel not connected";
-        setDisplayContainer(noConnectionContainer);
-    }
 
     function installAddIn() {
         var installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
@@ -433,33 +456,28 @@ window.addEventListener("DOMContentLoaded", function () {
 
         var statusElement = document.getElementById("status");
 
-        if (statusElement.innerText == "Connecting...") {
+        if (statusElement.innerText === "Connecting...") {
             return;
         }
 
         statusElement.innerText = "Connecting...";
 
-        Promise.resolve()
+        return Promise.resolve()
             .then(() => deployAddIn(servicePath, installFolder))
             .then(() => startExcelService(servicePath, installFolder))
-            .then(() => registerAddIn(servicePath, installFolder))
-            .then(launchExcel)
-            .catch(err => console.log(err));
+            .then(() => registerAddIn(servicePath, installFolder));
     }
 
     function deployAddIn(servicePath, installFolder) {
         return new Promise((resolve, reject) => {
+            console.log('Deploying Add-In');
             fin.desktop.System.launchExternalProcess({
                 alias: 'excel-api-addin',
                 target: servicePath,
                 arguments: '-d "' + installFolder + '"',
                 listener: function (args) {
                     console.log('Installer script completed! ' + args.exitCode);
-                    // (args.exitCode === 0) {
-                        resolve();
-                    //} else {
-                    //    reject('Error deploying Add-In');
-                    //}
+                    resolve();
                 }
             });
         });
@@ -467,12 +485,9 @@ window.addEventListener("DOMContentLoaded", function () {
 
     function registerAddIn(servicePath, installFolder) {
         return new Promise((resolve, reject) => {
+            console.log('Registering Add-In');
             fin.desktop.Excel.install(ack => {
-                if (ack.success) {
-                    resolve();
-                } else {
-                    reject();
-                }
+                resolve();
             });
         });
     }
@@ -492,19 +507,19 @@ window.addEventListener("DOMContentLoaded", function () {
 
                 var onServiceStarted = () => {
                     console.log('Service Started');
-                    fin.desktop.Excel.removeEventListener('excelServiceStarted', onServiceStarted);
+                    fin.desktop.Excel.instance.removeEventListener('started', onServiceStarted);
                     resolve();
                 };
 
                 chrome.desktop.getDetails(function (details) {
-                    fin.desktop.Excel.addEventListener('excelServiceStarted', onServiceStarted);
+                    fin.desktop.Excel.instance.addEventListener('started', onServiceStarted);
 
                     fin.desktop.System.launchExternalProcess({
                         target: installFolder + '\\OpenFin.ExcelService.exe',
                         arguments: '-p ' + details.port,
                         uuid: serviceUuid,
                     }, process => {
-                        console.log('Service Launced: ' + process.uuid);
+                        console.log('Service Launched: ' + process.uuid);
                     }, error => {
                         reject('Error starting Excel service');
                     });
@@ -513,8 +528,9 @@ window.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function launchExcel() {
+    function connectToExcel() {
         return new Promise((resolve, reject) => {
+            console.log("Launching Excel");
             fin.desktop.Excel.run(resolve);
         });
     }
@@ -522,17 +538,13 @@ window.addEventListener("DOMContentLoaded", function () {
     initTable(27, 12);
 
     fin.desktop.main(function () {
+       fin.desktop.Excel.init();
 
-        var Excel = fin.desktop.Excel;
-        Excel.init();
-        Excel.getConnectionStatus(onExcelConnected);
-        Excel.addEventListener("workbookAdded", onWorkbookAdded);
-        Excel.addEventListener("workbookOpened", onWorkbookAdded);
-        Excel.addEventListener("workbookClosed", onWorkbookRemoved);
-        Excel.addEventListener("connected", onExcelConnected);
-        Excel.addEventListener("disconnected", onExcelDisconnected)
-
-        installAddIn();
+        Promise.resolve()
+            .then(installAddIn)
+            .then(connectToExcel)
+            .then(onExcelConnected)
+            .catch(err => console.log(err));
     });
 
     window.installAddIn = installAddIn;
