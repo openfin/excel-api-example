@@ -1,7 +1,7 @@
 import { RpcDispatcher } from './RpcDispatcher';
 import { ExcelWorkbook } from './ExcelWorkbook';
 import { ExcelWorksheet } from './ExcelWorksheet';
-export declare class Excel extends RpcDispatcher {
+export declare class ExcelApplication extends RpcDispatcher {
     workbooks: {
         [workbookName: string]: ExcelWorkbook;
     };
@@ -10,16 +10,14 @@ export declare class Excel extends RpcDispatcher {
             [worksheetName: string]: ExcelWorksheet;
         };
     };
+    initialized: boolean;
     connected: boolean;
-    constructor();
+    constructor(connectionUuid: string);
     init(): void;
     processExcelEvent: (data: any, uuid: string) => void;
     processExcelResult: (data: any) => void;
-    processExcelServiceResult: (data: any) => void;
-    monitorDisconnect(uuid: string): void;
+    monitorDisconnect(): void;
     run(callback: Function): void;
-    install(callback: Function): void;
-    getInstallationStatus(callback: Function): void;
     getWorkbooks(callback: Function): void;
     getWorkbookByName(name: string): ExcelWorkbook;
     getWorksheetByName(workbookName: string, worksheetName: string): ExcelWorksheet;
@@ -30,5 +28,3 @@ export declare class Excel extends RpcDispatcher {
     calculateAll(callback: Function): void;
     toObject(): any;
 }
-declare var _default: Excel;
-export default _default;

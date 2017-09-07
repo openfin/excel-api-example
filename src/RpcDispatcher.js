@@ -56,7 +56,7 @@ class RpcDispatcher {
         if (callback) {
             RpcDispatcher.callbacks[RpcDispatcher.messageId] = callback;
         }
-        fin.desktop.InterApplicationBus.publish(topic, message);
+        fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message);
         RpcDispatcher.messageId++;
     }
 }
