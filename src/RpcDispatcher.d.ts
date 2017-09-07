@@ -3,11 +3,12 @@ export declare abstract class RpcDispatcher implements EventTarget {
     protected static callbacks: {
         [messageId: number]: Function;
     };
+    connectionUuid: string;
     listeners: {
         [eventType: string]: Function[];
     };
-    addEventListener(type: string, listener: () => any): void;
-    removeEventListener(type: string, listener: () => any): void;
+    addEventListener(type: string, listener: (data?: any) => any): void;
+    removeEventListener(type: string, listener: (data?: any) => any): void;
     private hasEventListener(type, listener);
     dispatchEvent(event: any): boolean;
     getDefaultMessage(): any;

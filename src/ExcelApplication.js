@@ -2,8 +2,8 @@
 const RpcDispatcher_1 = require('./RpcDispatcher');
 const ExcelWorkbook_1 = require('./ExcelWorkbook');
 const ExcelWorksheet_1 = require('./ExcelWorksheet');
-class Excel extends RpcDispatcher_1.RpcDispatcher {
-    constructor() {
+class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
+    constructor(connectionUuid) {
         super();
         this.workbooks = {};
         this.worksheets = {};
@@ -11,7 +11,6 @@ class Excel extends RpcDispatcher_1.RpcDispatcher {
             switch (data.event) {
                 case "connected":
                     this.connected = true;
-                    this.monitorDisconnect(uuid);
                     this.dispatchEvent({ type: data.event });
                     break;
                 case "sheetChanged":
@@ -152,20 +151,18 @@ class Excel extends RpcDispatcher_1.RpcDispatcher {
                 delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
             }
         };
-        this.processExcelServiceResult = (data) => {
-            if (RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId]) {
-                RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId](data.result);
-                delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
-            }
-        };
+        this.connectionUuid = connectionUuid;
     }
     init() {
-        fin.desktop.InterApplicationBus.subscribe("*", "excelEvent", this.processExcelEvent);
-        fin.desktop.InterApplicationBus.subscribe("*", "excelResult", this.processExcelResult);
-        fin.desktop.InterApplicationBus.subscribe("*", "excelServiceCallResult", this.processExcelServiceResult);
+        if (!this.initialized) {
+            fin.desktop.InterApplicationBus.subscribe("*", "excelEvent", this.processExcelEvent);
+            fin.desktop.InterApplicationBus.subscribe("*", "excelResult", this.processExcelResult);
+            this.monitorDisconnect();
+            this.initialized = true;
+        }
     }
-    monitorDisconnect(uuid) {
-        fin.desktop.ExternalApplication.wrap(uuid).addEventListener('disconnected', () => {
+    monitorDisconnect() {
+        fin.desktop.ExternalApplication.wrap(this.connectionUuid).addEventListener('disconnected', () => {
             this.connected = false;
             this.dispatchEvent({ type: 'disconnected' });
         });
@@ -180,14 +177,11 @@ class Excel extends RpcDispatcher_1.RpcDispatcher {
                 callback();
             };
             this.addEventListener('connected', connectedCallback);
-            fin.desktop.System.launchExternalProcess({ target: 'excel' });
+            fin.desktop.System.launchExternalProcess({
+                target: 'excel',
+                uuid: this.connectionUuid
+            });
         }
-    }
-    install(callback) {
-        this.invokeServiceCall("install", null, callback);
-    }
-    getInstallationStatus(callback) {
-        this.invokeServiceCall("getInstallationStatus", null, callback);
     }
     getWorkbooks(callback) {
         this.invokeExcelCall("getWorkbooks", null, callback);
@@ -231,7 +225,5 @@ class Excel extends RpcDispatcher_1.RpcDispatcher {
         };
     }
 }
-exports.Excel = Excel;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = new Excel();
+exports.ExcelApplication = ExcelApplication;
 //# sourceMappingURL=ExcelApplication.js.map

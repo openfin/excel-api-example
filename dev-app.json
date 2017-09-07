@@ -3,7 +3,7 @@
   "startup_app": {
     "name": "Excel-API-Example",
     "url": "http://localhost:8080/web/",
-    "uuid": "grid",
+    "uuid": "excel-api-example",
     "applicationIcon": "http://localhost:8080/web/openfin.ico",
     "autoShow": true,
     "defaultWidth": 760,
@@ -27,7 +27,7 @@
     {
       "src": "http://localhost:8080/web/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "forceDownload": true
     }
   ]

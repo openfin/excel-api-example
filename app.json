@@ -2,7 +2,7 @@
   "startup_app": {
     "name": "Excel-API-Example",
     "url": "http://openfin.github.io/excel-api-example/web/",
-    "uuid": "grid",
+    "uuid": "excel-api-example",
     "applicationIcon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
     "autoShow": true,
     "defaultWidth": 760,
@@ -26,7 +26,7 @@
     {
       "src": "http://openfin.github.io/excel-api-example/web/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "1.4.0"
+      "version": "1.5.0"
     }
   ]
 }

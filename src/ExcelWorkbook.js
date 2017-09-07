@@ -3,6 +3,7 @@ const RpcDispatcher_1 = require('./RpcDispatcher');
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
         super();
+        this.connectionUuid = application.connectionUuid;
         this.application = application;
         this.name = name;
     }
