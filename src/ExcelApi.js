@@ -1,6 +1,6 @@
 "use strict";
-const RpcDispatcher_1 = require("./RpcDispatcher");
-const ExcelApplication_1 = require("./ExcelApplication");
+const RpcDispatcher_1 = require('./RpcDispatcher');
+const ExcelApplication_1 = require('./ExcelApplication');
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
 class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
