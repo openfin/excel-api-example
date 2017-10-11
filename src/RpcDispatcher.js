@@ -28,15 +28,20 @@ class RpcDispatcher {
         }
         return (this.listeners[type].indexOf(listener) >= 0);
     }
-    dispatchEvent(event) {
-        event.target = this;
-        if (!this.listeners[event.type]) {
-            return false;
+    dispatchEvent(evtOrTypeArg, data) {
+        var event;
+        if (typeof evtOrTypeArg == "string") {
+            event = Object.assign({
+                target: this.toObject(),
+                type: evtOrTypeArg,
+                defaultPrevented: false
+            }, data);
         }
-        var callbacks = this.listeners[event.type];
-        for (var i = 0; i < callbacks.length; i++) {
-            callbacks[i](event);
+        else {
+            event = evtOrTypeArg;
         }
+        var callbacks = this.listeners[event.type] || [];
+        callbacks.forEach(callback => callback(event));
         return event.defaultPrevented;
     }
     getDefaultMessage() {
@@ -50,9 +55,19 @@ class RpcDispatcher {
     }
     invokeRemoteCall(topic, functionName, data, callback) {
         var message = this.getDefaultMessage();
-        message.messageId = RpcDispatcher.messageId;
-        message.action = functionName;
-        Object.assign(message, data);
+        var args = data || {};
+        var invoker = this;
+        Object.assign(message, {
+            messageId: RpcDispatcher.messageId,
+            target: {
+                connectionUuid: this.connectionUuid,
+                workbookName: invoker.workbookName || (invoker.workbook && invoker.workbook.workbookName) || args.workbookName || args.workbook,
+                worksheetName: invoker.worksheetName || args.worksheetName || args.worksheet,
+                rangeCode: args.rangeCode
+            },
+            action: functionName,
+            data: data
+        });
         if (callback) {
             RpcDispatcher.callbacks[RpcDispatcher.messageId] = callback;
         }

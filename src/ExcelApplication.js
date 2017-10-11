@@ -6,149 +6,132 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     constructor(connectionUuid) {
         super();
         this.workbooks = {};
-        this.worksheets = {};
         this.processExcelEvent = (data, uuid) => {
-            switch (data.event) {
+            var eventType = data.event;
+            var workbook = this.workbooks[data.workbookName];
+            var worksheets = workbook && workbook.worksheets;
+            var worksheet = worksheets && worksheets[data.sheetName];
+            switch (eventType) {
                 case "connected":
                     this.connected = true;
-                    this.dispatchEvent({ type: data.event });
+                    this.dispatchEvent(eventType);
                     break;
                 case "sheetChanged":
-                    var sheets = this.worksheets[data.workbookName];
-                    if (sheets && sheets[data.sheetName]) {
-                        sheets[data.sheetName].dispatchEvent({ type: data.event, data: data });
+                    if (worksheet) {
+                        worksheet.dispatchEvent(eventType, { data: data });
                     }
                     break;
                 case "sheetRenamed":
-                    var sheets = this.worksheets[data.workbookName];
-                    if (sheets && sheets[data.sheetName]) {
-                        var sheet = sheets[data.sheetName];
-                        sheets[data.sheetName] = null;
-                        sheet.name = data.newName;
-                        sheets[data.newName] = sheet;
-                        sheet.dispatchEvent({ type: data.event, data: data });
+                    var oldWorksheetName = data.oldSheetName;
+                    var newWorksheetName = data.sheetName;
+                    worksheet = worksheets && worksheets[oldWorksheetName];
+                    if (worksheet) {
+                        delete worksheets[oldWorksheetName];
+                        worksheet.worksheetName = newWorksheetName;
+                        worksheets[worksheet.worksheetName] = worksheet;
+                        workbook.dispatchEvent(eventType, { worksheet: worksheet.toObject(), oldWorksheetName: oldWorksheetName });
                     }
                     break;
                 case "selectionChanged":
-                    var sheets = this.worksheets[data.workbookName];
-                    if (sheets && sheets[data.sheetName]) {
-                        sheets[data.sheetName].dispatchEvent({ type: data.event, data: data });
+                    if (worksheet) {
+                        worksheet.dispatchEvent(eventType, { data: data });
                     }
                     break;
                 case "sheetActivated":
-                    var sheets = this.worksheets[data.workbookName];
-                    if (sheets && sheets[data.sheetName]) {
-                        sheets[data.sheetName].dispatchEvent({ type: data.event });
-                    }
-                    break;
                 case "sheetDeactivated":
-                    var sheets = this.worksheets[data.workbookName];
-                    if (sheets && sheets[data.sheetName]) {
-                        sheets[data.sheetName].dispatchEvent({ type: data.event });
+                    if (worksheet) {
+                        worksheet.dispatchEvent(eventType);
                     }
-                    break;
-                case "sheetAdded":
-                    var workbook = this.getWorkbookByName(data.workbookName);
-                    if (!this.worksheets[data.workbookName])
-                        this.worksheets[data.workbookName] = {};
-                    var sheets = this.worksheets[data.workbookName];
-                    var sheet = sheets[data.sheetName] ? sheets[data.sheetName] : sheets[data.sheetName] = new ExcelWorksheet_1.ExcelWorksheet(data.sheetName, workbook);
-                    workbook.dispatchEvent({ type: data.event, worksheet: sheet.toObject() });
-                    break;
-                case "sheetRemoved":
-                    var workbook = this.getWorkbookByName(data.workbookName);
-                    var sheet = this.worksheets[data.workbookName][data.sheetName];
-                    delete this.worksheets[data.workbookName][data.sheetName];
-                    workbook.dispatchEvent({ type: data.event, worksheet: sheet.toObject() });
-                    break;
-                case "workbookAdded":
-                case "workbookOpened":
-                    var workbook = new ExcelWorkbook_1.ExcelWorkbook(this, data.workbookName);
-                    this.workbooks[data.workbookName] = workbook;
-                    this.dispatchEvent({ type: data.event, workbook: workbook.toObject() });
-                    break;
-                case "afterCalculation":
-                    this.dispatchEvent({ type: data.event });
                     break;
                 case "workbookDeactivated":
                 case "workbookActivated":
-                    var workbook = this.getWorkbookByName(data.workbookName);
-                    if (workbook)
-                        workbook.dispatchEvent({ type: data.event });
+                    if (workbook) {
+                        workbook.dispatchEvent(eventType);
+                    }
+                    break;
+                case "sheetAdded":
+                    var newWorksheet = worksheet || new ExcelWorksheet_1.ExcelWorksheet(data.sheetName, workbook);
+                    worksheets[newWorksheet.worksheetName] = newWorksheet;
+                    workbook.dispatchEvent(eventType, { worksheet: newWorksheet.toObject() });
+                    break;
+                case "sheetRemoved":
+                    delete workbook.worksheets[worksheet.worksheetName];
+                    worksheet.dispatchEvent(eventType);
+                    workbook.dispatchEvent(eventType, { worksheet: worksheet.toObject() });
+                    break;
+                case "workbookAdded":
+                case "workbookOpened":
+                    var newWorkbook = workbook || new ExcelWorkbook_1.ExcelWorkbook(this, data.workbookName);
+                    this.workbooks[newWorkbook.workbookName] = newWorkbook;
+                    this.dispatchEvent(eventType, { workbook: newWorkbook.toObject() });
                     break;
                 case "workbookClosed":
-                    var workbook = this.getWorkbookByName(data.workbookName);
-                    delete this.workbooks[data.workbookName];
-                    delete this.worksheets[data.workbookName];
-                    workbook.dispatchEvent({ type: data.event });
-                    this.dispatchEvent({ type: data.event, workbook: workbook.toObject() });
+                    delete this.workbooks[workbook.workbookName];
+                    workbook.dispatchEvent(eventType);
+                    this.dispatchEvent(eventType, { workbook: workbook.toObject() });
                     break;
+                case "workbookSaved":
+                    var oldWorkbookName = data.oldWorkbookName;
+                    var newWorkbookName = data.workbookName;
+                    workbook = this.workbooks[oldWorkbookName];
+                    if (workbook) {
+                        delete this.workbooks[oldWorkbookName];
+                        workbook.workbookName = newWorkbookName;
+                        this.workbooks[workbook.workbookName] = workbook;
+                        this.dispatchEvent(eventType, { workbook: workbook.toObject(), oldWorkbookName: oldWorkbookName });
+                    }
+                    break;
+                case "afterCalculation":
                 default:
-                    this.dispatchEvent({ type: data.event });
+                    this.dispatchEvent(eventType);
                     break;
             }
         };
-        this.processExcelResult = (data) => {
+        this.processExcelResult = (result) => {
             var callbackData = {};
-            switch (data.action) {
+            var workbook = this.workbooks[result.target.workbookName];
+            var worksheets = workbook && workbook.worksheets;
+            var worksheet = worksheets && worksheets[result.target.sheetName];
+            var resultData = result.data;
+            switch (result.action) {
                 case "getWorkbooks":
-                    var workbookNames = data.data;
-                    var _workbooks = [];
-                    for (var i = 0; i < workbookNames.length; i++) {
-                        var name = workbookNames[i];
-                        if (!this.workbooks[name]) {
-                            this.workbooks[name] = new ExcelWorkbook_1.ExcelWorkbook(this, name);
-                        }
-                        _workbooks.push(this.workbooks[name]);
-                    }
-                    callbackData = _workbooks.map(wb => wb.toObject());
+                    var workbookNames = resultData;
+                    var oldworkbooks = this.workbooks;
+                    this.workbooks = {};
+                    workbookNames.forEach(workbookName => {
+                        this.workbooks[workbookName] = oldworkbooks[workbookName] || new ExcelWorkbook_1.ExcelWorkbook(this, workbookName);
+                    });
+                    callbackData = workbookNames.map(workbookName => this.workbooks[workbookName].toObject());
                     break;
                 case "getWorksheets":
-                    var worksheetNames = data.data;
-                    var _worksheets = [];
-                    var worksheet = null;
-                    for (var i = 0; i < worksheetNames.length; i++) {
-                        if (!this.worksheets[data.workbook]) {
-                            this.worksheets[data.workbook] = {};
-                        }
-                        worksheet = this.worksheets[data.workbook][worksheetNames[i]] ? this.worksheets[data.workbook][worksheetNames[i]] : this.worksheets[data.workbook][worksheetNames[i]] = new ExcelWorksheet_1.ExcelWorksheet(worksheetNames[i], this.workbooks[data.workbook]);
-                        _worksheets.push(worksheet);
-                    }
-                    callbackData = _worksheets.map(ws => ws.toObject());
-                    break;
-                case "getCells":
-                case "getCellsColumn":
-                case "getCellsRow":
-                    callbackData = data.data;
+                    var worksheetNames = resultData;
+                    var oldworksheets = worksheets;
+                    workbook.worksheets = {};
+                    worksheetNames.forEach(worksheetName => {
+                        workbook.worksheets[worksheetName] = oldworksheets[worksheetName] || new ExcelWorksheet_1.ExcelWorksheet(worksheetName, workbook);
+                    });
+                    callbackData = worksheetNames.map(worksheetName => workbook.worksheets[worksheetName].toObject());
                     break;
                 case "addWorkbook":
                 case "openWorkbook":
-                    if (!this.workbooks[data.workbookName]) {
-                        var workbook = new ExcelWorkbook_1.ExcelWorkbook(this, data.workbook);
-                        this.workbooks[data.workbook] = workbook;
-                    }
-                    else {
-                        var workbook = this.workbooks[data.workbookName];
-                    }
-                    callbackData = workbook.toObject();
+                    var newWorkbookName = resultData;
+                    var newWorkbook = this.workbooks[newWorkbookName] || new ExcelWorkbook_1.ExcelWorkbook(this, newWorkbookName);
+                    this.workbooks[newWorkbook.workbookName] = newWorkbook;
+                    callbackData = newWorkbook.toObject();
+                    break;
                 case "addSheet":
-                    if (!this.worksheets[data.workbookName])
-                        this.worksheets[data.workbookName] = {};
-                    var sheets = this.worksheets[data.workbookName];
-                    var worksheet = sheets[data.sheetName] ? sheets[data.sheetName] : sheets[data.sheetName] = new ExcelWorksheet_1.ExcelWorksheet(data.sheetName, this.workbooks[data.workbookName]);
-                    callbackData = worksheet.toObject();
+                    var newWorksheetName = resultData;
+                    var newWorksheet = workbook[newWorkbookName] || new ExcelWorksheet_1.ExcelWorksheet(newWorksheetName, workbook);
+                    worksheets[newWorksheet.worksheetName] = newWorksheet;
+                    callbackData = newWorksheet.toObject();
                     break;
-                case "getStatus":
-                    callbackData = data.status;
-                    break;
-                case "getCalculationMode":
-                case "getCellByName":
-                    callbackData = data;
+                default:
+                    callbackData = resultData;
                     break;
             }
-            if (RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId]) {
-                RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId](callbackData);
-                delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
+            if (RpcDispatcher_1.RpcDispatcher.callbacks[result.messageId]) {
+                RpcDispatcher_1.RpcDispatcher.callbacks[result.messageId](callbackData);
+                delete RpcDispatcher_1.RpcDispatcher.callbacks[result.messageId];
             }
         };
         this.connectionUuid = connectionUuid;
@@ -164,7 +147,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     monitorDisconnect() {
         fin.desktop.ExternalApplication.wrap(this.connectionUuid).addEventListener('disconnected', () => {
             this.connected = false;
-            this.dispatchEvent({ type: 'disconnected' });
+            this.dispatchEvent('disconnected');
         });
     }
     run(callback) {
@@ -189,11 +172,6 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     getWorkbookByName(name) {
         return this.workbooks[name];
     }
-    getWorksheetByName(workbookName, worksheetName) {
-        if (this.worksheets[workbookName])
-            return this.worksheets[workbookName][worksheetName] ? this.worksheets[workbookName][worksheetName] : null;
-        return null;
-    }
     addWorkbook(callback) {
         this.invokeExcelCall("addWorkbook", null, callback);
     }
@@ -211,6 +189,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     toObject() {
         return {
+            connectionUuid: this.connectionUuid,
             addEventListener: this.addEventListener.bind(this),
             dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),

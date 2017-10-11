@@ -1,8 +1,8 @@
 import { RpcDispatcher } from './RpcDispatcher';
 import { ExcelWorkbook } from './ExcelWorkbook';
 export declare class ExcelWorksheet extends RpcDispatcher {
-    name: string;
     workbook: ExcelWorkbook;
+    worksheetName: string;
     constructor(name: string, workbook: ExcelWorkbook);
     getDefaultMessage(): any;
     setCells(values: any[][], offset: string): void;

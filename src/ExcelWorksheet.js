@@ -5,12 +5,12 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
         super();
         this.connectionUuid = workbook.connectionUuid;
         this.workbook = workbook;
-        this.name = name;
+        this.worksheetName = name;
     }
     getDefaultMessage() {
         return {
-            workbook: this.workbook.name,
-            worksheet: this.name
+            workbook: this.workbook.workbookName,
+            worksheet: this.worksheetName
         };
     }
     setCells(values, offset) {
@@ -86,7 +86,7 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             addEventListener: this.addEventListener.bind(this),
             dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
-            name: this.name,
+            name: this.worksheetName,
             activate: this.activate.bind(this),
             activateCell: this.activateCell.bind(this),
             addButton: this.addButton.bind(this),
