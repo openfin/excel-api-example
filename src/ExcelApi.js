@@ -1,6 +1,6 @@
 "use strict";
-const RpcDispatcher_1 = require("./RpcDispatcher");
-const ExcelApplication_1 = require("./ExcelApplication");
+const RpcDispatcher_1 = require('./RpcDispatcher');
+const ExcelApplication_1 = require('./ExcelApplication');
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
 class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
@@ -8,6 +8,7 @@ class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
         this.applications = {};
         this.processExcelServiceEvent = (data) => {
             var preventDefault = false;
+            var eventPayload = { type: data.event };
             switch (data.event) {
                 case "started":
                     break;
@@ -22,7 +23,7 @@ class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
                     break;
             }
             if (!preventDefault) {
-                this.dispatchEvent(data.event);
+                this.dispatchEvent(eventPayload);
             }
         };
         this.processExcelServiceResult = (data) => {
@@ -39,7 +40,7 @@ class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
             }
         };
         this.registerAppInstance = () => {
-            this.invokeServiceCall("registerAppInstance", { domain: document.domain });
+            this.invokeServiceCall("registerAppInstance");
         };
         this.connectionUuid = excelServiceUuid;
     }
@@ -55,19 +56,19 @@ class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
     }
     monitorDisconnect() {
         fin.desktop.ExternalApplication.wrap(excelServiceUuid).addEventListener("disconnected", () => {
-            this.dispatchEvent("stopped");
+            this.dispatchEvent({ type: "stopped" });
         });
     }
     connectLegacyApi(connectedUuid) {
         if (!ExcelApi.legacyApi) {
-            ExcelApi.legacyApi = ExcelApi.instance.applications[connectedUuid].toObject();
+            ExcelApi.legacyApi = ExcelApi.instance.applications[connectedUuid];
         }
     }
     disconnectLegacyApi(disconnectedUuid) {
         if (ExcelApi.legacyApi.connectionUuid === disconnectedUuid) {
             ExcelApi.legacyApi = undefined;
             for (var connectionUuid in ExcelApi.instance.applications) {
-                ExcelApi.legacyApi = ExcelApi.instance.applications[connectionUuid].toObject();
+                ExcelApi.legacyApi = ExcelApi.instance.applications[connectionUuid];
                 break;
             }
         }
@@ -106,9 +107,6 @@ class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
     getExcelInstances(callback) {
         this.invokeServiceCall("getExcelInstances", null, callback);
     }
-    toObject() {
-        return {};
-    }
     // Legacy API / Single-Application Functions
     static init() {
         ExcelApi.instance.init();
@@ -146,6 +144,9 @@ class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
     static getWorkbookByName(name) {
         return ExcelApi.legacyApi.getWorkbookByName(name);
     }
+    static getWorksheetByName(workbookName, worksheetName) {
+        return ExcelApi.legacyApi.getWorksheetByName(workbookName, worksheetName);
+    }
     static addWorkbook(callback) {
         ExcelApi.legacyApi.addWorkbook(callback);
     }
@@ -153,18 +154,16 @@ class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
         ExcelApi.legacyApi.openWorkbook(path, callback);
     }
     static getConnectionStatus(callback) {
-        if (ExcelApi.legacyApi) {
-            ExcelApi.legacyApi.getConnectionStatus(callback);
-        }
-        else {
-            callback(false);
-        }
+        ExcelApi.legacyApi.getConnectionStatus(callback);
     }
     static getCalculationMode(callback) {
         ExcelApi.legacyApi.getCalculationMode(callback);
     }
     static calculateAll(callback) {
         ExcelApi.legacyApi.calculateAll(callback);
+    }
+    static toObject() {
+        return ExcelApi.legacyApi.toObject();
     }
 }
 ExcelApi.instance = new ExcelApi();
