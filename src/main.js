@@ -209,7 +209,6 @@ window.addEventListener("DOMContentLoaded", function () {
             var update = getAddress(event.target);
             update.value = event.target.innerText;
 
-            console.log('onDataChange ' + event.type);
             currentWorksheet.setCells([[update.value]], update.offset);
             if (event.type === "keydown") {
 
@@ -250,7 +249,6 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function onSheetChanged(event) {
-
         var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
         updateCell(cell, event.data.value, event.data.formula);
     }
@@ -261,7 +259,6 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function onSheetActivated(event) {
-
         selectWorksheet(event.target);
     }
 
@@ -281,7 +278,6 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function selectWorkbook(workbook) {
-
         if (currentWorkbook) {
 
             var tab = document.getElementById(currentWorkbook.name);
@@ -294,24 +290,23 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function onWorkbookTabClicked(event) {
-
         var workbook = fin.desktop.Excel.getWorkbookByName(event.target.innerText);
-        if (currentWorkbook === workbook) return;
         workbook.activate();
     }
 
     function onWorkbookActivated(event) {
-
         selectWorkbook(event.target);
     }
 
     function onWorkbookAdded(event) {
-
         var workbook = event.workbook;
+
         workbook.addEventListener("workbookActivated", onWorkbookActivated);
         workbook.addEventListener("sheetAdded", onWorksheetAdded);
         workbook.addEventListener("sheetRemoved", onWorksheetRemoved);
-        addWorkbookTab(event.workbook.name);
+        workbook.addEventListener("sheetRenamed", onWorksheetRenamed);
+
+        addWorkbookTab(workbook.name);
 
         if (workbooksContainer.style.display === "none") {
             setDisplayContainer(workbooksContainer);
@@ -324,21 +319,30 @@ window.addEventListener("DOMContentLoaded", function () {
         workbook.removeEventListener("workbookActivated", onWorkbookActivated);
         workbook.removeEventListener("sheetAdded", onWorksheetAdded);
         workbook.removeEventListener("sheetRemoved", onWorksheetRemoved);
+        workbook.removeEventListener("sheetRenamed", onWorksheetRenamed);
 
-        document.getElementById("workbookTabs").removeChild(document.getElementById(event.workbook.name));
+        document.getElementById("workbookTabs").removeChild(document.getElementById(workbook.name));
 
         if (document.getElementById("workbookTabs").childNodes.length < 2) {
             setDisplayContainer(noWorkbooksContainer);
         }
     }
 
-    function onWorksheetAdded(event) {
+    function onWorkbookSaved(event) {
+        var workbook = event.workbook;
+        var oldWorkbookName = event.oldWorkbookName;
 
+        var button = document.getElementById(oldWorkbookName);
+
+        button.id = workbook.name;
+        button.innerText = workbook.name;
+    }
+
+    function onWorksheetAdded(event) {
         addWorksheetTab(event.worksheet);
     }
 
     function addWorksheetTab(worksheet) {
-
         var sheetsTabHolder = document.getElementById("sheets");
         var button = document.createElement("button");
         button.innerText = worksheet.name;
@@ -353,22 +357,30 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function onSheetButtonClicked(event) {
-
         var sheet = currentWorkbook.getWorksheetByName(event.target.innerText);
         if (currentWorksheet === sheet) return;
         sheet.activate();
     }
 
     function onWorksheetRemoved(event) {
+        var worksheet = event.worksheet;
 
-        if (event.worksheet.workbook === currentWorkbook) {
-
-            event.worksheet.removeEventListener("sheetChanged", onSheetChanged);
-            event.worksheet.removeEventListener("selectionChanged", onSelectionChanged);
-            event.worksheet.removeEventListener("sheetActivated", onSheetActivated);
-            document.getElementById("sheets").removeChild(document.getElementById(event.worksheet.name));
+        if (worksheet.workbook === currentWorkbook) {
+            worksheet.removeEventListener("sheetChanged", onSheetChanged);
+            worksheet.removeEventListener("selectionChanged", onSelectionChanged);
+            worksheet.removeEventListener("sheetActivated", onSheetActivated);
+            document.getElementById("sheets").removeChild(document.getElementById(worksheet.name));
             currentWorksheet = null;
         }
+    }
+
+    function onWorksheetRenamed(event) {
+        var worksheet = event.worksheet;
+        var oldWorksheetName = event.oldWorksheetName;
+
+        var button = document.getElementById(oldWorksheetName);
+        button.id = worksheet.name;
+        button.innerText = worksheet.name;
     }
 
     function updateSheets(worksheets) {
@@ -406,7 +418,6 @@ window.addEventListener("DOMContentLoaded", function () {
         // Grab a snapshot of the current instance, it can change!
         var legacyApi = fin.desktop.Excel.legacyApi;
 
-
         var onExcelDisconnected = function () {
             console.log("Excel Disconnected: " + legacyApi.connectionUuid);
 
@@ -414,6 +425,8 @@ window.addEventListener("DOMContentLoaded", function () {
             legacyApi.removeEventListener("workbookAdded", onWorkbookAdded);
             legacyApi.removeEventListener("workbookOpened", onWorkbookAdded);
             legacyApi.removeEventListener("workbookClosed", onWorkbookRemoved);
+            legacyApi.removeEventListener("workbookSaved", onWorkbookSaved);
+
 
             if (fin.desktop.Excel.legacyApi) {
                 onExcelConnected();
@@ -429,6 +442,7 @@ window.addEventListener("DOMContentLoaded", function () {
         fin.desktop.Excel.addEventListener("workbookAdded", onWorkbookAdded);
         fin.desktop.Excel.addEventListener("workbookOpened", onWorkbookAdded);
         fin.desktop.Excel.addEventListener("workbookClosed", onWorkbookRemoved);
+        fin.desktop.Excel.addEventListener("workbookSaved", onWorkbookSaved);
 
         fin.desktop.Excel.getWorkbooks(workbooks => {
             for (var i = 0; i < workbooks.length; i++) {
@@ -436,6 +450,8 @@ window.addEventListener("DOMContentLoaded", function () {
                 workbooks[i].addEventListener("workbookActivated", onWorkbookActivated);
                 workbooks[i].addEventListener("sheetAdded", onWorksheetAdded);
                 workbooks[i].addEventListener("sheetRemoved", onWorksheetRemoved);
+                workbooks[i].addEventListener("sheetRenamed", onWorksheetRenamed);
+
             }
 
             if (workbooks.length) {
@@ -449,7 +465,7 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    function installAddIn() {
+    function simluatePluginService() {
         var installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
         var servicePath = 'OpenFin.ExcelService.exe';
         var addInPath = 'OpenFin.ExcelApi-AddIn.xll';
@@ -530,8 +546,15 @@ window.addEventListener("DOMContentLoaded", function () {
 
     function connectToExcel() {
         return new Promise((resolve, reject) => {
-            console.log("Launching Excel");
-            fin.desktop.Excel.run(resolve);
+            fin.desktop.Excel.instance.getExcelInstances(instances => {
+                if (instances.length > 0) {
+                    console.log("Excel Already Running");
+                    resolve();
+                } else {
+                    console.log("Launching Excel");
+                    fin.desktop.Excel.run(resolve);
+                }
+            });
         });
     }
 
@@ -541,11 +564,9 @@ window.addEventListener("DOMContentLoaded", function () {
        fin.desktop.Excel.init();
 
         Promise.resolve()
-            .then(installAddIn)
+            .then(simluatePluginService)
             .then(connectToExcel)
             .then(onExcelConnected)
             .catch(err => console.log(err));
     });
-
-    window.installAddIn = installAddIn;
 });
