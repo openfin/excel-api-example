@@ -3,20 +3,21 @@ const RpcDispatcher_1 = require('./RpcDispatcher');
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
         super();
+        this.worksheets = {};
         this.connectionUuid = application.connectionUuid;
         this.application = application;
-        this.name = name;
+        this.workbookName = name;
     }
     getDefaultMessage() {
         return {
-            workbook: this.name
+            workbook: this.workbookName
         };
     }
     getWorksheets(callback) {
         this.invokeExcelCall("getWorksheets", null, callback);
     }
     getWorksheetByName(name) {
-        return this.application.getWorksheetByName(this.name, name);
+        return this.worksheets[name];
     }
     addWorksheet(callback) {
         this.invokeExcelCall("addSheet", null, callback);
@@ -35,7 +36,7 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
             addEventListener: this.addEventListener.bind(this),
             dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
-            name: this.name,
+            name: this.workbookName,
             activate: this.activate.bind(this),
             addWorksheet: this.addWorksheet.bind(this),
             close: this.close.bind(this),

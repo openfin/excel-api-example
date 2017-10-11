@@ -3,7 +3,10 @@ import { ExcelApplication } from './ExcelApplication';
 import { ExcelWorksheet } from './ExcelWorksheet';
 export declare class ExcelWorkbook extends RpcDispatcher {
     application: ExcelApplication;
-    name: string;
+    workbookName: string;
+    worksheets: {
+        [worksheetName: string]: ExcelWorksheet;
+    };
     constructor(application: ExcelApplication, name: string);
     getDefaultMessage(): any;
     getWorksheets(callback: Function): void;
