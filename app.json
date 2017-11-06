@@ -9,11 +9,16 @@
     "defaultHeight": 704,
     "defaultTop": 100,
     "defaultLeft": 100,
-    "frame": true
+    "frame": true,
+    "preload": [
+      {
+        "url": "http://openfin.github.io/excel-api-example/plugin/fin.desktop.Excel.js"
+      }
+    ]
   },
   "runtime": {
     "arguments": "",
-    "version": "6.*"
+    "version": "7.*"
   },
   "splashScreenImage": "http://openfin.github.io/excel-api-example/web/splash_excel.png",
   "shortcut": {
@@ -24,9 +29,9 @@
   },
   "appAssets": [
     {
-      "src": "http://openfin.github.io/excel-api-example/web/add-in.zip",
+      "src": "http://openfin.github.io/excel-api-example/plugin/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "1.6.0"
+      "version": "1.7.1"
     }
   ]
 }
