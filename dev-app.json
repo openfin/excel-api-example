@@ -19,7 +19,7 @@
   },
   "runtime": {
     "arguments": "",
-    "version": "7.*"
+    "version": "8.*"
   },
   "splashScreenImage": "http://localhost:8080/web/splash_excel.png",
   "shortcut": {
@@ -32,7 +32,7 @@
     {
       "src": "http://localhost:8080/plugin/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "1.7.1",
+      "version": "1.7.2",
       "forceDownload": true
     }
   ]
