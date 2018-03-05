@@ -253,8 +253,41 @@
     </style>
     <meta charset="UTF-8">
     <title>Excel API</title>
+
     <script src="main.js"></script>
 
+    <style>
+        .fullOverlay {
+            background-color: rgba(0,0,0,0.5);
+            visibility: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .modalDialog {
+            background-color: white;
+            display: table;
+            width: 80%;
+            height: 120px;
+            margin: 120px auto;
+        }
+
+        .modalDialog span {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        #addWorkbookDialog input {
+            width: 600px;
+            margin: 40px;
+        }
+
+    </style>
 </head>
 <body>
 
@@ -272,8 +305,10 @@
 </div>
 
 <div id="workbooksContainer" class="workbooksContainer">
-
-    <div id="workbookTabs"><button class="workbookTab" title="New workbook (ctr+N)" id="newWorkbookButton">New</button></div>
+    <div id="workbookTabs">
+        <button id="newWorkbookTab" class="workbookTab" title="New workbook (ctrl+N)">New</button>
+        <button id="openWorkbookTab" class="workbookTab" title="Open Workbook" >Open</button>
+    </div>
     <div class="greenBar"></div>
     <div id="formulaInput">Formula: </div>
     <table id="excelExample" cellspacing="0" cellpadding="2">
@@ -284,6 +319,14 @@
 </div>
 
 <div id="status">Excel not connected</div>
+
+<div id="dialogOverlay" class="fullOverlay">
+    <div id="addWorkbookDialog" class="modalDialog">
+        <span>
+            <input id="openWorkbookPath"/><button id="openWorkbookButton">Open</button>
+        </span>
+    </div>
+</div>
 
 </body>
 </html>
