@@ -1,16 +1,20 @@
 import { RpcDispatcher } from './RpcDispatcher';
 import { ExcelWorkbook } from './ExcelWorkbook';
 export declare class ExcelApplication extends RpcDispatcher {
+    static defaultInstance: ExcelApplication;
     workbooks: {
         [workbookName: string]: ExcelWorkbook;
     };
-    initialized: boolean;
     connected: boolean;
+    initialized: boolean;
     constructor(connectionUuid: string);
-    init(): void;
+    init(): Promise<void>;
+    release(): Promise<void>;
     processExcelEvent: (data: any, uuid: string) => void;
     processExcelResult: (result: any) => void;
-    monitorDisconnect(): void;
+    subscribeToExcelMessages(): Promise<[void, void]>;
+    unsubscribeToExcelMessages(): Promise<[void, void]>;
+    monitorDisconnect(): Promise<{}>;
     run(callback: Function): void;
     getWorkbooks(callback: Function): void;
     getWorkbookByName(name: string): ExcelWorkbook;

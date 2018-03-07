@@ -68,14 +68,42 @@ class RpcDispatcher {
             action: functionName,
             data: data
         });
+        var executor;
+        var promise = new Promise((resolve, reject) => {
+            executor = {
+                resolve,
+                reject
+            };
+        });
+        // Legacy Callback-style API
         if (callback) {
-            RpcDispatcher.callbacks[RpcDispatcher.messageId] = callback;
+            promise
+                .then(result => {
+                callback(result);
+                return result;
+            }).catch(err => {
+                console.error(err);
+            });
+            promise = undefined;
         }
-        fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message);
+        var currentMessageId = RpcDispatcher.messageId;
         RpcDispatcher.messageId++;
+        if (this.connectionUuid !== undefined) {
+            fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message, ack => {
+                RpcDispatcher.callbacksP[currentMessageId] = executor;
+            }, nak => {
+                console.error('You need to fix this!', this.connectionUuid, topic, message);
+                // executor.reject(new Error(nak));
+            });
+        }
+        else {
+            executor.reject(new Error('The target UUID of the remote call is undefined.'));
+        }
+        return promise;
     }
 }
 RpcDispatcher.messageId = 1;
-RpcDispatcher.callbacks = {};
+//protected static callbacks: { [messageId: number]: Function } = {};
+RpcDispatcher.callbacksP = {};
 exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map

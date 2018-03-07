@@ -1,7 +1,10 @@
 export declare abstract class RpcDispatcher implements EventTarget {
     protected static messageId: number;
-    protected static callbacks: {
-        [messageId: number]: Function;
+    protected static callbacksP: {
+        [messageId: number]: {
+            resolve: Function;
+            reject: Function;
+        };
     };
     connectionUuid: string;
     listeners: {

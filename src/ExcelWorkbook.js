@@ -1,5 +1,5 @@
 "use strict";
-const RpcDispatcher_1 = require('./RpcDispatcher');
+const RpcDispatcher_1 = require("./RpcDispatcher");
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
         super();
@@ -34,7 +34,6 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     toObject() {
         return {
             addEventListener: this.addEventListener.bind(this),
-            dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
             name: this.workbookName,
             activate: this.activate.bind(this),

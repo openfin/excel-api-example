@@ -26,7 +26,6 @@ export declare class ExcelWorksheet extends RpcDispatcher {
     protect(password: string): void;
     toObject(): {
         addEventListener: any;
-        dispatchEvent: any;
         removeEventListener: any;
         name: string;
         activate: any;

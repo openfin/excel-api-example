@@ -12,6 +12,9 @@
     "frame": true,
     "preload": [
       {
+        "url": "http://openfin.github.io/excel-api-example/plugin/service-loader.js"
+      },
+      {
         "url": "http://openfin.github.io/excel-api-example/plugin/fin.desktop.Excel.js"
       }
     ]
