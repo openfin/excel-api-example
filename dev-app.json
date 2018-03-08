@@ -13,6 +13,9 @@
     "frame": true,
     "preload": [
       {
+        "url": "http://localhost:8080/plugin/service-loader.js"
+      },
+      {
         "url": "http://localhost:8080/plugin/fin.desktop.Excel.js"
       }
     ]

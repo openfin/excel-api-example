@@ -558,7 +558,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         console.log("Launching Excel");
         return new Promise((resolve, reject) => {
-            fin.desktop.ExcelService.run(resolve);
+            fin.desktop.Excel.run(resolve);
         });
     }
 
