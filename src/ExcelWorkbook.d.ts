@@ -7,13 +7,14 @@ export declare class ExcelWorkbook extends RpcDispatcher {
     worksheets: {
         [worksheetName: string]: ExcelWorksheet;
     };
+    private objectInstance;
     constructor(application: ExcelApplication, name: string);
     getDefaultMessage(): any;
-    getWorksheets(callback: Function): void;
+    getWorksheets(callback: Function): Promise<any>;
     getWorksheetByName(name: string): ExcelWorksheet;
-    addWorksheet(callback: Function): void;
-    activate(): void;
-    save(): void;
-    close(): void;
+    addWorksheet(callback: Function): Promise<any>;
+    activate(): Promise<any>;
+    save(): Promise<any>;
+    close(): Promise<any>;
     toObject(): any;
 }
