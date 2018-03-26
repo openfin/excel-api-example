@@ -4,100 +4,161 @@
 
 // fin.desktop.Excel API Injected via preload script
 
-window.addEventListener("DOMContentLoaded", function () {
-
+fin.desktop.main(function () {
     // Initialization and startup logic for Excel is at the very bottom
 
-    var excelInstance;
+    var view = {};
+    [].slice.call(document.querySelectorAll('[id]')).forEach(element => view[element.id] = element);   
+
+    var displayContainers = new Map([
+        [view.noConnectionContainer, { windowHeight: 195 }],
+        [view.noWorkbooksContainer, { windowHeight: 195 }],
+        [view.workbooksContainer, { windowHeight: 830 }]
+    ]);
 
     var rowLength = 27;
     var columnLength = 12;
-    var table = document.getElementById("excelExample");
-    var tBody = table.getElementsByTagName("tbody")[0];
-    var tHead = table.getElementsByTagName("thead")[0];
 
-    var newWorkbookTab = document.getElementById("newWorkbookTab");
-    var openWorkbookTab = document.getElementById("openWorkbookTab");
-    var openWorkbookButton = document.getElementById("openWorkbookButton");
-
-    var newWorksheetButton = document.getElementById("newSheetButton");
-
-    var noConnectionContainer = document.getElementById("noConnection");
-    var noWorkbooksContainer = document.getElementById("noWorkbooks");
-    var workbooksContainer = document.getElementById("workbooksContainer");
-
-    var openWorkbookPath = document.getElementById("openWorkbookPath");
-
-    var dialogOverlay = document.getElementById("dialogOverlay");
-
-    var connectionStatus = document.getElementById("status");
-
-    var displayContainers = new Map([
-        [noConnectionContainer, { windowHeight: 195 }],
-        [noWorkbooksContainer, { windowHeight: 195 }],
-        [workbooksContainer, { windowHeight: 830 }]
-    ]);
-
-    newWorkbookTab.addEventListener("click", function () {
-        fin.desktop.Excel.addWorkbook();
-    });
-
-    openWorkbookTab.addEventListener("click", function () {
-        dialogOverlay.style.visibility = "visible";
-    });
-
-    newWorksheetButton.addEventListener("click", function () {
-        currentWorkbook.addWorksheet();
-    });
-
-    dialogOverlay.addEventListener("click", function (e) {
-        if (e.target === dialogOverlay) {
-            dialogOverlay.style.visibility = "hidden";
-        } else {
-            e.stopPropagation();
-        }
-    });
-
-    openWorkbookButton.addEventListener("click", function (e) {
-        dialogOverlay.style.visibility = "hidden";
-        fin.desktop.Excel.openWorkbook(openWorkbookPath.value);
-    });
-
+    var excelInstance;
     var currentWorksheet = null;
     var currentWorkbook = null;
     var currentCell = null;
-    var formulaInput = document.getElementById("formulaInput");
 
-    window.addEventListener("keydown", function (event) {
+    // Initialization
 
-        switch (event.keyCode) {
+    function initializeTable() {
 
-            case 78: // N
-                if (event.ctrlKey) fin.desktop.Excel.addWorkbook();
-                break;
-            case 37: // LEFT
-                selectPreviousCell();
-                break;
-            case 38: // UP
-                selectCellAbove();
-                break;
-            case 39: // RIGHT
-                selectNextCell();
-                break;
-            case 40: //DOWN
-                selectCellBelow();
-                break;
+        for (var i = 0; i <= rowLength; i++) {
+            var isHeaderRow = (i === 0);
+            var rowClass = isHeaderRow ? "cellHeader" : "cell";
+
+            var row = createRow(i, columnLength, rowClass, isHeaderRow);
+            var rowTarget = isHeaderRow ? view.worksheetHeader : view.worksheetBody;
+            rowTarget.appendChild(row);
         }
-    });
+
+        function createRow(rowNumber, columnCount, rowClassName, isHeaderRow) {
+            var row = document.createElement("tr");
+
+            for (var i = 0; i <= columnCount; i++) {
+                var isHeaderCell = (i === 0);
+                var cellClass = isHeaderCell ? "rowNumber" : rowClassName;
+                var editable = !(isHeaderRow || isHeaderCell);
+
+                var cellContent = 
+                    (isHeaderCell && !isHeaderRow) ? rowNumber.toString() :
+                    (!isHeaderCell && isHeaderRow) ? String.fromCharCode(64 + i) : // Only support one letter-columns for now
+                    undefined;
+
+                var cell = createCell(cellClass, cellContent, editable);
+                row.appendChild(cell);
+            }
+
+            return row;
+        }
+
+        function createCell(cellClassName, cellContent, editable) {
+
+            var cell = document.createElement("td");
+            cell.className = cellClassName;
+
+            if (cellContent !== undefined) {
+                cell.innerText = cellContent;
+            }
+
+            if (editable) {
+
+                cell.contentEditable = true;
+
+                cell.addEventListener("keydown", onDataChange);
+                cell.addEventListener("blur", onDataChange);
+                cell.addEventListener("mousedown", onCellClicked);
+            }
+
+            return cell;
+        }
+    }
+
+    function initializeUIEvents() {
+        view.newWorkbookTab.addEventListener("click", function () {
+            fin.desktop.Excel.addWorkbook();
+        });
+
+        view.openWorkbookTab.addEventListener("click", function () {
+            view.dialogOverlay.style.visibility = "visible";
+        });
+
+        view.newWorksheetButton.addEventListener("click", function () {
+            currentWorkbook.addWorksheet();
+        });
+
+        view.launchExcelLink.addEventListener("click", function () {
+            connectToExcel();
+        });
+
+        view.newWorkbookLink.addEventListener("click", function () {
+            fin.desktop.Excel.addWorkbook();
+        });
+
+        view.dialogOverlay.addEventListener("click", function (e) {
+            if (e.target === view.dialogOverlay) {
+                view.dialogOverlay.style.visibility = "hidden";
+            } else {
+                e.stopPropagation();
+            }
+        });
+
+        view.openWorkbookButton.addEventListener("click", function (e) {
+            view.dialogOverlay.style.visibility = "hidden";
+            fin.desktop.Excel.openWorkbook(view.openWorkbookPath.value);
+        });
+
+        window.addEventListener("keydown", function (event) {
+
+            switch (event.keyCode) {
+
+                case 78: // N
+                    if (event.ctrlKey) fin.desktop.Excel.addWorkbook();
+                    break;
+                case 37: // LEFT
+                    selectAdjacentCell('left');
+                    break;
+                case 38: // UP
+                    selectAdjacentCell('above');
+                    break;
+                case 39: // RIGHT
+                    selectAdjacentCell('right');
+                    break;
+                case 40: //DOWN
+                    selectAdjacentCell('below');
+                    break;
+            }
+        });
+
+    }
+
+    function initializeExcelEvents() {
+        fin.desktop.ExcelService.addEventListener("excelConnected", onExcelConnected);
+        fin.desktop.ExcelService.addEventListener("excelDisconnected", onExcelDisconnected);
+    }
+
+    // UI Functions
 
     function setDisplayContainer(containerToDisplay) {
         if (!displayContainers.has(containerToDisplay)) {
             return;
         }
 
-        for (var container of displayContainers.keys()) {
-            container.style.display = "none";
+        // Element is already showing
+        if (containerToDisplay.style.display === "block") {
+            return;
         }
+
+        // Reset the display containers to their CSS definition (none)
+        for (var container of displayContainers.keys()) {
+            container.style.display = null;
+        }
+
         containerToDisplay.style.display = "block";
 
         var windowHeight = displayContainers.get(containerToDisplay).windowHeight;
@@ -110,59 +171,99 @@ window.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function initTable() {
-
-        var row = createRow(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"], "cellHeader", false);
-        var column = createColumn("");
-        column.className = "rowNumber";
-        row.insertBefore(column, row.childNodes[0]);
-        tHead.appendChild(row);
-
-        for (var i = 1; i <= rowLength; i++) {
-
-            row = createRow(columnLength, "cell", true);
-            column = createColumn(i);
-            column.className = "rowNumber";
-            column.contentEditable = false;
-            row.insertBefore(column, row.childNodes[0]);
-            tBody.appendChild(row);
-        }
+    function setStatusLabel(text) {
+        view.connectionStatus.innerText = text;
     }
 
-    function createRow(data, cellClassName, editable) {
-
-        var length = data.length ? data.length : data;
-        var row = document.createElement("tr");
-
-        for (var i = 0; i < length; i++) {
-
-            row.appendChild(createColumn(data[i], cellClassName, editable));
-        }
-
-        return row;
+    function addWorkbookTab(name) {
+        var button = getWorkbookTab(name);
+        button.addEventListener("click", onWorkbookTabClicked);
+        view.workbookTabs.insertBefore(button, view.newWorkbookTab);
     }
 
-    function createColumn(data, cellClassName, editable) {
+    function getWorkbookTab(name) {
+        var elementId = 'workbook-'.concat(name);
+        var element = document.getElementById(elementId) || document.createElement('button');
 
-        var column = document.createElement("td");
-        column.className = cellClassName;
+        element.id = elementId;
+        element.className = 'workbookTab';
+        element.innerHTML = name;
 
-        if (editable) {
-
-            column.contentEditable = true;
-            //column.addEventListener("DOMCharacterDataModified", onDataChange);
-            column.addEventListener("keydown", onDataChange);
-            column.addEventListener("blur", onDataChange);
-            column.addEventListener("mousedown", onCellClicked);
-        }
-
-        if (data) column.innerText = data;
-        return column;
+        return element;
     }
 
-    function onCellClicked(event) {
+    function selectWorkbook(workbook) {
+        if (currentWorkbook) {
 
-        selectCell(event.target);
+            var tab = getWorkbookTab(currentWorkbook.name);
+            if (tab) tab.className = "workbookTab";
+        }
+
+        getWorkbookTab(workbook.name).className = "workbookTabSelected";
+        currentWorkbook = workbook;
+        currentWorkbook.getWorksheets(updateSheets);
+    }
+
+    function addWorksheetTab(worksheet) {
+        var sheetsTabHolder = view.worksheetTabs;
+        var button = getWorksheetTab(worksheet.name);
+        button.addEventListener("click", onSheetButtonClicked);
+        sheetsTabHolder.insertBefore(button, view.newWorksheetButton);
+
+        worksheet.addEventListener("sheetChanged", onSheetChanged);
+        worksheet.addEventListener("selectionChanged", onSelectionChanged);
+        worksheet.addEventListener("sheetActivated", onSheetActivated);
+    }
+
+    function getWorksheetTab(name) {
+        var elementId = 'worksheet-'.concat(name);
+        var element = document.getElementById(elementId) || document.createElement('button');
+
+        element.id = elementId;
+        element.className = 'tab';
+        element.innerText = name;
+
+        return element;
+    }
+
+    function selectWorksheet(sheet) {
+
+        if (currentWorksheet === sheet) {
+            return;
+        }
+
+        if (currentWorksheet) {
+            var tab = getWorksheetTab(currentWorksheet.name);
+            if (tab) tab.className = "tab";
+        }
+        getWorksheetTab(sheet.name).className = "tabSelected";
+        currentWorksheet = sheet;
+        currentWorksheet.getCells("A1", columnLength, rowLength, updateData);
+    }
+
+    function updateSheets(worksheets) {
+
+        var sheetsTabHolder = view.worksheetTabs;
+        while (sheetsTabHolder.firstChild) {
+
+            sheetsTabHolder.removeChild(sheetsTabHolder.firstChild);
+        }
+
+        sheetsTabHolder.appendChild(view.newWorksheetButton);
+        for (var i = 0; i < worksheets.length; i++) {
+
+            addWorksheetTab(worksheets[i]);
+        }
+
+        selectWorksheet(worksheets[0]);
+    }
+
+    function getAddress(td) {
+
+        var column = td.cellIndex;
+        var row = td.parentElement.rowIndex;
+        var offset = view.worksheetHeader.children[0].children[column].innerText.toString() + row;
+        return { column: column, row: row, offset: offset };
     }
 
     function selectCell(cell, preventDefault) {
@@ -175,7 +276,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         currentCell = cell;
         currentCell.className = "cellSelected";
-        formulaInput.innerText = "Formula: " + cell.title;
+        view.formulaInput.innerText = "Formula: " + cell.title;
         cell.focus();
 
         updateCellNumberClass(cell, "rowNumberSelected", "cellHeaderSelected");
@@ -187,73 +288,34 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function updateCellNumberClass(cell, className, headerClassName) {
-
-        var row = cell.parentNode;
-        var columnIndex = Array.prototype.indexOf.call(row.childNodes, cell);
-        var rowIndex = Array.prototype.indexOf.call(row.parentNode.childNodes, cell.parentNode);
-        tBody.childNodes[rowIndex].childNodes[0].className = className;
-        tHead.getElementsByTagName("tr")[0].getElementsByTagName("td")[columnIndex].className = headerClassName;
-    }
-
-    function selectCellBelow() {
-
+    function selectAdjacentCell(direction) {
         if (!currentCell) return;
         var info = getAddress(currentCell);
-        if (info.row >= rowLength) return;
-        var cell = tBody.childNodes[info.row].childNodes[info.column];
-        selectCell(cell);
-    }
 
-    function selectCellAbove() {
+        var cell;
 
-        if (!currentCell) return;
-        var info = getAddress(currentCell);
-        if (info.row <= 1) return;
-        var cell = tBody.childNodes[info.row - 2].childNodes[info.column];
-        selectCell(cell);
-    }
-
-    function selectNextCell() {
-
-        if (!currentCell) return;
-        var info = getAddress(currentCell);
-        if (info.column >= columnLength) return;
-        var cell = tBody.childNodes[info.row - 1].childNodes[info.column + 1];
-        selectCell(cell);
-    }
-
-    function selectPreviousCell() {
-
-        if (!currentCell) return;
-        var info = getAddress(currentCell);
-        if (info.column <= 1) return;
-        var cell = tBody.childNodes[info.row - 1].childNodes[info.column - 1];
-        selectCell(cell);
-    }
-
-    function onDataChange(event) {
-
-        if (event.keyCode === 13 || event.type === "blur") {
-
-            var update = getAddress(event.target);
-            update.value = event.target.innerText;
-
-            currentWorksheet.setCells([[update.value]], update.offset);
-            if (event.type === "keydown") {
-
-                selectCellBelow();
-                event.preventDefault();
-            }
+        switch (direction) {
+            case 'above':
+                if (info.row <= 1) return;
+                cell = view.worksheetBody.childNodes[info.row - 2].childNodes[info.column];
+                break;
+            case 'below':
+                if (info.row >= rowLength) return;
+                cell = view.worksheetBody.childNodes[info.row].childNodes[info.column];
+                break;
+            case 'left':
+                if (info.column <= 1) return;
+                cell = view.worksheetBody.childNodes[info.row - 1].childNodes[info.column - 1];
+                break;
+            case 'right':
+                if (info.column >= columnLength) return;
+                cell = view.worksheetBody.childNodes[info.row - 1].childNodes[info.column + 1];
+                break;
         }
-    }
 
-    function getAddress(td) {
-
-        var column = td.cellIndex;
-        var row = td.parentElement.rowIndex;
-        var offset = tHead.getElementsByTagName("td")[column].innerText.toString() + row;
-        return { column: column, row: row, offset: offset };
+        if (cell) {
+            selectCell(cell);
+        }
     }
 
     function updateData(data) {
@@ -263,7 +325,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         for (var i = 0; i < data.length; i++) {
 
-            row = tBody.childNodes[i];
+            row = view.worksheetBody.childNodes[i];
 
             if (!row) {
                 continue;
@@ -282,112 +344,18 @@ window.addEventListener("DOMContentLoaded", function () {
         cell.title = formula ? formula : "";
     }
 
-    function onSheetChanged(event) {
-        var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
-        updateCell(cell, event.data.value, event.data.formula);
+    function updateCellNumberClass(cell, className, headerClassName) {
+        var row = cell.parentNode;
+        var columnIndex = Array.prototype.indexOf.call(row.childNodes, cell);
+        var rowIndex = Array.prototype.indexOf.call(row.parentNode.childNodes, cell.parentNode);
+        view.worksheetBody.childNodes[rowIndex].childNodes[0].className = className;
+        view.worksheetHeader.children[0].children[columnIndex].className = headerClassName;
     }
 
-    function onSelectionChanged(event) {
-        var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
-        selectCell(cell, true);
-    }
+    // UI Event Handlers
 
-    function onSheetActivated(event) {
-        selectWorksheet(event.target);
-    }
-
-    function selectWorksheet(sheet) {
-
-        if (currentWorksheet === sheet) {
-            return;
-        }
-
-        if (currentWorksheet) {
-            var tab = document.getElementById(currentWorksheet.name);
-            if (tab) tab.className = "tab";
-        }
-        document.getElementById(sheet.name).className = "tabSelected";
-        currentWorksheet = sheet;
-        currentWorksheet.getCells("A1", columnLength, rowLength, updateData);
-    }
-
-    function selectWorkbook(workbook) {
-        if (currentWorkbook) {
-
-            var tab = document.getElementById(currentWorkbook.name);
-            if (tab) tab.className = "workbookTab";
-        }
-
-        document.getElementById(workbook.name).className = "workbookTabSelected";
-        currentWorkbook = workbook;
-        currentWorkbook.getWorksheets(updateSheets);
-    }
-
-    function onWorkbookTabClicked(event) {
-        var workbook = fin.desktop.Excel.getWorkbookByName(event.target.innerText);
-        workbook.activate();
-    }
-
-    function onWorkbookActivated(event) {
-        selectWorkbook(event.target);
-    }
-
-    function onWorkbookAdded(event) {
-        var workbook = event.workbook;
-
-        workbook.addEventListener("workbookActivated", onWorkbookActivated);
-        workbook.addEventListener("sheetAdded", onWorksheetAdded);
-        workbook.addEventListener("sheetRemoved", onWorksheetRemoved);
-        workbook.addEventListener("sheetRenamed", onWorksheetRenamed);
-
-        addWorkbookTab(workbook.name);
-
-        if (workbooksContainer.style.display === "none") {
-            setDisplayContainer(workbooksContainer);
-        }
-    }
-
-    function onWorkbookRemoved(event) {
-        currentWorkbook = null;
-        var workbook = event.workbook;
-        workbook.removeEventListener("workbookActivated", onWorkbookActivated);
-        workbook.removeEventListener("sheetAdded", onWorksheetAdded);
-        workbook.removeEventListener("sheetRemoved", onWorksheetRemoved);
-        workbook.removeEventListener("sheetRenamed", onWorksheetRenamed);
-
-        document.getElementById("workbookTabs").removeChild(document.getElementById(workbook.name));
-
-        if (document.getElementById("workbookTabs").childNodes.length < 6) {
-            setDisplayContainer(noWorkbooksContainer);
-        }
-    }
-
-    function onWorkbookSaved(event) {
-        var workbook = event.workbook;
-        var oldWorkbookName = event.oldWorkbookName;
-
-        var button = document.getElementById(oldWorkbookName);
-
-        button.id = workbook.name;
-        button.innerText = workbook.name;
-    }
-
-    function onWorksheetAdded(event) {
-        addWorksheetTab(event.worksheet);
-    }
-
-    function addWorksheetTab(worksheet) {
-        var sheetsTabHolder = document.getElementById("sheets");
-        var button = document.createElement("button");
-        button.innerText = worksheet.name;
-        button.className = "tab";
-        button.id = worksheet.name;
-        button.addEventListener("click", onSheetButtonClicked);
-        sheetsTabHolder.insertBefore(button, newWorksheetButton);
-
-        worksheet.addEventListener("sheetChanged", onSheetChanged);
-        worksheet.addEventListener("selectionChanged", onSelectionChanged);
-        worksheet.addEventListener("sheetActivated", onSheetActivated);
+    function onCellClicked(event) {
+        selectCell(event.target);
     }
 
     function onSheetButtonClicked(event) {
@@ -396,64 +364,60 @@ window.addEventListener("DOMContentLoaded", function () {
         sheet.activate();
     }
 
-    function onWorksheetRemoved(event) {
-        var worksheet = event.worksheet;
+    function onWorkbookTabClicked(event) {
+        var workbook = fin.desktop.Excel.getWorkbookByName(event.target.innerText);
+        workbook.activate();
+    }
 
-        if (worksheet.workbook === currentWorkbook) {
-            worksheet.removeEventListener("sheetChanged", onSheetChanged);
-            worksheet.removeEventListener("selectionChanged", onSelectionChanged);
-            worksheet.removeEventListener("sheetActivated", onSheetActivated);
-            document.getElementById("sheets").removeChild(document.getElementById(worksheet.name));
-            currentWorksheet = null;
+    function onDataChange(event) {
+
+        if (event.keyCode === 13 || event.type === "blur") {
+
+            var update = getAddress(event.target);
+            update.value = event.target.innerText;
+
+            currentWorksheet.setCells([[update.value]], update.offset);
+            if (event.type === "keydown") {
+
+                selectAdjacentCell('below');
+                event.preventDefault();
+            }
         }
     }
 
-    function onWorksheetRenamed(event) {
-        var worksheet = event.worksheet;
-        var oldWorksheetName = event.oldWorksheetName;
+    // Excel Helper Functions
 
-        var button = document.getElementById(oldWorksheetName);
-        button.id = worksheet.name;
-        button.innerText = worksheet.name;
+    function checkConnectionStatus() {
+        fin.desktop.Excel.getConnectionStatus(connected => {
+            if (connected) {
+                onExcelConnected(fin.desktop.Excel);
+            } else {
+                setStatusLabel("Excel not connected");
+                setDisplayContainer(view.noConnectionContainer);
+            }
+        });
     }
 
-    function updateSheets(worksheets) {
+    function connectToExcel() {
+        console.log('connectToExcel');
+        setStatusLabel("Connecting...");
 
-        var sheetsTabHolder = document.getElementById("sheets");
-        while (sheetsTabHolder.firstChild) {
-
-            sheetsTabHolder.removeChild(sheetsTabHolder.firstChild);
-        }
-
-        sheetsTabHolder.appendChild(newWorksheetButton);
-        for (var i = 0; i < worksheets.length; i++) {
-
-            addWorksheetTab(worksheets[i]);
-        }
-
-        selectWorksheet(worksheets[0]);
+        return fin.desktop.Excel.run();
     }
 
-    function addWorkbookTab(name) {
-        var button = document.createElement("button");
-        button.id = button.innerText = name;
-        button.className = "workbookTab";
-        button.addEventListener("click", onWorkbookTabClicked);
-        document.getElementById("workbookTabs").insertBefore(button, newWorkbookTab);
-    }
+    // Excel Event Handlers
 
     function onExcelConnected(data) {
-        console.log("Excel Connected: " + data.connectionUuid);
-
-        connectionStatus.innerText = "Connected to Excel";
-
         if (excelInstance) {
             return;
         }
 
+        console.log("Excel Connected: " + data.connectionUuid);
+        setStatusLabel("Connected to Excel");
+
         // Grab a snapshot of the current instance, it can change!
         excelInstance = fin.desktop.Excel;
-       
+
         excelInstance.addEventListener("workbookAdded", onWorkbookAdded);
         excelInstance.addEventListener("workbookOpened", onWorkbookAdded);
         excelInstance.addEventListener("workbookClosed", onWorkbookRemoved);
@@ -470,10 +434,10 @@ window.addEventListener("DOMContentLoaded", function () {
 
             if (workbooks.length) {
                 selectWorkbook(workbooks[0]);
-                setDisplayContainer(workbooksContainer);
+                setDisplayContainer(view.workbooksContainer);
             }
             else {
-                setDisplayContainer(noWorkbooksContainer);
+                setDisplayContainer(view.noWorkbooksContainer);
             }
         });
     }
@@ -492,91 +456,101 @@ window.addEventListener("DOMContentLoaded", function () {
 
         excelInstance = undefined;
 
-        fin.desktop.Excel.getConnectionStatus(connected => {
-            if (connected) {
-                onExcelConnected(fin.desktop.Excel);
-            } else {
-                connectionStatus.innerText = "Excel not connected";
-                setDisplayContainer(noConnectionContainer);
-            }
-        });
+        checkConnectionStatus();
     }
 
-    // TODO: Remove this function once API uses promises
-    function getConnectionStatus() {
-        return new Promise((resolve, reject) => {
-            fin.desktop.Excel.getConnectionStatus(resolve);
-        });
+    function onWorkbookAdded(event) {
+        var workbook = event.workbook;
+
+        workbook.addEventListener("workbookActivated", onWorkbookActivated);
+        workbook.addEventListener("sheetAdded", onWorksheetAdded);
+        workbook.addEventListener("sheetRemoved", onWorksheetRemoved);
+        workbook.addEventListener("sheetRenamed", onWorksheetRenamed);
+
+        addWorkbookTab(workbook.name);
+
+        setDisplayContainer(view.workbooksContainer);
     }
 
-    // In practice this function only needs to be invoked once per user
-    // on a given machine. There is a ExcelService command line option
-    // to perform XLL registration and auto-starting as well.
-    // For simplicity, in the demo we use a cookie to keep track if
-    // the XLL was previously installed.
-    function installAddIn(connected) {
-        console.log('registerAddIn');
+    function onWorkbookRemoved(event) {
+        currentWorkbook = null;
+        var workbook = event.workbook;
+        workbook.removeEventListener("workbookActivated", onWorkbookActivated);
+        workbook.removeEventListener("sheetAdded", onWorksheetAdded);
+        workbook.removeEventListener("sheetRemoved", onWorksheetRemoved);
+        workbook.removeEventListener("sheetRenamed", onWorksheetRenamed);
 
-        var xllInstalledCookie = 'openfin-xll-installed';
+        view.workbookTabs.removeChild(getWorkbookTab(workbook.name));
 
-        // If Excel is connected, XLL must already be installed
-        if (connected) {
-            document.cookie = xllInstalledCookie;
+        if (view.workbookTabs.children.length < 3) {
+            setDisplayContainer(view.noWorkbooksContainer);
         }
-
-        if (document.cookie.includes(xllInstalledCookie)) {
-            console.log('Add-In previously installed')
-            return Promise.resolve(connected);
-        }
-
-        return new Promise((resolve, reject) => {
-            console.log('Installing Add-In');
-            fin.desktop.ExcelService.install(result => {
-                if (result.success) {
-                    console.log('Add-In successfully installed');
-                    document.cookie = xllInstalledCookie;
-                    resolve(connected);
-                } else {
-                    reject(new Error('Failed to install Add-In'));
-                }
-            });
-        });
     }
 
-    function connectToExcel(connected) {
-        console.log('connectToExcel');
-        connectionStatus.innerText = "Connecting...";
-
-        fin.desktop.ExcelService.addEventListener("excelConnected", onExcelConnected);
-        fin.desktop.ExcelService.addEventListener("excelDisconnected", onExcelDisconnected);
-
-        if (connected) {
-            console.log("Excel Already Running");
-            onExcelConnected(fin.desktop.Excel);
-            return Promise.resolve();
-        }
-
-        console.log("Launching Excel");
-        return new Promise((resolve, reject) => {
-            fin.desktop.ExcelService.run(resolve);
-        });
+    function onWorkbookActivated(event) {
+        selectWorkbook(event.target);
     }
 
-    initTable(27, 12);
+    function onWorkbookSaved(event) {
+        var workbook = event.workbook;
+        var oldWorkbookName = event.oldWorkbookName;
 
-    fin.desktop.main(function () {
+        var button = getWorkbookTab(oldWorkbookName);
 
-        // The Excel Service is started independently and asynchronously
-        // from this page. The init call opens the communications channel
-        // with the service and registers the current document domain
+        button.id = workbook.name;
+        button.innerText = workbook.name;
+    }
 
-        fin.desktop.ExcelService.init()
-            .then(getConnectionStatus)
-            .then(installAddIn)
-            .then(connectToExcel);
+    function onWorksheetAdded(event) {
+        addWorksheetTab(event.worksheet);
+    }
 
-        fin.desktop.System.getEnvironmentVariable("userprofile", profilePath => {
-            openWorkbookPath.value = profilePath + "\\Documents\\";
-        });
+    function onWorksheetRemoved(event) {
+        var worksheet = event.worksheet;
+
+        if (worksheet.workbook === currentWorkbook) {
+            worksheet.removeEventListener("sheetChanged", onSheetChanged);
+            worksheet.removeEventListener("selectionChanged", onSelectionChanged);
+            worksheet.removeEventListener("sheetActivated", onSheetActivated);
+            view.worksheetTabs.removeChild(getWorksheetTab(worksheet.name));
+            currentWorksheet = null;
+        }
+    }
+
+    function onSheetActivated(event) {
+        selectWorksheet(event.target);
+    }
+
+    function onWorksheetRenamed(event) {
+        var worksheet = event.worksheet;
+        var oldWorksheetName = event.oldWorksheetName;
+
+        var button = getWorksheetTab(oldWorksheetName);
+        button.id = worksheet.name;
+        button.innerText = worksheet.name;
+    }
+
+    function onSelectionChanged(event) {
+        var cell = view.worksheetBody.children[event.data.row - 1].children[event.data.column];
+        selectCell(cell, true);
+    }
+
+    function onSheetChanged(event) {
+        var cell = view.worksheetBody.children[event.data.row - 1].children[event.data.column];
+        updateCell(cell, event.data.value, event.data.formula);
+    }
+
+    // Main App Start
+
+    initializeTable();
+    initializeUIEvents();
+    initializeExcelEvents();
+
+    fin.desktop.ExcelService.init()
+        .then(checkConnectionStatus)
+        .catch(err => console.error(err));
+
+    fin.desktop.System.getEnvironmentVariable("userprofile", profilePath => {
+        view.openWorkbookPath.value = profilePath + "\\Documents\\";
     });
 });

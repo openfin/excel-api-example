@@ -16,28 +16,28 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     setCells(values, offset) {
         if (!offset)
             offset = "A1";
-        this.invokeExcelCall("setCells", { offset: offset, values: values });
+        return this.invokeExcelCall("setCells", { offset: offset, values: values });
     }
     getCells(start, offsetWidth, offsetHeight, callback) {
-        this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
+        return this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
     }
     getRow(start, width, callback) {
-        this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
+        return this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
     }
     getColumn(start, offsetHeight, callback) {
-        this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
+        return this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
     }
     activate() {
-        this.invokeExcelCall("activateSheet");
+        return this.invokeExcelCall("activateSheet");
     }
     activateCell(cellAddress) {
-        this.invokeExcelCall("activateCell", { address: cellAddress });
+        return this.invokeExcelCall("activateCell", { address: cellAddress });
     }
     addButton(name, caption, cellAddress) {
-        this.invokeExcelCall("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
+        return this.invokeExcelCall("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
     }
     setFilter(start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown) {
-        this.invokeExcelCall("setFilter", {
+        return this.invokeExcelCall("setFilter", {
             start: start,
             offsetWidth: offsetWidth,
             offsetHeight: offsetHeight,
@@ -49,40 +49,40 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
         });
     }
     formatRange(rangeCode, format, callback) {
-        this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format }, callback);
+        return this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format }, callback);
     }
     clearRange(rangeCode, callback) {
-        this.invokeExcelCall("clearRange", { rangeCode: rangeCode }, callback);
+        return this.invokeExcelCall("clearRange", { rangeCode: rangeCode }, callback);
     }
     clearRangeContents(rangeCode, callback) {
-        this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode }, callback);
+        return this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode }, callback);
     }
     clearRangeFormats(rangeCode, callback) {
-        this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode }, callback);
+        return this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode }, callback);
     }
     clearAllCells(callback) {
-        this.invokeExcelCall("clearAllCells", null, callback);
+        return this.invokeExcelCall("clearAllCells", null, callback);
     }
     clearAllCellContents(callback) {
-        this.invokeExcelCall("clearAllCellContents", null, callback);
+        return this.invokeExcelCall("clearAllCellContents", null, callback);
     }
     clearAllCellFormats(callback) {
-        this.invokeExcelCall("clearAllCellFormats", null, callback);
+        return this.invokeExcelCall("clearAllCellFormats", null, callback);
     }
     setCellName(cellAddress, cellName) {
-        this.invokeExcelCall("setCellName", { address: cellAddress, cellName: cellName });
+        return this.invokeExcelCall("setCellName", { address: cellAddress, cellName: cellName });
     }
     calculate() {
-        this.invokeExcelCall("calculateSheet");
+        return this.invokeExcelCall("calculateSheet");
     }
     getCellByName(cellName, callback) {
-        this.invokeExcelCall("getCellByName", { cellName: cellName }, callback);
+        return this.invokeExcelCall("getCellByName", { cellName: cellName }, callback);
     }
     protect(password) {
-        this.invokeExcelCall("protectSheet", { password: password ? password : null });
+        return this.invokeExcelCall("protectSheet", { password: password ? password : null });
     }
     toObject() {
-        return {
+        return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
             name: this.worksheetName,
@@ -105,7 +105,7 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             setCellName: this.setCellName.bind(this),
             setCells: this.setCells.bind(this),
             setFilter: this.setFilter.bind(this)
-        };
+        });
     }
 }
 exports.ExcelWorksheet = ExcelWorksheet;

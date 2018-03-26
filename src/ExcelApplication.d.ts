@@ -7,6 +7,7 @@ export declare class ExcelApplication extends RpcDispatcher {
     };
     connected: boolean;
     initialized: boolean;
+    private objectInstance;
     constructor(connectionUuid: string);
     init(): Promise<void>;
     release(): Promise<void>;
@@ -15,13 +16,13 @@ export declare class ExcelApplication extends RpcDispatcher {
     subscribeToExcelMessages(): Promise<[void, void]>;
     unsubscribeToExcelMessages(): Promise<[void, void]>;
     monitorDisconnect(): Promise<{}>;
-    run(callback: Function): void;
-    getWorkbooks(callback: Function): void;
+    run(callback?: Function): Promise<any>;
+    getWorkbooks(callback?: Function): Promise<any>;
     getWorkbookByName(name: string): ExcelWorkbook;
-    addWorkbook(callback: Function): void;
-    openWorkbook(path: string, callback: Function): void;
-    getConnectionStatus(callback: Function): void;
-    getCalculationMode(callback: Function): void;
-    calculateAll(callback: Function): void;
+    addWorkbook(callback?: Function): Promise<any>;
+    openWorkbook(path: string, callback?: Function): Promise<any>;
+    getConnectionStatus(callback?: Function): Promise<any>;
+    getCalculationMode(callback: Function): Promise<any>;
+    calculateAll(callback: Function): Promise<any>;
     toObject(): any;
 }

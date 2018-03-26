@@ -3,6 +3,6 @@
 const ExcelApi_1 = require("./ExcelApi");
 window.fin.desktop.ExcelService = ExcelApi_1.ExcelService.instance;
 Object.defineProperty(window.fin.desktop, 'Excel', {
-    get() { return ExcelApi_1.ExcelService.defaultApplication; }
+    get() { return ExcelApi_1.ExcelService.instance.defaultApplicationObj; }
 });
 //# sourceMappingURL=plugin.js.map

@@ -2,7 +2,8 @@ import { RpcDispatcher } from './RpcDispatcher';
 import { ExcelApplication } from './ExcelApplication';
 export declare class ExcelService extends RpcDispatcher {
     static instance: ExcelService;
-    static defaultApplication: ExcelApplication;
+    defaultApplicationUuid: string;
+    defaultApplicationObj: any;
     initialized: boolean;
     applications: {
         [connectionUuid: string]: ExcelApplication;
@@ -13,13 +14,13 @@ export declare class ExcelService extends RpcDispatcher {
     processExcelServiceResult: (data: any) => Promise<void>;
     subscribeToServiceMessages(): Promise<[void, void]>;
     monitorDisconnect(): Promise<{}>;
-    registerAppInstance: (callback?: Function) => void;
+    registerAppInstance: (callback?: Function) => Promise<any>;
+    configureDefaultApplication(): Promise<void>;
     processExcelConnectedEvent(data: any): Promise<void>;
     processExcelDisconnectedEvent(data: any): Promise<void>;
     processGetExcelInstancesResult(connectionUuids: string[]): Promise<void>;
-    install(callback: Function): void;
-    getInstallationStatus(callback?: Function): void;
-    getExcelInstances(callback?: Function): void;
-    run(callback?: Function): void;
+    install(callback?: Function): Promise<any>;
+    getInstallationStatus(callback?: Function): Promise<any>;
+    getExcelInstances(callback?: Function): Promise<any>;
     toObject(): any;
 }

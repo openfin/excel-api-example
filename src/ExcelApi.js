@@ -10,13 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const RpcDispatcher_1 = require("./RpcDispatcher");
 const ExcelApplication_1 = require("./ExcelApplication");
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
-const nullApplication = new ExcelApplication_1.ExcelApplication(undefined);
 class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
         super();
+        this.defaultApplicationUuid = undefined;
+        this.defaultApplicationObj = undefined;
         this.applications = {};
         this.processExcelServiceEvent = (data) => __awaiter(this, void 0, void 0, function* () {
-            console.log('processExcelServiceEvent', data.event);
             var eventType = data.event;
             var eventData;
             switch (data.event) {
@@ -39,9 +39,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             this.dispatchEvent(eventType, eventData);
         });
         this.processExcelServiceResult = (data) => __awaiter(this, void 0, void 0, function* () {
-            console.log('processExcelServiceResult', data.action);
-            var executor = RpcDispatcher_1.RpcDispatcher.callbacksP[data.messageId];
-            delete RpcDispatcher_1.RpcDispatcher.callbacksP[data.messageId];
+            var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[data.messageId];
+            delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[data.messageId];
             if (data.error) {
                 executor.reject(data.error);
                 return;
@@ -55,7 +54,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             executor.resolve(data.result);
         });
         this.registerAppInstance = (callback) => {
-            this.invokeServiceCall("registerAppInstance", { domain: document.domain }, callback);
+            return this.invokeServiceCall("registerAppInstance", { domain: document.domain }, callback);
         };
         this.connectionUuid = excelServiceUuid;
     }
@@ -65,9 +64,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                 yield this.subscribeToServiceMessages();
                 yield this.monitorDisconnect();
                 yield fin.desktop.Service.connect({ uuid: excelServiceUuid });
-                //TODO: Change these once API Calls return promises
-                yield new Promise(resolve => this.registerAppInstance(resolve));
-                yield new Promise(resolve => this.getExcelInstances(resolve));
+                yield this.registerAppInstance();
+                yield this.getExcelInstances();
                 this.initialized = true;
             }
             return;
@@ -89,6 +87,29 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             }, resolve, reject);
         });
     }
+    configureDefaultApplication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var defaultAppObjUuid = this.defaultApplicationObj && this.defaultApplicationObj.connectionUuid;
+            var defaultAppEntry = this.applications[defaultAppObjUuid];
+            var defaultAppObjConnected = defaultAppEntry ? defaultAppEntry.connected : false;
+            if (defaultAppObjConnected) {
+                return;
+            }
+            var connectedAppUuid = Object.keys(this.applications).find(appUuid => this.applications[appUuid].connected);
+            if (connectedAppUuid) {
+                delete this.applications[defaultAppObjUuid];
+                this.defaultApplicationObj = this.applications[connectedAppUuid].toObject();
+                return;
+            }
+            if (defaultAppEntry === undefined) {
+                var disconnectedAppUuid = fin.desktop.getUuid();
+                var disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
+                yield disconnectedApp.init();
+                this.applications[disconnectedAppUuid] = disconnectedApp;
+                this.defaultApplicationObj = disconnectedApp.toObject();
+            }
+        });
+    }
     // Internal Event Handlers
     processExcelConnectedEvent(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -97,9 +118,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             this.applications[data.uuid] = applicationInstance;
             // Synthetically raise connected event
             applicationInstance.processExcelEvent({ event: "connected" }, data.uuid);
-            if (ExcelService.defaultApplication.connectionUuid === undefined) {
-                ExcelService.defaultApplication = applicationInstance.toObject();
-            }
+            yield this.configureDefaultApplication();
             return;
         });
     }
@@ -110,65 +129,44 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                 return;
             }
             delete this.applications[data.uuid];
-            if (applicationInstance.connectionUuid === ExcelService.defaultApplication.connectionUuid) {
-                var nextDefaultUuid = Object.keys(this.applications).find(() => true);
-                ExcelService.defaultApplication = nextDefaultUuid && this.applications[nextDefaultUuid].toObject();
-            }
-            if (ExcelService.defaultApplication === undefined) {
-                ExcelService.defaultApplication = nullApplication;
-            }
+            yield this.configureDefaultApplication();
             yield applicationInstance.release();
         });
     }
     // Internal API Handlers
     processGetExcelInstancesResult(connectionUuids) {
         return __awaiter(this, void 0, void 0, function* () {
-            var oldInstances = this.applications;
+            var existingInstances = this.applications;
             this.applications = {};
             yield Promise.all(connectionUuids.map((connectionUuid) => __awaiter(this, void 0, void 0, function* () {
-                var applicationInstance = oldInstances[connectionUuid] || new ExcelApplication_1.ExcelApplication(connectionUuid);
-                yield applicationInstance.init();
-                // Assume since the ExcelService reported the instance
-                // that it is currently subscribed and connected
-                applicationInstance.connected = true;
-                this.applications[connectionUuid] = applicationInstance;
-                if (ExcelService.defaultApplication.connectionUuid === undefined) {
-                    ExcelService.defaultApplication = applicationInstance.toObject();
+                var existingInstance = existingInstances[connectionUuid];
+                if (existingInstance === undefined) {
+                    // Assume that since the ExcelService is aware of the instance it,
+                    // is connected and to simulate the the connection event
+                    yield this.processExcelServiceEvent({ event: "excelConnected", uuid: connectionUuid });
+                }
+                else {
+                    this.applications[connectionUuid] = existingInstance;
                 }
                 return;
             })));
+            yield this.configureDefaultApplication();
         });
     }
     // API Calls
     install(callback) {
-        this.invokeServiceCall("install", null, callback);
+        return this.invokeServiceCall("install", null, callback);
     }
     getInstallationStatus(callback) {
-        this.invokeServiceCall("getInstallationStatus", null, callback);
+        return this.invokeServiceCall("getInstallationStatus", null, callback);
     }
     getExcelInstances(callback) {
-        this.invokeServiceCall("getExcelInstances", null, callback);
-    }
-    run(callback) {
-        if (ExcelService.defaultApplication.connectionUuid != undefined && callback) {
-            callback();
-        }
-        else {
-            var connectedCallback = () => {
-                ExcelService.instance.removeEventListener("excelConnected", connectedCallback);
-                callback && callback();
-            };
-            ExcelService.instance.addEventListener("excelConnected", connectedCallback);
-            fin.desktop.System.launchExternalProcess({
-                target: "excel"
-            });
-        }
+        return this.invokeServiceCall("getExcelInstances", null, callback);
     }
     toObject() {
         return {};
     }
 }
 ExcelService.instance = new ExcelService();
-ExcelService.defaultApplication = nullApplication;
 exports.ExcelService = ExcelService;
 //# sourceMappingURL=ExcelApi.js.map

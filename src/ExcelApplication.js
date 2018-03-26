@@ -97,8 +97,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         };
         this.processExcelResult = (result) => {
             var callbackData = {};
-            var executor = RpcDispatcher_1.RpcDispatcher.callbacksP[result.messageId];
-            delete RpcDispatcher_1.RpcDispatcher.callbacksP[result.messageId];
+            var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
             if (result.error) {
                 executor.reject(result.error);
                 return;
@@ -190,44 +190,44 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         });
     }
     run(callback) {
-        if (this.connected) {
-            callback();
-        }
-        else {
+        var runPromise = this.connected ? Promise.resolve() : new Promise(resolve => {
             var connectedCallback = () => {
                 this.removeEventListener('connected', connectedCallback);
-                callback();
+                resolve();
             };
-            this.addEventListener('connected', connectedCallback);
+            if (this.connectionUuid !== undefined) {
+                this.addEventListener('connected', connectedCallback);
+            }
             fin.desktop.System.launchExternalProcess({
                 target: 'excel',
                 uuid: this.connectionUuid
             });
-        }
+        });
+        return this.applyCallbackToPromise(runPromise, callback);
     }
     getWorkbooks(callback) {
-        this.invokeExcelCall("getWorkbooks", null, callback);
+        return this.invokeExcelCall("getWorkbooks", null, callback);
     }
     getWorkbookByName(name) {
         return this.workbooks[name];
     }
     addWorkbook(callback) {
-        this.invokeExcelCall("addWorkbook", null, callback);
+        return this.invokeExcelCall("addWorkbook", null, callback);
     }
     openWorkbook(path, callback) {
-        this.invokeExcelCall("openWorkbook", { path: path }, callback);
+        return this.invokeExcelCall("openWorkbook", { path: path }, callback);
     }
     getConnectionStatus(callback) {
-        callback(this.connected);
+        return this.applyCallbackToPromise(Promise.resolve(this.connected), callback);
     }
     getCalculationMode(callback) {
-        this.invokeExcelCall("getCalculationMode", null, callback);
+        return this.invokeExcelCall("getCalculationMode", null, callback);
     }
     calculateAll(callback) {
-        this.invokeExcelCall("calculateFull", null, callback);
+        return this.invokeExcelCall("calculateFull", null, callback);
     }
     toObject() {
-        return {
+        return this.objectInstance || (this.objectInstance = {
             connectionUuid: this.connectionUuid,
             addEventListener: this.addEventListener.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
@@ -237,8 +237,9 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
             getConnectionStatus: this.getConnectionStatus.bind(this),
             getWorkbookByName: name => this.getWorkbookByName(name).toObject(),
             getWorkbooks: this.getWorkbooks.bind(this),
-            openWorkbook: this.openWorkbook.bind(this)
-        };
+            openWorkbook: this.openWorkbook.bind(this),
+            run: this.run.bind(this)
+        });
     }
 }
 ExcelApplication.defaultInstance = undefined;
