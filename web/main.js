@@ -390,6 +390,7 @@ fin.desktop.main(function () {
     function checkConnectionStatus() {
         fin.desktop.Excel.getConnectionStatus(connected => {
             if (connected) {
+                console.log('Already connected to Excel, synthetically raising event.')
                 onExcelConnected(fin.desktop.Excel);
             } else {
                 setStatusLabel("Excel not connected");

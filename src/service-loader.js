@@ -22,7 +22,7 @@ fin.desktop.main(() => {
     function configureLogger() {
         return new Promise(resolve => {
             fin.desktop.System.getMinLogLevel(logLevel => {
-                if (logLevel === fin.desktop.System.logLevels.VERBOSE) {
+                if (logLevel === fin.desktop.System.logLevels.INFO) {
                     consoleLog = console.log;
                     consoleError = console.error;
                 }
@@ -80,7 +80,7 @@ fin.desktop.main(() => {
                     listener: result => {
                         if (result.exitCode === 0) {
                             consoleLog('Add-In Installed');
-                            document.cookie = xllInstalledCookie;
+                            document.cookie = `${xllInstalledCookie}; expires=Fri, 31 Dec 9999 23:59:59 GMT`;
                             resolve();
                         }
                         else {

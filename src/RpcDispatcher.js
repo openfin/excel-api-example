@@ -83,8 +83,7 @@ class RpcDispatcher {
             fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message, ack => {
                 RpcDispatcher.promiseExecutors[currentMessageId] = executor;
             }, nak => {
-                console.error('You need to fix this!', this.connectionUuid, topic, message);
-                // executor.reject(new Error(nak));
+                executor.reject(new Error(nak));
             });
         }
         else {

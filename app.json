@@ -21,7 +21,7 @@
   },
   "runtime": {
     "arguments": "",
-    "version": "8.*"
+    "version": "8.56.27.75"
   },
   "splashScreenImage": "http://openfin.github.io/excel-api-example/web/splash_excel.png",
   "shortcut": {

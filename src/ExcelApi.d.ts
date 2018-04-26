@@ -11,10 +11,10 @@ export declare class ExcelService extends RpcDispatcher {
     constructor();
     init(): Promise<void>;
     processExcelServiceEvent: (data: any) => Promise<void>;
-    processExcelServiceResult: (data: any) => Promise<void>;
+    processExcelServiceResult: (result: any) => Promise<void>;
     subscribeToServiceMessages(): Promise<[void, void]>;
     monitorDisconnect(): Promise<{}>;
-    registerAppInstance: (callback?: Function) => Promise<any>;
+    registerWindowInstance: (callback?: Function) => Promise<any>;
     configureDefaultApplication(): Promise<void>;
     processExcelConnectedEvent(data: any): Promise<void>;
     processExcelDisconnectedEvent(data: any): Promise<void>;

@@ -24,7 +24,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                     break;
                 case "registrationRollCall":
                     if (this.initialized) {
-                        this.registerAppInstance();
+                        this.registerWindowInstance();
                     }
                     break;
                 case "excelConnected":
@@ -38,23 +38,23 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             }
             this.dispatchEvent(eventType, eventData);
         });
-        this.processExcelServiceResult = (data) => __awaiter(this, void 0, void 0, function* () {
-            var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[data.messageId];
-            delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[data.messageId];
-            if (data.error) {
-                executor.reject(data.error);
+        this.processExcelServiceResult = (result) => __awaiter(this, void 0, void 0, function* () {
+            var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            if (result.error) {
+                executor.reject(result.error);
                 return;
             }
             // Internal processing
-            switch (data.action) {
+            switch (result.action) {
                 case "getExcelInstances":
-                    yield this.processGetExcelInstancesResult(data.result);
+                    yield this.processGetExcelInstancesResult(result.data);
                     break;
             }
-            executor.resolve(data.result);
+            executor.resolve(result.data);
         });
-        this.registerAppInstance = (callback) => {
-            return this.invokeServiceCall("registerAppInstance", { domain: document.domain }, callback);
+        this.registerWindowInstance = (callback) => {
+            return this.invokeServiceCall("registerOpenfinWindow", { domain: document.domain }, callback);
         };
         this.connectionUuid = excelServiceUuid;
     }
@@ -64,7 +64,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                 yield this.subscribeToServiceMessages();
                 yield this.monitorDisconnect();
                 yield fin.desktop.Service.connect({ uuid: excelServiceUuid });
-                yield this.registerAppInstance();
+                yield this.registerWindowInstance();
                 yield this.getExcelInstances();
                 this.initialized = true;
             }
