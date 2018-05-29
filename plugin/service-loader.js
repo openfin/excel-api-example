@@ -175,7 +175,7 @@ fin.desktop.main(() => {
                 fin.desktop.System.launchExternalProcess({
                     target: `${installFolder}\\${servicePath}`,
                     arguments: '-p ' + details.port,
-                    uuid: excelServiceUuid,
+                    uuid: excelServiceUuid
                 }, process => {
                     consoleLog('Service Launched: ' + process.uuid);
                 }, error => {

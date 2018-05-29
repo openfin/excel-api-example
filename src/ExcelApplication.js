@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = require("./RpcDispatcher");
 const ExcelWorkbook_1 = require("./ExcelWorkbook");
 const ExcelWorksheet_1 = require("./ExcelWorksheet");
@@ -162,6 +163,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.initialized) {
                 yield this.unsubscribeToExcelMessages();
+                //TODO: Provide external means to stop monitoring disconnect
             }
             return;
         });
