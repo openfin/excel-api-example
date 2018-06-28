@@ -48,10 +48,10 @@ class RpcDispatcher {
         return {};
     }
     invokeExcelCall(functionName, data, callback) {
-        this.invokeRemoteCall('excelCall', functionName, data, callback);
+        return this.invokeRemoteCall('excelCall', functionName, data, callback);
     }
     invokeServiceCall(functionName, data, callback) {
-        this.invokeRemoteCall('excelServiceCall', functionName, data, callback);
+        return this.invokeRemoteCall('excelServiceCall', functionName, data, callback);
     }
     invokeRemoteCall(topic, functionName, data, callback) {
         var message = this.getDefaultMessage();
@@ -68,14 +68,44 @@ class RpcDispatcher {
             action: functionName,
             data: data
         });
-        if (callback) {
-            RpcDispatcher.callbacks[RpcDispatcher.messageId] = callback;
-        }
-        fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message);
+        var executor;
+        var promise = new Promise((resolve, reject) => {
+            executor = {
+                resolve,
+                reject
+            };
+        });
+        // Legacy Callback-style API
+        promise = this.applyCallbackToPromise(promise, callback);
+        var currentMessageId = RpcDispatcher.messageId;
         RpcDispatcher.messageId++;
+        if (this.connectionUuid !== undefined) {
+            fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message, ack => {
+                RpcDispatcher.promiseExecutors[currentMessageId] = executor;
+            }, nak => {
+                executor.reject(new Error(nak));
+            });
+        }
+        else {
+            executor.reject(new Error('The target UUID of the remote call is undefined.'));
+        }
+        return promise;
+    }
+    applyCallbackToPromise(promise, callback) {
+        if (callback) {
+            promise
+                .then(result => {
+                callback(result);
+                return result;
+            }).catch(err => {
+                console.error(err);
+            });
+            promise = undefined;
+        }
+        return promise;
     }
 }
 RpcDispatcher.messageId = 1;
-RpcDispatcher.callbacks = {};
+RpcDispatcher.promiseExecutors = {};
 exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map
