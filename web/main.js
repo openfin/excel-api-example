@@ -29,54 +29,57 @@ fin.desktop.main(function () {
     function initializeTable() {
 
         for (var i = 0; i <= rowLength; i++) {
-            var isHeaderRow = (i === 0);
+            var isHeaderRow = i === 0;
             var rowClass = isHeaderRow ? "cellHeader" : "cell";
 
             var row = createRow(i, columnLength, rowClass, isHeaderRow);
             var rowTarget = isHeaderRow ? view.worksheetHeader : view.worksheetBody;
             rowTarget.appendChild(row);
         }
+    }
 
-        function createRow(rowNumber, columnCount, rowClassName, isHeaderRow) {
-            var row = document.createElement("tr");
+    function createRow(rowNumber, columnCount, rowClassName, isHeaderRow) {
+        var row = document.createElement("tr");
 
-            for (var i = 0; i <= columnCount; i++) {
-                var isHeaderCell = (i === 0);
-                var cellClass = isHeaderCell ? "rowNumber" : rowClassName;
-                var editable = !(isHeaderRow || isHeaderCell);
+        for (var i = 0; i <= columnCount; i++) {
+            var isHeaderCell = i === 0;
+            var cellClass = isHeaderCell ? "rowNumber" : rowClassName;
+            var editable = !(isHeaderRow || isHeaderCell);
 
-                var cellContent = 
-                    (isHeaderCell && !isHeaderRow) ? rowNumber.toString() :
-                    (!isHeaderCell && isHeaderRow) ? String.fromCharCode(64 + i) : // Only support one letter-columns for now
-                    undefined;
+            var cellContent =
+                isHeaderCell && !isHeaderRow ? rowNumber.toString() :
+                    !isHeaderCell && isHeaderRow ? String.fromCharCode(64 + i) : // Only support one letter-columns for now
+                        undefined;
 
-                var cell = createCell(cellClass, cellContent, editable);
-                row.appendChild(cell);
-            }
-
-            return row;
+            var cell = createCell(cellClass, cellContent, editable);
+            row.appendChild(cell);
         }
 
-        function createCell(cellClassName, cellContent, editable) {
+        return row;
+    }
 
-            var cell = document.createElement("td");
-            cell.className = cellClassName;
+    function createCell(cellClassName, cellContent, editable) {
 
-            if (cellContent !== undefined) {
-                cell.innerText = cellContent;
-            }
+        var cell = document.createElement("td");
+        cell.className = cellClassName;
 
-            if (editable) {
-
-                cell.contentEditable = true;
-
-                cell.addEventListener("keydown", onDataChange);
-                cell.addEventListener("blur", onDataChange);
-                cell.addEventListener("mousedown", onCellClicked);
-            }
-
-            return cell;
+        if (cellContent !== undefined) {
+            cell.innerText = cellContent;
         }
+
+        if (editable) {
+
+            cell.contentEditable = true;
+
+            cell.addEventListener("keydown", onDataChange);
+            cell.addEventListener("blur", onDataChange);
+            cell.addEventListener("mousedown", onCellClicked);
+        } else {
+            cell.onmousedown = contextMenu;
+            cell.addEventListener("mousedown", onRowSelected);
+        }
+
+        return cell;
     }
 
     function initializeUIEvents() {
@@ -213,6 +216,8 @@ fin.desktop.main(function () {
         worksheet.addEventListener("sheetChanged", onSheetChanged);
         worksheet.addEventListener("selectionChanged", onSelectionChanged);
         worksheet.addEventListener("sheetActivated", onSheetActivated);
+        worksheet.addEventListener("rangeDeleted", onRowDeleted);
+        worksheet.addEventListener("rangeInserted", onRowInserted);
     }
 
     function getWorksheetTab(name) {
@@ -268,7 +273,9 @@ fin.desktop.main(function () {
 
     function selectCell(cell, preventDefault) {
 
-        if (currentCell) {
+        clearAllSelectedCells();
+
+        if (currentCell && currentCell.parentNode.parentNode) {
 
             currentCell.className = "cell";
             updateCellNumberClass(currentCell, "rowNumber", "cellHeader");
@@ -347,15 +354,54 @@ fin.desktop.main(function () {
     function updateCellNumberClass(cell, className, headerClassName) {
         var row = cell.parentNode;
         var columnIndex = Array.prototype.indexOf.call(row.childNodes, cell);
-        var rowIndex = Array.prototype.indexOf.call(row.parentNode.childNodes, cell.parentNode);
+        //let rows = document.getElementById('worksheetBody');
+        var rowIndex = Array.prototype.indexOf.call(row.parentNode.childNodes, row);
         view.worksheetBody.childNodes[rowIndex].childNodes[0].className = className;
         view.worksheetHeader.children[0].children[columnIndex].className = headerClassName;
     }
 
     // UI Event Handlers
+    function clearAllSelectedCells() {
+        let rowNumberSelected = document.querySelectorAll('.rowNumberSelected');
+        rowNumberSelected.forEach((rowNumber) => {
+            rowNumber.className = 'rowNumber';
+        });
+
+        let cellHeaderSelected = document.querySelectorAll('.cellHeaderSelected');
+        cellHeaderSelected.forEach((header) => {
+            header.className = 'cellHeader';
+        });
+
+        let selectedCells = document.querySelectorAll('.cellSelected');
+        selectedCells.forEach((cell) => {
+            cell.className = 'cell';
+        });
+    }
 
     function onCellClicked(event) {
-        selectCell(event.target);
+        if (event.target.class !== 'rowNumber') {
+            selectCell(event.target);
+        }
+    }
+
+    function selectRow(rowHeader) {
+        clearAllSelectedCells();
+        let cells = rowHeader.parentElement.children;
+
+        if (cells[0].innerHTML) {
+            cells[0].className = 'rowNumberSelected';
+            for (let i = 1; i < cells.length; i++) {
+                cells[i].className = 'cellSelected';
+            }
+        }
+        let currentCellAddress = `A${cells[0].innerHTML}`;
+        currentWorksheet.activateRow(currentCellAddress);
+    }
+
+    function onRowSelected(event) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        selectRow(event.target);
     }
 
     function onSheetButtonClicked(event) {
@@ -390,7 +436,7 @@ fin.desktop.main(function () {
     function checkConnectionStatus() {
         fin.desktop.Excel.getConnectionStatus(connected => {
             if (connected) {
-                console.log('Already connected to Excel, synthetically raising event.')
+                console.log('Already connected to Excel, synthetically raising event.');
                 onExcelConnected(fin.desktop.Excel);
             } else {
                 setStatusLabel("Excel not connected");
@@ -470,6 +516,13 @@ fin.desktop.main(function () {
 
         addWorkbookTab(workbook.name);
 
+        workbook.getWorksheets((sheets) => {
+            sheets.forEach((sheet) => {
+                sheet.addEventListener("rangeDeleted", onRowDeleted);
+                sheet.addEventListener("rangeInserted", onRowInserted);
+            });
+        });
+
         setDisplayContainer(view.workbooksContainer);
     }
 
@@ -503,6 +556,7 @@ fin.desktop.main(function () {
     }
 
     function onWorksheetAdded(event) {
+        console.log('worksheetadded');
         addWorksheetTab(event.worksheet);
     }
 
@@ -513,6 +567,8 @@ fin.desktop.main(function () {
             worksheet.removeEventListener("sheetChanged", onSheetChanged);
             worksheet.removeEventListener("selectionChanged", onSelectionChanged);
             worksheet.removeEventListener("sheetActivated", onSheetActivated);
+            worksheet.removeEventListener("rangeDeleted", onRowDeleted);
+            worksheet.removeEventListener("rangeInserted", onRowInserted);
             view.worksheetTabs.removeChild(getWorksheetTab(worksheet.name));
             currentWorksheet = null;
         }
@@ -520,6 +576,14 @@ fin.desktop.main(function () {
 
     function onSheetActivated(event) {
         selectWorksheet(event.target);
+    }
+
+    function onRowDeleted(event) {
+        deleteRow(event.data.range);
+    }
+
+    function onRowInserted(event) {
+        insertRow(event.data.range);
     }
 
     function onWorksheetRenamed(event) {
@@ -532,8 +596,14 @@ fin.desktop.main(function () {
     }
 
     function onSelectionChanged(event) {
-        var cell = view.worksheetBody.children[event.data.row - 1].children[event.data.column];
-        selectCell(cell, true);
+        let target;
+        if (event.data.width === 1) {
+            target = view.worksheetBody.children[event.data.row - 1].children[event.data.column];
+            selectCell(target, true);
+        } else {
+            target = view.worksheetBody.children[event.data.row - 1].children[event.data.column - 1];
+            selectRow(target);
+        }
     }
 
     function onSheetChanged(event) {
@@ -541,8 +611,93 @@ fin.desktop.main(function () {
         updateCell(cell, event.data.value, event.data.formula);
     }
 
-    // Main App Start
+    // Right click context menu
+    function contextMenu(event) {
+        event.preventDefault();
+        if (event.which == 3) {
+            let menu = document.getElementById('menu');
+            menu.style.visibility = 'visible';
 
+            menu.style.left = event.x + 'px';
+            menu.style.top = event.y + 'px';
+        }
+    }
+
+    /**
+     * @function insertRowDelegate This function will be attached on click of the delete button and will insert a row above
+     * @param {any} event Click event
+     */
+    function insertRowDelegate(event) {
+        let rowNumber = document.getElementsByClassName('rowNumberSelected')[0].innerText;
+        insertRow(rowNumber);
+        currentWorksheet.insertRow(rowNumber);
+        let menu = document.getElementById('menu');
+        menu.style.visibility = 'hidden';
+    }
+
+    /**
+     * @function deleteRowDelegate This function will be attached on click of the delete button and will insert a row above
+     * @param {any} event Click event
+     */
+    function deleteRowDelegate(event) {
+        let rowNumber = document.getElementsByClassName('rowNumberSelected')[0].innerText;
+        deleteRow(rowNumber);
+        currentWorksheet.deleteRow(rowNumber);
+        let menu = document.getElementById('menu');
+        menu.style.visibility = 'hidden';
+    }
+
+    /**
+     * Inserts a row above the currently selected row
+     * @param {any} range The row number
+     */
+    function insertRow(range) {
+        if (isNaN(range)) {
+            console.error('Either no range has been passed or the range is not a number');
+            return;
+        }
+
+        let rowNumber = parseInt(range);
+        let rowToInsertAbove = document.getElementById('worksheetBody').children[rowNumber - 1];
+
+        var row = createRow(rowToInsertAbove.children[0].innerText, columnLength, 'cellSelected', false);
+        clearAllSelectedCells();
+        rowToInsertAbove.parentNode.insertBefore(row, rowToInsertAbove);
+        let rows = document.querySelectorAll('tr');
+
+        for (let i = rowNumber; i < rows.length; i++) {
+            let rowNumberElement = rows[i].children[0];
+            rowNumberElement.innerHTML = rowNumber;
+            rowNumber++;
+        }
+    }
+
+    /**
+     * @function deleteRow Deletes the selected row
+     * @param {any} range The selected row
+     */
+    function deleteRow(range) {
+        if (isNaN(range)) {
+            console.error('Either no range has been passed or the range is not a number');
+            return;
+        }
+
+        let rowNumber = parseInt(range);
+
+        let rowToDelete = document.getElementById('worksheetBody').deleteRow(rowNumber - 1);
+
+        let rows = document.querySelectorAll('tr');
+
+        for (let i = rowNumber; i < rows.length; i++) {
+            let rowNumberElement = rows[i].children[0];
+            rowNumberElement.innerHTML = rowNumber;
+            rowNumber++;
+        } 
+    }
+
+    // Main App Start
+    document.getElementById('insert').onclick = insertRowDelegate;
+    document.getElementById('delete').onclick = deleteRowDelegate;
     initializeTable();
     initializeUIEvents();
     initializeExcelEvents();

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = require("./RpcDispatcher");
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {

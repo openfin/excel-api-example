@@ -460,6 +460,21 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                         this.dispatchEvent(eventType, { workbook: workbook.toObject(), oldWorkbookName: oldWorkbookName });
                     }
                     break;
+                case "rangeDeleted":
+                    console.log(data);
+                    if (!worksheet) {
+                        console.error('No worksheet could be found');
+                        return;
+                    }
+                    worksheet.dispatchEvent(eventType, { data: data });
+                    break;
+                case "rangeInserted":
+                    console.log(data);
+                    if (!worksheet) {
+                        console.error('No worksheet could be found');
+                        return;
+                    }
+                    worksheet.dispatchEvent(eventType, { data: data });
                 case "afterCalculation":
                 default:
                     this.dispatchEvent(eventType);
@@ -706,8 +721,31 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     getRow(start, width, callback) {
         return this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
     }
+    /**
+     * @function activateRow This mirrors the row selected in the openfin application to Excel
+     * @param {string} cellAddress THe address of the first cell of the row
+     */
+    activateRow(cellAddress) {
+        return this.invokeExcelCall("activateRow", { address: cellAddress });
+    }
     getColumn(start, offsetHeight, callback) {
         return this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
+    }
+    /**
+     * @function insertRow This inserts a row just before the selected row
+     * @param {number} rowNumber The address of the first cell in the row
+     * @returns {Promise<void>} A promise
+     */
+    insertRow(rowNumber) {
+        return this.invokeExcelCall("insertRow", { rowNumber: rowNumber });
+    }
+    /**
+     * @function deleteRow This deletes the selected row
+     * @param {number} rowNumber The address of the first cell in the row
+     * @returns {Promise<any>} A promise
+     */
+    deleteRow(rowNumber) {
+        return this.invokeExcelCall("deleteRow", { rowNumber: rowNumber });
     }
     activate() {
         return this.invokeExcelCall("activateSheet");
@@ -770,6 +808,7 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             name: this.worksheetName,
             activate: this.activate.bind(this),
             activateCell: this.activateCell.bind(this),
+            activateRow: this.activateRow.bind(this),
             addButton: this.addButton.bind(this),
             calculate: this.calculate.bind(this),
             clearAllCellContents: this.clearAllCellContents.bind(this),
@@ -786,7 +825,9 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             protect: this.protect.bind(this),
             setCellName: this.setCellName.bind(this),
             setCells: this.setCells.bind(this),
-            setFilter: this.setFilter.bind(this)
+            setFilter: this.setFilter.bind(this),
+            insertRow: this.insertRow.bind(this),
+            deleteRow: this.deleteRow.bind(this)
         });
     }
 }

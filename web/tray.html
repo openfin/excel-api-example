@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>System Tray</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">    
+    <style>
+        /* The container <div> - needed to position the dropdown content */
+        body {
+            position: relative;
+            display: block;
+            margin: 0px;
+            overflow: hidden;
+            font-family: "Segoe UI"
+        }
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+            display: block;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        /* Links inside the dropdown */
+        .dropdown-content li {
+            position: relative;
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+            font-size: 9pt;
+            padding: 0.7em 1.5em;
+            padding-left: 40px;
+        }
+        li.checked:before {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            left: 12px;
+            content:'\2713';
+            display:inline-block;
+            padding:0 6px 0 0;
+        }
+        li#available-pods {
+            user-select: none;
+        }
+        .dropdown-content li {
+            transition: 0.3s;
+        }
+        /* Change color of dropdown links on hover */
+        .dropdown-content > li:hover {
+            background-color: #ebebeb
+        }
+        li.pod-list {
+            /* display: none; */
+        }
+        li.hide {
+            display: none;
+        }
+        li.show {
+            display: block;
+        }
+        li > li {
+            padding: 0.7em 1.5em;
+        }
+        .sublist > li {
+            padding-left: 0.2em;
+        }
+        .sublist  {
+            padding-left: 0;
+        }
+        #add-pod-text {
+            display: block;
+        }
+        #new-pod-url {
+            display: none;
+            font-size: 0.9em;
+        }
+        .close {
+            float: right;
+        }
+        li.additional-pod {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            background-color: #ebebeb; 
+        }
+        li.additional-pod > span.pod-text {
+            display: inline-block;
+            width: 90%;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden
+        }
+        #primary-pod {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <ul id="myDropdown" class="dropdown-content">
+            <li onclick="exit()">Delete row</li>
+        </ul>
+    </div>
+</body>
+<script type="text/javascript">
+
+    const exit = () => {
+        fin.desktop.System.getAllApplications(function (applicationInfoList) {
+            applicationInfoList.forEach(function (applicationInfo) {
+                if (applicationInfo.uuid !== 'Launcher_Main') {
+                    var thisApp = fin.desktop.Application.wrap(applicationInfo.uuid);
+                    thisApp.terminate();
+                }
+            });
+
+            fin.desktop.Application.getCurrent().terminate();
+        });
+    };
+
+    fin.desktop.Window.getCurrent().addEventListener('blurred', () => {
+        fin.desktop.Window.getCurrent().hide();
+    });
+</script>
+</html>

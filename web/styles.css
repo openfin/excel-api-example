@@ -248,3 +248,29 @@ body {
     width: 600px;
     margin: 40px;
 }
+
+.displayOff {
+    display: none;
+}
+
+#menu {
+    visibility: hidden;
+    background-color: whitesmoke;
+    position: absolute;
+}
+
+.menu-option {
+    list-style-type: none;
+}
+
+.menu-options {
+    display: inline-block;
+    color: #808080;
+    padding-bottom: 3px;
+    padding-right: 50%;
+    cursor: pointer;
+}
+
+.menu-option:hover {
+    background-color: lightgrey;
+}

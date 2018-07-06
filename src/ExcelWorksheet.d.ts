@@ -9,7 +9,24 @@ export declare class ExcelWorksheet extends RpcDispatcher {
     setCells(values: any[][], offset: string): Promise<any>;
     getCells(start: string, offsetWidth: number, offsetHeight: number, callback: Function): Promise<any>;
     getRow(start: string, width: number, callback: Function): Promise<any>;
+    /**
+     * @function activateRow This mirrors the row selected in the openfin application to Excel
+     * @param {string} cellAddress THe address of the first cell of the row
+     */
+    activateRow(cellAddress: string): Promise<void>;
     getColumn(start: string, offsetHeight: number, callback: Function): Promise<any>;
+    /**
+     * @function insertRow This inserts a row just before the selected row
+     * @param {number} rowNumber The address of the first cell in the row
+     * @returns {Promise<void>} A promise
+     */
+    insertRow(rowNumber: number): Promise<void>;
+    /**
+     * @function deleteRow This deletes the selected row
+     * @param {number} rowNumber The address of the first cell in the row
+     * @returns {Promise<any>} A promise
+     */
+    deleteRow(rowNumber: string): Promise<void>;
     activate(): Promise<any>;
     activateCell(cellAddress: string): Promise<any>;
     addButton(name: string, caption: string, cellAddress: string): Promise<any>;
