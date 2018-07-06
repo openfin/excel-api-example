@@ -249,8 +249,7 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 
     function onSheetChanged(event) {
-        var cell = tBody.getElementsByTagName("tr")[event.data.row - 1].getElementsByTagName("td")[event.data.column];
-        updateCell(cell, event.data.value, event.data.formula);
+        event.target.getCells("A1", columnLength, rowLength, updateData);
     }
 
     function onSelectionChanged(event) {
