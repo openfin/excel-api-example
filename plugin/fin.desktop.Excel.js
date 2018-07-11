@@ -121,10 +121,10 @@ class RpcDispatcher {
         return {};
     }
     invokeExcelCall(functionName, data, callback) {
-        this.invokeRemoteCall('excelCall', functionName, data, callback);
+        return this.invokeRemoteCall('excelCall', functionName, data, callback);
     }
     invokeServiceCall(functionName, data, callback) {
-        this.invokeRemoteCall('excelServiceCall', functionName, data, callback);
+        return this.invokeRemoteCall('excelServiceCall', functionName, data, callback);
     }
     invokeRemoteCall(topic, functionName, data, callback) {
         var message = this.getDefaultMessage();
@@ -141,15 +141,45 @@ class RpcDispatcher {
             action: functionName,
             data: data
         });
-        if (callback) {
-            RpcDispatcher.callbacks[RpcDispatcher.messageId] = callback;
-        }
-        fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message);
+        var executor;
+        var promise = new Promise((resolve, reject) => {
+            executor = {
+                resolve,
+                reject
+            };
+        });
+        // Legacy Callback-style API
+        promise = this.applyCallbackToPromise(promise, callback);
+        var currentMessageId = RpcDispatcher.messageId;
         RpcDispatcher.messageId++;
+        if (this.connectionUuid !== undefined) {
+            fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message, ack => {
+                RpcDispatcher.promiseExecutors[currentMessageId] = executor;
+            }, nak => {
+                executor.reject(new Error(nak));
+            });
+        }
+        else {
+            executor.reject(new Error('The target UUID of the remote call is undefined.'));
+        }
+        return promise;
+    }
+    applyCallbackToPromise(promise, callback) {
+        if (callback) {
+            promise
+                .then(result => {
+                callback(result);
+                return result;
+            }).catch(err => {
+                console.error(err);
+            });
+            promise = undefined;
+        }
+        return promise;
     }
 }
 RpcDispatcher.messageId = 1;
-RpcDispatcher.callbacks = {};
+RpcDispatcher.promiseExecutors = {};
 exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map
 
@@ -159,180 +189,176 @@ exports.RpcDispatcher = RpcDispatcher;
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const RpcDispatcher_1 = __webpack_require__(0);
 const ExcelApplication_1 = __webpack_require__(2);
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
-class ExcelApi extends RpcDispatcher_1.RpcDispatcher {
+class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
         super();
+        this.defaultApplicationUuid = undefined;
+        this.defaultApplicationObj = undefined;
         this.applications = {};
-        this.processExcelServiceEvent = (data) => {
-            var preventDefault = false;
+        this.processExcelServiceEvent = (data) => __awaiter(this, void 0, void 0, function* () {
+            var eventType = data.event;
+            var eventData;
             switch (data.event) {
                 case "started":
                     break;
                 case "registrationRollCall":
-                    this.registerAppInstance();
+                    if (this.initialized) {
+                        this.registerWindowInstance();
+                    }
                     break;
                 case "excelConnected":
-                    this.processExcelConnectedEvent(data);
+                    yield this.processExcelConnectedEvent(data);
+                    eventData = { connectionUuid: data.uuid };
                     break;
                 case "excelDisconnected":
-                    this.processExcelDisconnectedEvent(data);
+                    yield this.processExcelDisconnectedEvent(data);
+                    eventData = { connectionUuid: data.uuid };
                     break;
             }
-            if (!preventDefault) {
-                this.dispatchEvent(data.event);
+            this.dispatchEvent(eventType, eventData);
+        });
+        this.processExcelServiceResult = (result) => __awaiter(this, void 0, void 0, function* () {
+            var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            if (result.error) {
+                executor.reject(result.error);
+                return;
             }
-        };
-        this.processExcelServiceResult = (data) => {
             // Internal processing
-            switch (data.action) {
+            switch (result.action) {
                 case "getExcelInstances":
-                    this.processGetExcelInstancesResult(data.result);
+                    yield this.processGetExcelInstancesResult(result.data);
                     break;
             }
-            // Dispatch result to callbacks
-            if (RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId]) {
-                RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId](data.result);
-                delete RpcDispatcher_1.RpcDispatcher.callbacks[data.messageId];
-            }
-        };
-        this.registerAppInstance = () => {
-            this.invokeServiceCall("registerAppInstance", { domain: document.domain });
+            executor.resolve(result.data);
+        });
+        this.registerWindowInstance = (callback) => {
+            return this.invokeServiceCall("registerOpenfinWindow", { domain: document.domain }, callback);
         };
         this.connectionUuid = excelServiceUuid;
     }
     init() {
-        if (!this.initialized) {
-            fin.desktop.InterApplicationBus.subscribe("*", "excelServiceEvent", this.processExcelServiceEvent);
-            fin.desktop.InterApplicationBus.subscribe("*", "excelServiceCallResult", this.processExcelServiceResult);
-            this.registerAppInstance();
-            this.getExcelInstances();
-            this.monitorDisconnect();
-            this.initialized = true;
-        }
-    }
-    monitorDisconnect() {
-        fin.desktop.ExternalApplication.wrap(excelServiceUuid).addEventListener("disconnected", () => {
-            this.dispatchEvent("stopped");
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.initialized) {
+                yield this.subscribeToServiceMessages();
+                yield this.monitorDisconnect();
+                yield fin.desktop.Service.connect({ uuid: excelServiceUuid });
+                yield this.registerWindowInstance();
+                yield this.getExcelInstances();
+                this.initialized = true;
+            }
+            return;
         });
     }
-    connectLegacyApi(connectedUuid) {
-        if (!ExcelApi.legacyApi) {
-            ExcelApi.legacyApi = ExcelApi.instance.applications[connectedUuid].toObject();
-        }
+    subscribeToServiceMessages() {
+        return Promise.all([
+            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(excelServiceUuid, "excelServiceEvent", this.processExcelServiceEvent, resolve)),
+            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(excelServiceUuid, "excelServiceCallResult", this.processExcelServiceResult, resolve))
+        ]);
     }
-    disconnectLegacyApi(disconnectedUuid) {
-        if (ExcelApi.legacyApi.connectionUuid === disconnectedUuid) {
-            ExcelApi.legacyApi = undefined;
-            for (var connectionUuid in ExcelApi.instance.applications) {
-                ExcelApi.legacyApi = ExcelApi.instance.applications[connectionUuid].toObject();
-                break;
+    monitorDisconnect() {
+        return new Promise((resolve, reject) => {
+            var excelServiceConnection = fin.desktop.ExternalApplication.wrap(excelServiceUuid);
+            var onDisconnect;
+            excelServiceConnection.addEventListener("disconnected", onDisconnect = () => {
+                excelServiceConnection.removeEventListener("disconnected", onDisconnect);
+                this.dispatchEvent("stopped");
+            }, resolve, reject);
+        });
+    }
+    configureDefaultApplication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var defaultAppObjUuid = this.defaultApplicationObj && this.defaultApplicationObj.connectionUuid;
+            var defaultAppEntry = this.applications[defaultAppObjUuid];
+            var defaultAppObjConnected = defaultAppEntry ? defaultAppEntry.connected : false;
+            if (defaultAppObjConnected) {
+                return;
             }
-        }
+            var connectedAppUuid = Object.keys(this.applications).find(appUuid => this.applications[appUuid].connected);
+            if (connectedAppUuid) {
+                delete this.applications[defaultAppObjUuid];
+                this.defaultApplicationObj = this.applications[connectedAppUuid].toObject();
+                return;
+            }
+            if (defaultAppEntry === undefined) {
+                var disconnectedAppUuid = fin.desktop.getUuid();
+                var disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
+                yield disconnectedApp.init();
+                this.applications[disconnectedAppUuid] = disconnectedApp;
+                this.defaultApplicationObj = disconnectedApp.toObject();
+            }
+        });
     }
     // Internal Event Handlers
     processExcelConnectedEvent(data) {
-        var applicationInstance = this.applications[data.uuid] || new ExcelApplication_1.ExcelApplication(data.uuid);
-        this.applications[data.uuid] = applicationInstance;
-        applicationInstance.init();
-        // Synthetically raise connected event
-        applicationInstance.processExcelEvent({ event: "connected" }, data.uuid);
-        this.connectLegacyApi(data.uuid);
+        return __awaiter(this, void 0, void 0, function* () {
+            var applicationInstance = this.applications[data.uuid] || new ExcelApplication_1.ExcelApplication(data.uuid);
+            yield applicationInstance.init();
+            this.applications[data.uuid] = applicationInstance;
+            // Synthetically raise connected event
+            applicationInstance.processExcelEvent({ event: "connected" }, data.uuid);
+            yield this.configureDefaultApplication();
+            return;
+        });
     }
     processExcelDisconnectedEvent(data) {
-        delete this.applications[data.uuid];
-        this.disconnectLegacyApi(data.uuid);
+        return __awaiter(this, void 0, void 0, function* () {
+            var applicationInstance = this.applications[data.uuid];
+            if (applicationInstance === undefined) {
+                return;
+            }
+            delete this.applications[data.uuid];
+            yield this.configureDefaultApplication();
+            yield applicationInstance.release();
+        });
     }
     // Internal API Handlers
     processGetExcelInstancesResult(connectionUuids) {
-        var oldInstances = this.applications;
-        this.applications = {};
-        connectionUuids.forEach(connectionUuid => {
-            var applicationInstance = oldInstances[connectionUuid] || new ExcelApplication_1.ExcelApplication(connectionUuid);
-            this.applications[connectionUuid] = applicationInstance;
-            applicationInstance.init();
-            this.connectLegacyApi(connectionUuid);
+        return __awaiter(this, void 0, void 0, function* () {
+            var existingInstances = this.applications;
+            this.applications = {};
+            yield Promise.all(connectionUuids.map((connectionUuid) => __awaiter(this, void 0, void 0, function* () {
+                var existingInstance = existingInstances[connectionUuid];
+                if (existingInstance === undefined) {
+                    // Assume that since the ExcelService is aware of the instance it,
+                    // is connected and to simulate the the connection event
+                    yield this.processExcelServiceEvent({ event: "excelConnected", uuid: connectionUuid });
+                }
+                else {
+                    this.applications[connectionUuid] = existingInstance;
+                }
+                return;
+            })));
+            yield this.configureDefaultApplication();
         });
     }
     // API Calls
     install(callback) {
-        this.invokeServiceCall("install", null, callback);
+        return this.invokeServiceCall("install", null, callback);
     }
     getInstallationStatus(callback) {
-        this.invokeServiceCall("getInstallationStatus", null, callback);
+        return this.invokeServiceCall("getInstallationStatus", null, callback);
     }
     getExcelInstances(callback) {
-        this.invokeServiceCall("getExcelInstances", null, callback);
+        return this.invokeServiceCall("getExcelInstances", null, callback);
     }
     toObject() {
         return {};
     }
-    // Legacy API / Single-Application Functions
-    static init() {
-        ExcelApi.instance.init();
-    }
-    static addEventListener(type, listener) {
-        ExcelApi.legacyApi.addEventListener(type, listener);
-    }
-    static removeEventListener(type, listener) {
-        ExcelApi.legacyApi.removeEventListener(type, listener);
-    }
-    static run(callback) {
-        if (ExcelApi.legacyApi && callback) {
-            callback();
-        }
-        else {
-            var connectedCallback = () => {
-                ExcelApi.instance.removeEventListener("excelConnected", connectedCallback);
-                callback && callback();
-            };
-            ExcelApi.instance.addEventListener("excelConnected", connectedCallback);
-            fin.desktop.System.launchExternalProcess({
-                target: "excel"
-            });
-        }
-    }
-    static install(callback) {
-        ExcelApi.instance.install(callback);
-    }
-    static getInstallationStatus(callback) {
-        ExcelApi.instance.getInstallationStatus(callback);
-    }
-    static getWorkbooks(callback) {
-        ExcelApi.legacyApi.getWorkbooks(callback);
-    }
-    static getWorkbookByName(name) {
-        return ExcelApi.legacyApi.getWorkbookByName(name);
-    }
-    static addWorkbook(callback) {
-        ExcelApi.legacyApi.addWorkbook(callback);
-    }
-    static openWorkbook(path, callback) {
-        ExcelApi.legacyApi.openWorkbook(path, callback);
-    }
-    static getConnectionStatus(callback) {
-        if (ExcelApi.legacyApi) {
-            ExcelApi.legacyApi.getConnectionStatus(callback);
-        }
-        else {
-            callback(false);
-        }
-    }
-    static getCalculationMode(callback) {
-        ExcelApi.legacyApi.getCalculationMode(callback);
-    }
-    static calculateAll(callback) {
-        ExcelApi.legacyApi.calculateAll(callback);
-    }
 }
-ExcelApi.instance = new ExcelApi();
-ExcelApi.legacyApi = undefined;
-exports.ExcelApi = ExcelApi;
-exports.LegacyApi = ExcelApi;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = ExcelApi.instance;
+ExcelService.instance = new ExcelService();
+exports.ExcelService = ExcelService;
 //# sourceMappingURL=ExcelApi.js.map
 
 /***/ }),
@@ -341,6 +367,14 @@ exports.default = ExcelApi.instance;
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const RpcDispatcher_1 = __webpack_require__(0);
 const ExcelWorkbook_1 = __webpack_require__(3);
 const ExcelWorksheet_1 = __webpack_require__(4);
@@ -431,6 +465,12 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         };
         this.processExcelResult = (result) => {
             var callbackData = {};
+            var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            if (result.error) {
+                executor.reject(result.error);
+                return;
+            }
             var workbook = this.workbooks[result.target.workbookName];
             var worksheets = workbook && workbook.worksheets;
             var worksheet = worksheets && worksheets[result.target.sheetName];
@@ -471,69 +511,93 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                     callbackData = resultData;
                     break;
             }
-            if (RpcDispatcher_1.RpcDispatcher.callbacks[result.messageId]) {
-                RpcDispatcher_1.RpcDispatcher.callbacks[result.messageId](callbackData);
-                delete RpcDispatcher_1.RpcDispatcher.callbacks[result.messageId];
-            }
+            executor.resolve(callbackData);
         };
         this.connectionUuid = connectionUuid;
+        this.connected = false;
     }
     init() {
-        if (!this.initialized) {
-            fin.desktop.InterApplicationBus.subscribe("*", "excelEvent", this.processExcelEvent);
-            fin.desktop.InterApplicationBus.subscribe("*", "excelResult", this.processExcelResult);
-            this.monitorDisconnect();
-            this.initialized = true;
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.initialized) {
+                yield this.subscribeToExcelMessages();
+                yield this.monitorDisconnect();
+                this.initialized = true;
+            }
+            return;
+        });
+    }
+    release() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.initialized) {
+                yield this.unsubscribeToExcelMessages();
+            }
+            return;
+        });
+    }
+    subscribeToExcelMessages() {
+        return Promise.all([
+            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(this.connectionUuid, "excelEvent", this.processExcelEvent, resolve)),
+            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(this.connectionUuid, "excelResult", this.processExcelResult, resolve))
+        ]);
+    }
+    unsubscribeToExcelMessages() {
+        return Promise.all([
+            new Promise(resolve => fin.desktop.InterApplicationBus.unsubscribe(this.connectionUuid, "excelEvent", this.processExcelEvent, resolve)),
+            new Promise(resolve => fin.desktop.InterApplicationBus.unsubscribe(this.connectionUuid, "excelResult", this.processExcelResult, resolve))
+        ]);
     }
     monitorDisconnect() {
-        fin.desktop.ExternalApplication.wrap(this.connectionUuid).addEventListener('disconnected', () => {
-            this.connected = false;
-            this.dispatchEvent('disconnected');
+        return new Promise((resolve, reject) => {
+            var excelApplicationConnection = fin.desktop.ExternalApplication.wrap(this.connectionUuid);
+            var onDisconnect;
+            excelApplicationConnection.addEventListener('disconnected', onDisconnect = () => {
+                excelApplicationConnection.removeEventListener('disconnected', onDisconnect);
+                this.connected = false;
+                this.dispatchEvent('disconnected');
+            }, resolve, reject);
         });
     }
     run(callback) {
-        if (this.connected) {
-            callback();
-        }
-        else {
+        var runPromise = this.connected ? Promise.resolve() : new Promise(resolve => {
             var connectedCallback = () => {
                 this.removeEventListener('connected', connectedCallback);
-                callback();
+                resolve();
             };
-            this.addEventListener('connected', connectedCallback);
+            if (this.connectionUuid !== undefined) {
+                this.addEventListener('connected', connectedCallback);
+            }
             fin.desktop.System.launchExternalProcess({
                 target: 'excel',
                 uuid: this.connectionUuid
             });
-        }
+        });
+        return this.applyCallbackToPromise(runPromise, callback);
     }
     getWorkbooks(callback) {
-        this.invokeExcelCall("getWorkbooks", null, callback);
+        return this.invokeExcelCall("getWorkbooks", null, callback);
     }
     getWorkbookByName(name) {
         return this.workbooks[name];
     }
     addWorkbook(callback) {
-        this.invokeExcelCall("addWorkbook", null, callback);
+        return this.invokeExcelCall("addWorkbook", null, callback);
     }
     openWorkbook(path, callback) {
-        this.invokeExcelCall("openWorkbook", { path: path }, callback);
+        return this.invokeExcelCall("openWorkbook", { path: path }, callback);
     }
     getConnectionStatus(callback) {
-        callback(this.connected);
+        return this.applyCallbackToPromise(Promise.resolve(this.connected), callback);
     }
     getCalculationMode(callback) {
-        this.invokeExcelCall("getCalculationMode", null, callback);
+        return this.invokeExcelCall("getCalculationMode", null, callback);
     }
     calculateAll(callback) {
-        this.invokeExcelCall("calculateFull", null, callback);
+        return this.invokeExcelCall("calculateFull", null, callback);
     }
     toObject() {
-        return {
+        return this.objectInstance || (this.objectInstance = {
             connectionUuid: this.connectionUuid,
             addEventListener: this.addEventListener.bind(this),
-            dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
             addWorkbook: this.addWorkbook.bind(this),
             calculateAll: this.calculateAll.bind(this),
@@ -541,11 +605,12 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
             getConnectionStatus: this.getConnectionStatus.bind(this),
             getWorkbookByName: name => this.getWorkbookByName(name).toObject(),
             getWorkbooks: this.getWorkbooks.bind(this),
-            init: this.init.bind(this),
-            openWorkbook: this.openWorkbook.bind(this)
-        };
+            openWorkbook: this.openWorkbook.bind(this),
+            run: this.run.bind(this)
+        });
     }
 }
+ExcelApplication.defaultInstance = undefined;
 exports.ExcelApplication = ExcelApplication;
 //# sourceMappingURL=ExcelApplication.js.map
 
@@ -570,27 +635,26 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
         };
     }
     getWorksheets(callback) {
-        this.invokeExcelCall("getWorksheets", null, callback);
+        return this.invokeExcelCall("getWorksheets", null, callback);
     }
     getWorksheetByName(name) {
         return this.worksheets[name];
     }
     addWorksheet(callback) {
-        this.invokeExcelCall("addSheet", null, callback);
+        return this.invokeExcelCall("addSheet", null, callback);
     }
     activate() {
-        this.invokeExcelCall("activateWorkbook");
+        return this.invokeExcelCall("activateWorkbook");
     }
     save() {
-        this.invokeExcelCall("saveWorkbook");
+        return this.invokeExcelCall("saveWorkbook");
     }
     close() {
-        this.invokeExcelCall("closeWorkbook");
+        return this.invokeExcelCall("closeWorkbook");
     }
     toObject() {
-        return {
+        return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
-            dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
             name: this.workbookName,
             activate: this.activate.bind(this),
@@ -599,7 +663,7 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
             getWorksheetByName: name => this.getWorksheetByName(name).toObject(),
             getWorksheets: this.getWorksheets.bind(this),
             save: this.save.bind(this)
-        };
+        });
     }
 }
 exports.ExcelWorkbook = ExcelWorkbook;
@@ -628,28 +692,28 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     setCells(values, offset) {
         if (!offset)
             offset = "A1";
-        this.invokeExcelCall("setCells", { offset: offset, values: values });
+        return this.invokeExcelCall("setCells", { offset: offset, values: values });
     }
     getCells(start, offsetWidth, offsetHeight, callback) {
-        this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
+        return this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
     }
     getRow(start, width, callback) {
-        this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
+        return this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
     }
     getColumn(start, offsetHeight, callback) {
-        this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
+        return this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
     }
     activate() {
-        this.invokeExcelCall("activateSheet");
+        return this.invokeExcelCall("activateSheet");
     }
     activateCell(cellAddress) {
-        this.invokeExcelCall("activateCell", { address: cellAddress });
+        return this.invokeExcelCall("activateCell", { address: cellAddress });
     }
     addButton(name, caption, cellAddress) {
-        this.invokeExcelCall("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
+        return this.invokeExcelCall("addButton", { address: cellAddress, buttonName: name, buttonCaption: caption });
     }
     setFilter(start, offsetWidth, offsetHeight, field, criteria1, op, criteria2, visibleDropDown) {
-        this.invokeExcelCall("setFilter", {
+        return this.invokeExcelCall("setFilter", {
             start: start,
             offsetWidth: offsetWidth,
             offsetHeight: offsetHeight,
@@ -661,42 +725,41 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
         });
     }
     formatRange(rangeCode, format, callback) {
-        this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format }, callback);
+        return this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format }, callback);
     }
     clearRange(rangeCode, callback) {
-        this.invokeExcelCall("clearRange", { rangeCode: rangeCode }, callback);
+        return this.invokeExcelCall("clearRange", { rangeCode: rangeCode }, callback);
     }
     clearRangeContents(rangeCode, callback) {
-        this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode }, callback);
+        return this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode }, callback);
     }
     clearRangeFormats(rangeCode, callback) {
-        this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode }, callback);
+        return this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode }, callback);
     }
     clearAllCells(callback) {
-        this.invokeExcelCall("clearAllCells", null, callback);
+        return this.invokeExcelCall("clearAllCells", null, callback);
     }
     clearAllCellContents(callback) {
-        this.invokeExcelCall("clearAllCellContents", null, callback);
+        return this.invokeExcelCall("clearAllCellContents", null, callback);
     }
     clearAllCellFormats(callback) {
-        this.invokeExcelCall("clearAllCellFormats", null, callback);
+        return this.invokeExcelCall("clearAllCellFormats", null, callback);
     }
     setCellName(cellAddress, cellName) {
-        this.invokeExcelCall("setCellName", { address: cellAddress, cellName: cellName });
+        return this.invokeExcelCall("setCellName", { address: cellAddress, cellName: cellName });
     }
     calculate() {
-        this.invokeExcelCall("calculateSheet");
+        return this.invokeExcelCall("calculateSheet");
     }
     getCellByName(cellName, callback) {
-        this.invokeExcelCall("getCellByName", { cellName: cellName }, callback);
+        return this.invokeExcelCall("getCellByName", { cellName: cellName }, callback);
     }
     protect(password) {
-        this.invokeExcelCall("protectSheet", { password: password ? password : null });
+        return this.invokeExcelCall("protectSheet", { password: password ? password : null });
     }
     toObject() {
-        return {
+        return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
-            dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
             name: this.worksheetName,
             activate: this.activate.bind(this),
@@ -718,7 +781,7 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             setCellName: this.setCellName.bind(this),
             setCells: this.setCells.bind(this),
             setFilter: this.setFilter.bind(this)
-        };
+        });
     }
 }
 exports.ExcelWorksheet = ExcelWorksheet;
@@ -732,7 +795,10 @@ exports.ExcelWorksheet = ExcelWorksheet;
 
 // This is the entry point of the Plugin script
 const ExcelApi_1 = __webpack_require__(1);
-window.fin.desktop.Excel = ExcelApi_1.LegacyApi;
+window.fin.desktop.ExcelService = ExcelApi_1.ExcelService.instance;
+Object.defineProperty(window.fin.desktop, 'Excel', {
+    get() { return ExcelApi_1.ExcelService.instance.defaultApplicationObj; }
+});
 //# sourceMappingURL=plugin.js.map
 
 /***/ })
