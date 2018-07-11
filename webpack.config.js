@@ -1,8 +1,4 @@
-﻿module.exports = {
-    entry: './src/main.js',
-    output: {
-        filename: './web/excel-api-example.js'
-    },
+﻿var config = {
     resolve: {
         extensions: ['.js']
     },
@@ -13,4 +9,23 @@
             }
         ]
     }
-}
+};
+
+var pluginConfig = Object.assign({}, config, {
+    entry: './src/plugin.js',
+    output: {
+        filename: './plugin/fin.desktop.Excel.js'
+    }
+});
+
+var loaderConfig = Object.assign({}, config, {
+    entry: './src/service-loader.js',
+    output: {
+        filename: './plugin/service-loader.js'
+    }
+});
+
+module.exports = [
+    pluginConfig,
+    loaderConfig
+];

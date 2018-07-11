@@ -1,5 +1,6 @@
 "use strict";
-const RpcDispatcher_1 = require('./RpcDispatcher');
+Object.defineProperty(exports, "__esModule", { value: true });
+const RpcDispatcher_1 = require("./RpcDispatcher");
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
         super();
@@ -14,27 +15,26 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
         };
     }
     getWorksheets(callback) {
-        this.invokeExcelCall("getWorksheets", null, callback);
+        return this.invokeExcelCall("getWorksheets", null, callback);
     }
     getWorksheetByName(name) {
         return this.worksheets[name];
     }
     addWorksheet(callback) {
-        this.invokeExcelCall("addSheet", null, callback);
+        return this.invokeExcelCall("addSheet", null, callback);
     }
     activate() {
-        this.invokeExcelCall("activateWorkbook");
+        return this.invokeExcelCall("activateWorkbook");
     }
     save() {
-        this.invokeExcelCall("saveWorkbook");
+        return this.invokeExcelCall("saveWorkbook");
     }
     close() {
-        this.invokeExcelCall("closeWorkbook");
+        return this.invokeExcelCall("closeWorkbook");
     }
     toObject() {
-        return {
+        return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
-            dispatchEvent: this.dispatchEvent.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
             name: this.workbookName,
             activate: this.activate.bind(this),
@@ -43,7 +43,7 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
             getWorksheetByName: name => this.getWorksheetByName(name).toObject(),
             getWorksheets: this.getWorksheets.bind(this),
             save: this.save.bind(this)
-        };
+        });
     }
 }
 exports.ExcelWorkbook = ExcelWorkbook;

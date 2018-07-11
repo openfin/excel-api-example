@@ -24,10 +24,13 @@ Clone the repository and, in the Command Prompt, navigate into the _excel-api-ex
 
 In the Command Prompt run:
 
+
 ```
 > npm install
 ```
+
 Once the Node packages have installed, it is now possible to make modifications to files in the _excel-api-example\src_ folder and rebuild the project by running:
+
 
 ```
 > npm run webpack
@@ -38,6 +41,7 @@ After rebuilding, start the application by running:
 ```
 > npm start
 ```
+
 This will start a simple HTTP server on port 8080 and launch the OpenFin App automatically.
 
 # Getting Started
@@ -47,8 +51,6 @@ This will start a simple HTTP server on port 8080 and launch the OpenFin App aut
 After a connection has been established between Excel and the OpenFin application, pushing data to a spreadsheet and reading back the calculated values can be performed as follows:
 
 ```
-fin.desktop.Excel.getWoorkbooks();
-
 var sheet1 = fin.desktop.Excel.getWorkbookByName('Book1').getWorksheetByName('Sheet1');
 
 // A little fun with Pythagorean triples:
@@ -88,9 +90,28 @@ sheet1.getCells("C2", 0, 2, cells => {
 })
 ```
 
-## Custom Functions:
+## Legacy Callback-Based API
 
-_Coming back in the next release._
+Version 1 of the Demo API utilized callbacks to handle asynchronous actions and return values. Starting in Version 2, all asynchronous functions are instead handled via Promises, however, for reverse compatibility the legacy callback-style calls are still supported.
+
+All functions which return promises can also take a callback as the final argument. The following three calls are identical:
+
+```
+// Version 1 - Callback style [deprecated]
+fin.desktop.Excel.getWorkbooks(workbooks => {
+  console.log('Number of open workbooks: ', workbooks.length);
+});
+
+// Version 2 - Promise then callback
+fin.desktop.Excel.getWorkbooks().then(workbooks => {
+  console.log('Number of open workbooks: ', workbooks.length);
+});
+
+// Version 2 - Promise await
+var workbooks = await fin.desktop.Excel.getWorkbooks();
+console.log('Number of open workbooks: ', workbooks.length);
+
+```
 
 # Full API Documentation
 
@@ -98,75 +119,104 @@ The Excel API is composition based object model. Where Excel is the top most lev
 To use the API you will need to include ExcelAPI.js in your project and it will extend Openfin API with Excel API included.
 Once included you will be able to use following API calls.
 
+## fin.desktop.ExcelService
 
-## fin.desktop.Excel:
-**methods:**
+Represents the helper service which manages OpenFin connections to running instances of Excel.
 
-``` javascript
+### Properties
+
+```
+connected: Boolean // indicates that OpenFin is connected to the helper service
+initialized: Boolean // indicates that the current window is subscribed to Excel service events
+```
+
+### Functions
+
+```
 /*
 init();
-this function is required to be executed before using the rest of the API.
+Returns a promise which resolves when the Excel helper service is running and initialized.
 */
-fin.desktop.init();
+
+await fin.desktop.ExcelService.init();
+```
+
+## fin.desktop.Excel:
+
+Represents a single instance of an Excel application.
+
+### Functions
+
+```
 
 /*
-getWorkbooks(callback);
-Retrieves currently opened workbooks from excel and passes an array of workbook objects as an argument to the callback.
+getWorkbooks();
+Returns a promise which resolves the currently opened workbooks from Excel.
 */
-fin.desktop.Excel.getWorkbooks(function(workbooks){...});
+
+var workbooks = await fin.desktop.Excel.getWorkbooks();
 
 /*
-addWorkbook(callback);
-creates a new workbook in Excel
+addWorkbook();
+Asynchronously creates a new workbook in Excel and returns a promise which resolves the newly added workbook.
 */
-fin.desktop.Excel.addWorkbook(function(workbook){...});
+
+var workbook = await fin.desktop.Excel.addWorkbook();
 
 /*
-openWorkbook(path, callback);
-opens workbook from the specified path and passes the workbook object to the callback
+openWorkbook(path);
+Asynchronously opens workbook from the specified path and returns a promise which resolves the opened workbook.
 */
-fin.desktop.Excel.openWorkbook(function(workbook){...});
+
+var workbook = await fin.desktop.Excel.openWorkbook(path);
 
 /*
 getWorkbookByName(name);
-returns workbook object that represents the workbook with supplied name.
-Note: to use this function, you need to call getWorkbooks at least once.
+Synchronously returns workbook object that represents the workbook with supplied name.
+
 */
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
 
 /*
-getConnectionStatus(callback);
-Passes true to the callback if its connected to Excel
+getConnectionStatus();
+Returns a promise which resolves the connection status of the current Excel application instance.
 */
-fin.desktop.Excel.getConnectionStatus(function(isConnected){...});
+
+var isConnected = await fin.desktop.Excel.getConnectionStatus();
 
 /*
-getCalculationMode(callback);
-Passes calculation mode information to the callback if its connected to Excel
+getCalculationMode();
+Returns a promise which resolves the calculation mode information.
 */
-fin.desktop.Excel.getCalculationMode(function(info){...});
+
+var info = await fin.desktop.Excel.getCalculationMode();
 
 /*
 calculateAll();
-forces calculation on all sheets
+Asynchronously forces calculation on all sheets
 */
-fin.desktop.Excel.calculateAll();
+
+await fin.desktop.Excel.calculateAll();
 
 /*
 addEventListener(type, listener);
 Adds event handler to handle events from Excel
 */
+
 fin.desktop.Excel.addEventListener("workbookAdded", function(event){...})
 
 /*
 removeEventListener(type, listener);
 removes an attached event handler from Excel
 */
+
 removeEventListener("workbookAdded", handler);
 ```
-**events:**
-```javascript
 
+### Events
+
+```
 {type: "connected"};
 // is fired when excel connects to Openfin.
 //Example:
@@ -195,75 +245,80 @@ fin.desktop.Excel.addEventListener("afterCalculation",
 function(event){
     console.log("calculation is complete.";
 });
-
 ```
 
 ## fin.desktop.ExcelWorkbook:
+
 Represents an Excel workbook.
+
 Note: New workbooks are not supposed to be created using new or Object.create().
 Workbook objects can only be retrieved using API calls like fin.desktop.Excel.getWorkbooks() fin.desktop.Excel.getWorkbookByName() and fin.desktop.Excel.addWorkbook() etc.
 
-**properties:**
-```javascript
+### Properties
+
+```
 name: String // name of the workbook that the object represents.
 ```
 
-**methods:**
-```javascript
+### Functions
+
+```
 /*
-getWorksheets(callback);
-Passes an array of worksheet objects to the callback.
+getWorksheets();
+Returns a promise which resolves an array of worksheets in the current workbook.
 */
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.getWorksheets(function(worksheets){...});
+
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
+var worksheets = await workbook.getWorksheets();
 
 /*
 getWorksheetByName(name);
-returns the worksheet object with the specified name.
-Note: you have to at least use getWorksheets() once before using this function.
+Synchronously returns worksheet object that represents the worksheet with supplied name.
 */
 
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
 var sheet = workbook.getWorksheetByName("sheet1");
 
-
 /*
-addWorksheet(callback);
-creates a new worksheet and passes the worksheet object to the callback
+addWorksheet();
+Asynchronously creates a new worksheet in the workbook and returns a promise which resolves the newly added worksheet.
 */
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.addWorksheet(function(sheet){...});
+
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
+var worksheet = await workbook.addWorksheet();
 
 /*
 activate();
-activates or brings focus to the workbook
+Returns a promise which resolves when the workbook is activated
 */
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.activate();
+
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
+await workbook.activate();
 
 /*
 save();
-Saves the changes to the workbook.
+Asynchronously saves changes to the current workbook and returns a promise which resolves when the operation is complete.
 */
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.save();
+
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
+await workbook.save();
 
 /*
 close();
-Closes the workbook.
+Asynchronously closes the current workbook and returns a promise which resolves when the operation is complete.
 */
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.close();
 
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
+await workbook.close();
+```
 
+### Events
 
 ```
-**events:**
-```javascript
 {type: "sheetAdded", target: ExcelWorkbook, worksheet: ExcelWorksheet};
 //fired when a new sheet is added to the workbook
 //Example:
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
 workbook.addEventListener("sheetAdded",
 function(event){
     console.log("New sheet", event.worksheet.name, "was added to the workbook", event.worksheet.workbook.name)
@@ -272,7 +327,7 @@ function(event){
 {type: "sheetRemoved", target: ExcelWorkbook, worksheet: ExcelWorksheet};
 //fired when a sheet is closed/removed
 //Example:
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
 workbook.addEventListener("sheetRemoved",
 function(event){
     console.log("Sheet", event.worksheet.name, "was removed from workbook", event.worksheet.workbook.name)
@@ -281,7 +336,7 @@ function(event){
 {type: "workbookActivated", target: ExcelWorkbook};
 //fired when a workbook is activated/focused
 //Example:
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
 workbook.addEventListener("workbookActivated",
 function(event){
     console.log("Workbook", event.target.name, "was activated");
@@ -290,7 +345,7 @@ function(event){
 {type: "workbookDeactivated", target: ExcelWorkbook};
 //fired when a workbook is deactivated/blurred
 //Example:
-var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
+var workbook = fin.desktop.Excel.getWorkbookByName("Workbook1");
 workbook.addEventListener("workbookDeactivated",
 function(event){
     console.log("Workbook", event.target.name, "was deactivated");
@@ -299,29 +354,32 @@ function(event){
 ```
 
 ## fin.desktop.ExcelWorksheet:
+
 Represents a worksheet in Excel.
 Note: New sheets are not supposed to be created using new or Object.create().
 new sheets can be created only using workbook.addWorksheet() or existing sheet objects can be retrieved using workbook.getWorksheets() and workbook.getWorksheetByName();
 
-**properties:**
-```javascript
+### Properties
+
+```
 name: String // name of the worksheet
 workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to.
 ```
-**methods:**
-```javascript
+
+### Functions
+
+```
 /*
 setCells(values, offset);
-Populates the cells with the values that is a two dimensional array(array of rows) starting from the provided offset.
+Asynchronously populates the cells with the values starting from the provided cell reference and returns a promise which resolves when the operation is complete.
 */
-workbook.addWorksheet(function(sheet){
 
-   sheet.setCells([["a", "b", "c"], [1, 2, 3]], "A1");
-});
+var worksheet = await workbook.addWorksheet();
+await worksheet.setCells([["a", "b", "c"], [1, 2, 3]], "A1");
 
 /*
 setFilter(start, offsetWidth, offsetHeight, field, criteria1[, operator, criteria2, visibleDropDown]);
-sets filter on selected range in a worksheet.
+Asynchronously sets a filter on selected range in a worksheet and returns a promise which resolves when the operation is complete.
 
 arguments:
 start: starting address of the range. e.g "A1"
@@ -338,122 +396,123 @@ operator: Optional. Can be one of the following:
           top10percent
 criteria2: Optional. The second criteria (a string). Used with Criteria1 and Operator to construct compound criteria.
 visibleDropDown: Optional. true to display the AutoFilter drop-down arrow for the filtered field; false to hide the AutoFilter drop-down arrow for the filtered field. true by default.
-
 */
-var sheet = workbook.getSheetByName("sheet1");
-sheet.setCells([["Column1", "Column2"], ["TRUE", "1"], ["TRUE", "2"],["FALSE", ""]], "A1");
-sheet.setFilter("A1", 2, 4, 1, "TRUE");
+
+var worksheet = workbook.getSheetByName("sheet1");
+await worksheet.setCells([["Column1", "Column2"], ["TRUE", "1"], ["TRUE", "2"],["FALSE", ""]], "A1");
+await worksheet.setFilter("A1", 2, 4, 1, "TRUE");
 
 /*
-getCells(start, offsetWidth, offsetHeight, callback);
-Passes a two dimensional array of objects that have following format {value: --, formula: --}
+getCells(start, offsetWidth, offsetHeight);
+Returns a promise which resolves a two dimensional array of cell values starting at the specified cell reference and the specified width and length.
 */
+
 var sheet = workbook.getSheetByName("sheet1");
-sheet.getCells("A1", 3, 2, function(cells){ // cell: {value: --, formula: --}});
+var cells = await sheet.getCells("A1", 3, 2); // cells: [[{value: --, formula: --}, ...], ...]
 
 /*
 activate();
-activates or brings focus to the worksheet.
+Asynchronously activates the worksheet and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.activate();
+await sheet.activate();
 
 /*
-activateCell(cellAddress);
-selects the given cell. cellAddress: (A1, A2 etc)
+activateCell(cellReference);
+Asynchronously selects specified cell reference and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.activateCell("A1");
+await sheet.activateCell("A1");
 
 /*
 clearAllCells();
-clears all the cell values and formatting in the worksheet.
+Asynchronously clears all the cell values and formatting in the worksheet and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.clearAllCells();
+await sheet.clearAllCells();
 
 /*
 clearAllCellContents();
-clears all the cell values in the worksheet.
+Asynchronously clears all the cell values in the worksheet and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.clearAllCellContents();
+await sheet.clearAllCellContents();
 
 /*
 clearAllCellFormats();
-clears all the cell formatting in the worksheet.
+Asynchronously clears all the cell formatting in the worksheet and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.clearAllCellFormats();
+await sheet.clearAllCellFormats();
 
 /*
 clearRange();
-clears all the cell values and formatting in the specified range.
+Asynchronously clears all the cell values and formatting in the specified range and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.clearRange();
+await sheet.clearRange();
 
 /*
 clearRangeContents();
-clears all the cell values in the specified range.
+Asynchronously clears all the cell values in the specified range and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.clearRangeContents();
+await sheet.clearRangeContents();
 
 /*
 clearRangeFormats();
-clears all the cell formatting in the specified range.
+Asynchronously clears all the cell formatting in the specified range and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.clearRangeFormats();
+await sheet.clearRangeFormats();
 
 /*
 setCellName(cellAddress, cellName);
-sets a name for the cell which can be referenced to get values or in formulas
+Asynchronously sets a name for the cell which can be referenced to get values or in formulas and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.setCellName("A1", "TheCellName");
+await sheet.setCellName("A1", "TheCellName");
 
 /*
 calculate();
-forces calculation on the sheet.
+Asynchronously forces calculation on the sheet and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.calculate();
-
+await sheet.calculate();
 
 /*
-getCellByName(name, callback);
-returns cell info of the cell with the name provided.
+getCellByName(name);
+Returns a promise which resolves the cell info of the cell with the name provided.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.getCellByName("TheCellName", function(cellInfo){...});
+var cellInfo = await sheet.getCellByName("TheCellName");
 
 /*
 protect();
-makes all cells in the sheet read only, except the ones marked as locked:false
+Asynchronously makes all cells in the sheet read only, except the ones marked as locked:false and returns a promise which resolves when the operation is complete.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.protect();
+await sheet.protect();
 
 /*
-
 formatRange(rangeCode, format);
-formats the specified range.
+Asynchronously formats the specified range and returns a promise which resolves when the operation is complete.
+*/
+
 var sheet = workbook.getSheetByName("sheet1");
-sheet.formatRange("A1:E:10", {
+await sheet.formatRange("A1:E:10", {
                                     border: {color:"0,0,0,1", style: "continuous"}, //dash, dashDot, dashDotDot, dot, double, none, slantDashDot
                                     border-right: {color:"0,0,0,1", style: "continuous"},
                                     border-left: {color:"0,0,0,1", style: "continuous"},
@@ -466,14 +525,11 @@ sheet.formatRange("A1:E:10", {
                                     shrinkToFit: true, // the text will shrink to fit the cell
                                     locked: false // specifies if the cell is readonly or not in protect mode, default is true
                                 });
+```
 
-
-*/
-
+### Events
 
 ```
-**events:**
-```javascript
 {type: "sheetChanged", target: ExcelWorksheet,  data: {column: int, row: int, formula: String, sheetName: String, value:String}};
 //fired when any cell value in the sheet has changed.
 //Example:

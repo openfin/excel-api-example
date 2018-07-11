@@ -1,0 +1,250 @@
+﻿.greenBar {
+    border-top: 1px solid darkgreen;
+    width: 100%;
+    height: 1px;
+}
+
+.cell {
+    width: 55px;
+    height: 15px;
+    border: none;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+    border-collapse: collapse;
+    text-align: center;
+    font-family: "Verdana", sans-serif;
+    font-size: 9pt;
+}
+
+.cellHeader {
+    width: 55px;
+    height: 15px;
+    border: none;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+    border-collapse: collapse;
+    text-align: center;
+    font-family: "Verdana", sans-serif;
+    font-size: 9pt;
+}
+
+.cellHeaderSelected {
+    width: 55px;
+    height: 15px;
+    border: none;
+    border-right: 1px solid lightgray;
+    border-bottom: 2px solid darkgreen;
+    border-collapse: collapse;
+    text-align: center;
+    font-family: "Verdana", sans-serif;
+    font-size: 9pt;
+    font-weight: bold;
+    color: darkgreen;
+    background-color: #e5e5e5;
+    ;
+}
+
+.cellSelected {
+    width: 55px;
+    height: 15px;
+    border: 2px solid darkgreen;
+    text-align: center;
+    font-family: "Verdana", sans-serif;
+    font-size: 9pt;
+}
+
+.rowNumber {
+    width: 30px;
+    height: 15px;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+    text-align: center;
+    font-family: "Verdana", sans-serif;
+    font-size: 9pt;
+    color: #3a3a3a;
+}
+
+.rowNumberSelected {
+    width: 30px;
+    height: 15px;
+    border-right: 2px solid darkgreen;
+    border-bottom: 1px solid lightgray;
+    text-align: center;
+    font-family: "Verdana", sans-serif;
+    font-size: 9pt;
+    color: darkgreen;
+    font-weight: bold;
+    background-color: #e5e5e5;
+}
+
+.tabSelected {
+    border: 1px solid gray;
+    border-bottom: 3px solid darkgreen;
+    border-top: none;
+    padding: 5px;
+    border-right: 2px solid gray;
+    padding-left: 15px;
+    padding-right: 15px;
+    color: darkgreen;
+    font-weight: bold;
+    background-color: white;
+}
+
+    .tabSelected:focus {
+        outline: none;
+    }
+
+.tab:focus {
+    outline: none;
+}
+
+.tab {
+    border: none;
+    border-top: none;
+    border-right: 1px solid gray;
+    padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: white;
+    border-bottom: 1px solid gray;
+    border-top: 1px solid gray;
+}
+
+.workbookTab:focus {
+    outline: none;
+}
+
+.workbookTabSelected:focus {
+    outline: none;
+}
+
+.workbookTab {
+    border: none;
+    border-top: none;
+    border-right: 1px solid gray;
+    padding: 5px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: white;
+    color: darkgreen;
+    border-bottom: none;
+    border-top: 1px solid gray;
+    font-size: 16px;
+}
+
+.workbookTabSelected {
+    border: 1px solid darkgreen;
+    padding: 5px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: darkgreen;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#sheets {
+}
+
+#formulaInput {
+    width: 500px;
+    border: 1px solid lightgray;
+    height: 20px;
+    margin: 10px;
+    ;
+    margin-bottom: 10px;
+    ;
+    margin-top: 10px;
+    padding: 5px;
+    font-family: "Verdana", sans-serif;
+    font-size: 10pt;
+}
+
+#connectionStatus {
+    background-color: darkgreen;
+    color: white;
+    width: 100%;
+    margin-top: 5px;
+    padding: 5px;
+    font-family: "Verdana", sans-serif;
+    font-size: 8pt;
+    padding-left: 10px;
+    bottom: 0px;
+    position: fixed;
+}
+
+body {
+    overflow: hidden;
+    margin: 0px;
+}
+
+#intro {
+    padding: 10px;
+}
+
+.introHeader {
+    font-family: Calibri, Helvetica, Arial;
+    color: green;
+    clear: right;
+    font-size: 20pt;
+    font-weight: lighter;
+    text-align: center;
+}
+
+.introDescription {
+    font-family: Calibri, Helvetica, Arial;
+    font-size: 11pt;
+    padding-top: 10px;
+    color: #282828;
+    text-align: center;
+}
+
+.noWorkbooks {
+    font-family: Calibri, Helvetica, Arial;
+    font-size: 11pt;
+    padding: 15px;
+    text-align: center;
+    color: #0e77ed;
+    display: none;
+}
+
+    .noWorkbooks a {
+        font-family: Calibri, Helvetica, Arial;
+        font-size: 11pt;
+        text-align: center;
+        color: #0e77ed;
+    }
+
+.workbooksContainer {
+    display: none;
+}
+
+.fullOverlay {
+    background-color: rgba(0,0,0,0.5);
+    visibility: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.modalDialog {
+    background-color: white;
+    display: table;
+    width: 80%;
+    height: 120px;
+    margin: 120px auto;
+}
+
+    .modalDialog span {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+#addWorkbookDialog input {
+    width: 600px;
+    margin: 40px;
+}
