@@ -8,7 +8,7 @@ Note: This main source code for this demo is intentionally coded in plain JavaSc
 ## Quick Start
 
 1) Download and run the installer.
-[openfin installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://openfin.github.io/excel-api-example/app.json)
+[openfin installer download](https://install.openfin.co/download/?config=http%3A%2F%2Fopenfin.github.io%2Fexcel-api-example%2Fapp.json&fileName=excel-api-example-installer)
 
 2) After the installer runs, the OpenFin application should launch and automatically start Excel. At this point you should be able to interact with eith either application (create workbooks, worksheets, update cells, etc.) and see it mirrored on the other side.
 
