@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // This is the entry point of the Plugin script
 const ExcelApi_1 = require("./ExcelApi");
 window.fin.desktop.ExcelService = ExcelApi_1.ExcelService.instance;
