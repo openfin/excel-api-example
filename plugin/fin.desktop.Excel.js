@@ -72,6 +72,7 @@
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 class RpcDispatcher {
     constructor() {
         this.listeners = {};
@@ -197,6 +198,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = __webpack_require__(0);
 const ExcelApplication_1 = __webpack_require__(2);
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
@@ -375,6 +377,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = __webpack_require__(0);
 const ExcelWorkbook_1 = __webpack_require__(3);
 const ExcelWorksheet_1 = __webpack_require__(4);
@@ -530,6 +533,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.initialized) {
                 yield this.unsubscribeToExcelMessages();
+                //TODO: Provide external means to stop monitoring disconnect
             }
             return;
         });
@@ -620,6 +624,7 @@ exports.ExcelApplication = ExcelApplication;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = __webpack_require__(0);
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
@@ -675,6 +680,7 @@ exports.ExcelWorkbook = ExcelWorkbook;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = __webpack_require__(0);
 class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     constructor(name, workbook) {
@@ -793,6 +799,7 @@ exports.ExcelWorksheet = ExcelWorksheet;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 // This is the entry point of the Plugin script
 const ExcelApi_1 = __webpack_require__(1);
 window.fin.desktop.ExcelService = ExcelApi_1.ExcelService.instance;
