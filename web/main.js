@@ -8,7 +8,7 @@ fin.desktop.main(function () {
     // Initialization and startup logic for Excel is at the very bottom
 
     var view = {};
-    [].slice.call(document.querySelectorAll('[id]')).forEach(element => view[element.id] = element);   
+    [].slice.call(document.querySelectorAll('[id]')).forEach(element => view[element.id] = element);
 
     var displayContainers = new Map([
         [view.noConnectionContainer, { windowHeight: 195 }],
@@ -204,7 +204,7 @@ fin.desktop.main(function () {
 
         getWorkbookTab(workbook.name).className = "workbookTabSelected";
         currentWorkbook = workbook;
-        currentWorkbook.getWorksheets(updateSheets);
+        currentWorkbook.getWorksheets().then(updateSheets);
     }
 
     function addWorksheetTab(worksheet) {
@@ -216,8 +216,8 @@ fin.desktop.main(function () {
         worksheet.addEventListener("sheetChanged", onSheetChanged);
         worksheet.addEventListener("selectionChanged", onSelectionChanged);
         worksheet.addEventListener("sheetActivated", onSheetActivated);
-        worksheet.addEventListener("rangeDeleted", onRowDeleted);
-        worksheet.addEventListener("rangeInserted", onRowInserted);
+        worksheet.addEventListener("rowDeleted", onRowDeleted);
+        worksheet.addEventListener("rowInserted", onRowInserted);
     }
 
     function getWorksheetTab(name) {
@@ -243,7 +243,7 @@ fin.desktop.main(function () {
         }
         getWorksheetTab(sheet.name).className = "tabSelected";
         currentWorksheet = sheet;
-        currentWorksheet.getCells("A1", columnLength, rowLength, updateData);
+        currentWorksheet.getCells("A1", columnLength, rowLength).then(updateData);
     }
 
     function updateSheets(worksheets) {
@@ -470,7 +470,7 @@ fin.desktop.main(function () {
         excelInstance.addEventListener("workbookClosed", onWorkbookRemoved);
         excelInstance.addEventListener("workbookSaved", onWorkbookSaved);
 
-        fin.desktop.Excel.getWorkbooks(workbooks => {
+        let workbooks = fin.desktop.Excel.getWorkbooks().then(function () {
             for (var i = 0; i < workbooks.length; i++) {
                 addWorkbookTab(workbooks[i].name);
                 workbooks[i].addEventListener("workbookActivated", onWorkbookActivated);
@@ -490,6 +490,10 @@ fin.desktop.main(function () {
     }
 
     function onExcelDisconnected(data) {
+        if (!excelInstance) {
+            return;
+        }
+
         console.log("Excel Disconnected: " + data.connectionUuid);
 
         if (data.connectionUuid !== excelInstance.connectionUuid) {
@@ -516,10 +520,10 @@ fin.desktop.main(function () {
 
         addWorkbookTab(workbook.name);
 
-        workbook.getWorksheets((sheets) => {
+        workbook.getWorksheets().then((sheets) => {
             sheets.forEach((sheet) => {
-                sheet.addEventListener("rangeDeleted", onRowDeleted);
-                sheet.addEventListener("rangeInserted", onRowInserted);
+                sheet.addEventListener("rowDeleted", onRowDeleted);
+                sheet.addEventListener("rowInserted", onRowInserted);
             });
         });
 
@@ -567,8 +571,8 @@ fin.desktop.main(function () {
             worksheet.removeEventListener("sheetChanged", onSheetChanged);
             worksheet.removeEventListener("selectionChanged", onSelectionChanged);
             worksheet.removeEventListener("sheetActivated", onSheetActivated);
-            worksheet.removeEventListener("rangeDeleted", onRowDeleted);
-            worksheet.removeEventListener("rangeInserted", onRowInserted);
+            worksheet.removeEventListener("rowDeleted", onRowDeleted);
+            worksheet.removeEventListener("rowInserted", onRowInserted);
             view.worksheetTabs.removeChild(getWorksheetTab(worksheet.name));
             currentWorksheet = null;
         }
@@ -614,37 +618,39 @@ fin.desktop.main(function () {
     // Right click context menu
     function contextMenu(event) {
         event.preventDefault();
-        if (event.which == 3) {
-            let menu = document.getElementById('menu');
-            menu.style.visibility = 'visible';
+        if (event.which === 3) {
+            let menu = document.getElementById('excelContextMenu');
 
-            menu.style.left = event.x + 'px';
-            menu.style.top = event.y + 'px';
+            menu.style.left = `${event.pageX}px`
+            menu.style.top = `${event.pageY}px`
+            menu.style.display = "block";
         }
     }
 
     /**
-     * @function insertRowDelegate This function will be attached on click of the delete button and will insert a row above
+     * This function will be attached on click of the delete button and will insert a row above
      * @param {any} event Click event
+     * @returns {void}
      */
     function insertRowDelegate(event) {
         let rowNumber = document.getElementsByClassName('rowNumberSelected')[0].innerText;
         insertRow(rowNumber);
         currentWorksheet.insertRow(rowNumber);
-        let menu = document.getElementById('menu');
-        menu.style.visibility = 'hidden';
+        let menu = document.getElementById('excelContextMenu');
+        menu.style.display = 'none';
     }
 
     /**
-     * @function deleteRowDelegate This function will be attached on click of the delete button and will insert a row above
+     * This function will be attached on click of the delete button and will insert a row above
      * @param {any} event Click event
+     * @returns {void}
      */
     function deleteRowDelegate(event) {
         let rowNumber = document.getElementsByClassName('rowNumberSelected')[0].innerText;
         deleteRow(rowNumber);
         currentWorksheet.deleteRow(rowNumber);
-        let menu = document.getElementById('menu');
-        menu.style.visibility = 'hidden';
+        let menu = document.getElementById('excelContextMenu');
+        menu.style.display = 'none';
     }
 
     /**
@@ -673,7 +679,7 @@ fin.desktop.main(function () {
     }
 
     /**
-     * @function deleteRow Deletes the selected row
+     * Deletes the selected row
      * @param {any} range The selected row
      */
     function deleteRow(range) {
@@ -684,7 +690,7 @@ fin.desktop.main(function () {
 
         let rowNumber = parseInt(range);
 
-        let rowToDelete = document.getElementById('worksheetBody').deleteRow(rowNumber - 1);
+        document.getElementById('worksheetBody').deleteRow(rowNumber - 1);
 
         let rows = document.querySelectorAll('tr');
 
@@ -692,7 +698,7 @@ fin.desktop.main(function () {
             let rowNumberElement = rows[i].children[0];
             rowNumberElement.innerHTML = rowNumber;
             rowNumber++;
-        } 
+        }
     }
 
     // Main App Start

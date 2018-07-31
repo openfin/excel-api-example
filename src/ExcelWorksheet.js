@@ -1,29 +1,69 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = require("./RpcDispatcher");
+/**
+ * @class Class that represents a worksheet
+ */
 class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
+    /**
+     * @constructor Constructor for the ExcelWorksheet class
+     * @param name The name of the worksheet
+     * @param workbook The ExcelWorkbook this worksheet is tied to
+     */
     constructor(name, workbook) {
         super();
         this.connectionUuid = workbook.connectionUuid;
         this.workbook = workbook;
-        this.worksheetName = name;
+        this.mWorksheetName = name;
     }
+    /**
+     * @protected
+     * @function getDefaultMessage Returns the default message
+     * @returns {any} Returns the default message
+     */
     getDefaultMessage() {
         return {
             workbook: this.workbook.workbookName,
-            worksheet: this.worksheetName
+            worksheet: this.mWorksheetName
         };
     }
+    /**
+     * @public
+     * @property Returns worksheet name
+     * @returns {string} The name of the worksheet
+     */
+    get worksheetName() {
+        return this.mWorksheetName;
+    }
+    /**
+     * @public
+     * @property Returns worksheet name
+     * @returns {string} The name of the worksheet
+     */
+    set worksheetName(name) {
+        this.mWorksheetName = name;
+    }
+    /**
+     * @public
+     * @function setCells Sets the content for the cells
+     * @param values values for the cell
+     * @param offset The cell address
+     */
     setCells(values, offset) {
-        if (!offset)
+        if (!offset) {
             offset = "A1";
+        }
         return this.invokeExcelCall("setCells", { offset: offset, values: values });
     }
-    getCells(start, offsetWidth, offsetHeight, callback) {
-        return this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight }, callback);
-    }
-    getRow(start, width, callback) {
-        return this.invokeExcelCall("getCellsRow", { start: start, offsetWidth: width }, callback);
+    /**
+     * @public
+     * @function getCells Gets cell values from the range specified
+     * @param start The start cell address
+     * @param offsetWidth The number of columns in the openfin app
+     * @param offsetHeight The number of rows in the openfin app
+     */
+    getCells(start, offsetWidth, offsetHeight) {
+        return this.invokeExcelCall("getCells", { start: start, offsetWidth: offsetWidth, offsetHeight: offsetHeight });
     }
     /**
      * @function activateRow This mirrors the row selected in the openfin application to Excel
@@ -32,13 +72,10 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     activateRow(cellAddress) {
         return this.invokeExcelCall("activateRow", { address: cellAddress });
     }
-    getColumn(start, offsetHeight, callback) {
-        return this.invokeExcelCall("getCellsColumn", { start: start, offsetHeight: offsetHeight }, callback);
-    }
     /**
      * @function insertRow This inserts a row just before the selected row
      * @param {number} rowNumber The address of the first cell in the row
-     * @returns {Promise<void>} A promise
+     * @returns {Promise<any>} A promise
      */
     insertRow(rowNumber) {
         return this.invokeExcelCall("insertRow", { rowNumber: rowNumber });
@@ -51,9 +88,20 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     deleteRow(rowNumber) {
         return this.invokeExcelCall("deleteRow", { rowNumber: rowNumber });
     }
+    /**
+     * @public
+     * @function activate Activates the current worksheet
+     * @returns {Promise<any>} A promise
+     */
     activate() {
         return this.invokeExcelCall("activateSheet");
     }
+    /**
+     * @public
+     * @function activateCell Activates the selected cell
+     * @param cellAddress The address of the cell
+     * @returns {Promise<any>} A promise
+     */
     activateCell(cellAddress) {
         return this.invokeExcelCall("activateCell", { address: cellAddress });
     }
@@ -72,39 +120,104 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             visibleDropDown: visibleDropDown
         });
     }
-    formatRange(rangeCode, format, callback) {
-        return this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format }, callback);
+    /**
+     * @public
+     * @function formatRange Formats the range selected
+     * @param rangeCode The selected range
+     * @param format The formatting to be applied to the range
+     */
+    formatRange(rangeCode, format) {
+        return this.invokeExcelCall("formatRange", { rangeCode: rangeCode, format: format });
     }
-    clearRange(rangeCode, callback) {
-        return this.invokeExcelCall("clearRange", { rangeCode: rangeCode }, callback);
+    /**
+     * @public
+     * @function clearRange Clear the range of formatting and content
+     * @param rangeCode The range selected
+     */
+    clearRange(rangeCode) {
+        return this.invokeExcelCall("clearRange", { rangeCode: rangeCode });
     }
-    clearRangeContents(rangeCode, callback) {
-        return this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode }, callback);
+    /**
+     * @public
+     * @function clearRangeContents Clears the contents in the specified range
+     * @param rangeCode The selected range
+     */
+    clearRangeContents(rangeCode) {
+        return this.invokeExcelCall("clearRangeContents", { rangeCode: rangeCode });
     }
-    clearRangeFormats(rangeCode, callback) {
-        return this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode }, callback);
+    /**
+     * @public
+     * @function clearRangeFormats Clears the formatting in the range specified
+     * @param rangeCode The selected range
+     */
+    clearRangeFormats(rangeCode) {
+        return this.invokeExcelCall("clearRangeFormats", { rangeCode: rangeCode });
     }
-    clearAllCells(callback) {
-        return this.invokeExcelCall("clearAllCells", null, callback);
+    /**
+     * @public
+     * @function clearAllCells Clear all cells and their formatting
+     * @returns {Promise<any>} A promise
+     */
+    clearAllCells() {
+        return this.invokeExcelCall("clearAllCells", null);
     }
-    clearAllCellContents(callback) {
-        return this.invokeExcelCall("clearAllCellContents", null, callback);
+    /**
+     * @public
+     * @function clearAllCellContents Clears all the cells content
+     * @returns {Promise<any>} A promise
+     */
+    clearAllCellContents() {
+        return this.invokeExcelCall("clearAllCellContents", null);
     }
-    clearAllCellFormats(callback) {
-        return this.invokeExcelCall("clearAllCellFormats", null, callback);
+    /**
+     * @public
+     * @function clearAllCellFormats Clear all formatting in every cell
+     * @returns {Promise<any>} A promise
+     */
+    clearAllCellFormats() {
+        return this.invokeExcelCall("clearAllCellFormats", null);
     }
+    /**
+     * @public
+     * @function setCellName Sets a name for the cell address
+     * @param cellAddress The address of the cell e.g. A1
+     * @param cellName The name of the cell
+     * @returns {Promise<any>} A promise
+     */
     setCellName(cellAddress, cellName) {
         return this.invokeExcelCall("setCellName", { address: cellAddress, cellName: cellName });
     }
+    /**
+     * @public
+     * @function calculate Calculates all formula on teh sheet
+     * @returns {Promise<any>} A promise
+     */
     calculate() {
         return this.invokeExcelCall("calculateSheet");
     }
-    getCellByName(cellName, callback) {
-        return this.invokeExcelCall("getCellByName", { cellName: cellName }, callback);
+    /**
+     * @public
+     * @function getCellByName Gets a cell by its name
+     * @param cellName The name of the cell
+     * @returns {Promise<any>} A promise
+     */
+    getCellByName(cellName) {
+        return this.invokeExcelCall("getCellByName", { cellName: cellName });
     }
+    /**
+     * @public
+     * @function protect Password protects the sheet
+     * @param password Password used to protect the sheet
+     * @returns {Promise<any>} A promise
+     */
     protect(password) {
         return this.invokeExcelCall("protectSheet", { password: password ? password : null });
     }
+    /**
+     * @public
+     * @function toObject Returns only the functions that should be exposed by this class
+     * @returns {object} Public methods in ExcelWorksheet
+     */
     toObject() {
         return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
@@ -124,8 +237,6 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             formatRange: this.formatRange.bind(this),
             getCellByName: this.getCellByName.bind(this),
             getCells: this.getCells.bind(this),
-            getColumn: this.getColumn.bind(this),
-            getRow: this.getRow.bind(this),
             protect: this.protect.bind(this),
             setCellName: this.setCellName.bind(this),
             setCells: this.setCells.bind(this),

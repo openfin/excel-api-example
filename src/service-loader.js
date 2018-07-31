@@ -1,3 +1,4 @@
+const logLevels = fin.desktop.System.logLevels;
 // This script exists to mimic the functionality that will ultimately be provided
 // by the OpenFin services API. It's primary purpose is to deploy the shared assets
 // needed by Excel to a common location, and to start the ExcelService process
@@ -22,7 +23,7 @@ fin.desktop.main(() => {
     function configureLogger() {
         return new Promise(resolve => {
             fin.desktop.System.getMinLogLevel(logLevel => {
-                if (logLevel === fin.desktop.System.logLevels.INFO) {
+                if (logLevel === logLevels.INFO) {
                     consoleLog = console.log;
                     consoleError = console.error;
                 }
@@ -54,7 +55,7 @@ fin.desktop.main(() => {
     function deploySharedAssets() {
         return new Promise((resolve, reject) => {
             fin.desktop.Application.getCurrent().getManifest(manifest => {
-                fin.desktop.System.launchExternalProcess({
+                fin.desktop.System.launchExternalProcess(Object.assign({
                     alias: 'excel-api-addin',
                     target: servicePath,
                     arguments: `-d "${installFolder}" -c ${manifest.runtime.version}`,
@@ -62,7 +63,7 @@ fin.desktop.main(() => {
                         consoleLog(`Asset Deployment completed! Exit Code: ${result.exitCode}`);
                         resolve();
                     }
-                }, () => consoleLog('Deploying Shared Assets'), err => reject(err));
+                }), () => consoleLog('Deploying Shared Assets'), err => reject(err));
             });
         });
     }
@@ -100,11 +101,12 @@ fin.desktop.main(() => {
                 resolve();
             });
             chrome.desktop.getDetails(function (details) {
-                fin.desktop.System.launchExternalProcess({
+                console.log(details);
+                fin.desktop.System.launchExternalProcess(Object.assign({
                     target: `${installFolder}\\${servicePath}`,
                     arguments: '-p ' + details.port,
                     uuid: excelServiceUuid,
-                }, process => {
+                }), process => {
                     consoleLog('Service Launched: ' + process.uuid);
                 }, error => {
                     reject('Error starting Excel service');
@@ -113,14 +115,14 @@ fin.desktop.main(() => {
         });
     }
     // This is a very shallow polyfill for the services API
-    window.fin.desktop.Service = {
-        connect: serviceOpts => {
-            var serviceUuid = serviceOpts.uuid;
-            if (serviceUuid !== excelServiceUuid) {
-                console.error('Unknown service UUID!');
-            }
-            return excelServicePromise;
-        }
-    };
+    //(window as any).fin.desktop.Service = {
+    //    connect: serviceOpts => {
+    //        var serviceUuid = serviceOpts.uuid;
+    //        if (serviceUuid !== excelServiceUuid) {
+    //            console.error('Unknown service UUID!');
+    //        }
+    //        return excelServicePromise;
+    //    }
+    //};
 });
 //# sourceMappingURL=service-loader.js.map

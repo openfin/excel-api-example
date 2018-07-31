@@ -3,8 +3,8 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Excel API</title>
-    <link rel="stylesheet" type="text/css" href="styles.css"/>
-    
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
 </head>
 <body>
 
@@ -22,7 +22,6 @@
     </div>
 
     <div id="workbooksContainer" class="workbooksContainer">
-        <button id="deleteRow">delete row</button>
         <div id="workbookTabs">
             <button id="newWorkbookTab" class="workbookTab" title="New workbook (ctrl+N)">New</button>
             <button id="openWorkbookTab" class="workbookTab" title="Open Workbook">Open</button>
@@ -46,10 +45,10 @@
         </div>
     </div>
 
-    <div id="menu">
-        <ul class="menu-options">
-            <li id="insert" class="menu-option">Insert</li>
-            <li id="delete" class="menu-option">Delete</li>
+    <div id="excelContextMenu">
+        <ul>
+            <li id="insert"><img src="https://image.flaticon.com/icons/svg/148/148764.svg">Insert</li>
+            <li id="delete"><img src="https://image.flaticon.com/icons/svg/458/458594.svg">Delete</li>
         </ul>
     </div>
 

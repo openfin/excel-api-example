@@ -1,9 +1,4 @@
-declare namespace fin.desktop {
-    var Application: any;
-    var InterApplicationBus: any;
-    var ExternalApplication: any;
-    var System: any;
-    var Service: any;
-    var main: any;
-}
 declare var chrome: any;
+declare const logLevels: {
+    [key: string]: string;
+};
