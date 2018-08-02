@@ -101,7 +101,6 @@ fin.desktop.main(() => {
                 resolve();
             });
             chrome.desktop.getDetails(function (details) {
-                console.log(details);
                 fin.desktop.System.launchExternalProcess(Object.assign({
                     target: `${installFolder}\\${servicePath}`,
                     arguments: '-p ' + details.port,

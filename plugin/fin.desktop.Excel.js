@@ -485,7 +485,6 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
      */
     processGetExcelInstancesResult(connectionUuids) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(connectionUuids);
             var existingInstances = this.mApplications;
             this.mApplications = {};
             yield Promise.all(connectionUuids.map((connectionUuid) => __awaiter(this, void 0, void 0, function* () {
