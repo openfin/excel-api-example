@@ -583,6 +583,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         this.workbooks = {};
         this.connectionUuid = connectionUuid;
         this.mConnected = false;
+        this.initialized = false;
     }
     /**
      * @public
@@ -736,8 +737,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
             executor.reject(result.error);
             return;
         }
-        var workbook = this.workbooks[result.target.workbookName];
-        var worksheets = workbook && workbook.worksheets;
+        const workbook = this.workbooks[result.target.workbookName];
+        const worksheets = workbook && workbook.worksheets;
         var worksheet = worksheets && worksheets[result.target.sheetName];
         var resultData = result.data;
         switch (result.action) {
@@ -892,6 +893,14 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
      */
     calculateAll() {
         return this.invokeExcelCall("calculateFull", null);
+    }
+    /**
+     * @private
+     * @function getInitialised Gets whether or not the ExcelApplicationServer has been initialised
+     * @returns {Promise<any>} A promise with a result
+     */
+    getInitialised() {
+        return this.invokeExcelCall("getInitialised", null);
     }
     /**
      * @public

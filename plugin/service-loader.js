@@ -140,7 +140,7 @@ fin.desktop.main(() => {
         });
     }
     function tryInstallAddIn(connected) {
-        var xllInstalledCookie = 'openfin-xll-installed';
+        const xllInstalledCookie = 'openfin-xll-installed';
         return new Promise((resolve, reject) => {
             if (document.cookie.includes(xllInstalledCookie)) {
                 consoleLog('Add-In previously installed');
@@ -166,7 +166,7 @@ fin.desktop.main(() => {
     }
     function startExcelService() {
         return new Promise((resolve, reject) => {
-            var onExcelServiceEvent;
+            let onExcelServiceEvent;
             fin.desktop.InterApplicationBus.subscribe('*', excelServiceEventTopic, onExcelServiceEvent = () => {
                 consoleLog('Excel Service Alive');
                 fin.desktop.InterApplicationBus.unsubscribe('*', excelServiceEventTopic, onExcelServiceEvent);

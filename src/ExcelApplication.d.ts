@@ -134,6 +134,12 @@ export declare class ExcelApplication extends RpcDispatcher {
      */
     calculateAll(): Promise<any>;
     /**
+     * @private
+     * @function getInitialised Gets whether or not the ExcelApplicationServer has been initialised
+     * @returns {Promise<any>} A promise with a result
+     */
+    private getInitialised();
+    /**
      * @public
      * @function toObject Returns an object with only the methods and properties to be exposed
      * @returns {any} An object with only the methods and properties to be exposed

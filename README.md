@@ -104,28 +104,22 @@ Once included you will be able to use following API calls.
 
 ``` javascript
 /*
-init();
-this function is required to be executed before using the rest of the API.
-*/
-fin.desktop.init();
-
-/*
-getWorkbooks(callback);
+getWorkbooks().then(function(workbook));
 Retrieves currently opened workbooks from excel and passes an array of workbook objects as an argument to the callback.
 */
-fin.desktop.Excel.getWorkbooks(function(workbooks){...});
+fin.desktop.Excel.getWorkbooks().then(function(workbooks){...});
 
 /*
-addWorkbook(callback);
+addWorkbook().then(function(workbook));
 creates a new workbook in Excel
 */
-fin.desktop.Excel.addWorkbook(function(workbook){...});
+fin.desktop.Excel.addWorkbook().then(function(workbook){...});
 
 /*
-openWorkbook(path, callback);
+openWorkbook(path).then(function(workbook));
 opens workbook from the specified path and passes the workbook object to the callback
 */
-fin.desktop.Excel.openWorkbook(function(workbook){...});
+fin.desktop.Excel.openWorkbook(path).then(function(workbook){...});
 
 /*
 getWorkbookByName(name);
@@ -141,10 +135,10 @@ Passes true to the callback if its connected to Excel
 fin.desktop.Excel.getConnectionStatus(function(isConnected){...});
 
 /*
-getCalculationMode(callback);
+getCalculationMode().then(callback);
 Passes calculation mode information to the callback if its connected to Excel
 */
-fin.desktop.Excel.getCalculationMode(function(info){...});
+fin.desktop.Excel.getCalculationMode().then(function(info){...});
 
 /*
 calculateAll();
@@ -162,7 +156,7 @@ fin.desktop.Excel.addEventListener("workbookAdded", function(event){...})
 removeEventListener(type, listener);
 removes an attached event handler from Excel
 */
-removeEventListener("workbookAdded", handler);
+fin.desktop.Excel.removeEventListener("workbookAdded", handler);
 ```
 **events:**
 ```javascript
@@ -188,6 +182,12 @@ function(event){
     console.log("Workbook closed; Name:", event.workbook.name);
 });
 
+{type: "workbookSaved", workbook: ExcelWorkbook};
+// Is fired when a workbook is saved.
+fin.desktop.Excel.addEventListener("workbookSaved", function(event) {
+    console.log("Workbook saved; Name:", event.workbook.name);
+});
+
 {type: "afterCalculation"};
 //is fired when calculation is complete on any sheet.
 //Example:
@@ -206,33 +206,33 @@ Workbook objects can only be retrieved using API calls like fin.desktop.Excel.ge
 **properties:**
 ```javascript
 name: String // name of the workbook that the object represents.
+worksheets: { [worksheetName: string]: ExcelWorksheet } // Worksheets tied to the current workbook
 ```
 
 **methods:**
 ```javascript
 /*
-getWorksheets(callback);
+getWorksheets().then(callback);
 Passes an array of worksheet objects to the callback.
 */
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.getWorksheets(function(worksheets){...});
+workbook.getWorksheets().then(function(worksheets){...});
 
 /*
 getWorksheetByName(name);
 returns the worksheet object with the specified name.
 Note: you have to at least use getWorksheets() once before using this function.
 */
-
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 var sheet = workbook.getWorksheetByName("sheet1");
 
 
 /*
-addWorksheet(callback);
+addWorksheet().then(callback);
 creates a new worksheet and passes the worksheet object to the callback
 */
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.addWorksheet(function(sheet){...});
+workbook.addWorksheet().then(function(sheet){...});
 
 /*
 activate();
@@ -305,8 +305,7 @@ new sheets can be created only using workbook.addWorksheet() or existing sheet o
 
 **properties:**
 ```javascript
-name: String // name of the worksheet
-workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to.
+worksheetName: String // name of the worksheet
 ```
 **methods:**
 ```javascript
@@ -314,8 +313,7 @@ workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to
 setCells(values, offset);
 Populates the cells with the values that is a two dimensional array(array of rows) starting from the provided offset.
 */
-workbook.addWorksheet(function(sheet){
-
+workbook.addWorksheet().then(function(sheet){
    sheet.setCells([["a", "b", "c"], [1, 2, 3]], "A1");
 });
 
@@ -518,6 +516,22 @@ sheet.addEventListener("sheetRenamed",
 function(event){
     console.log("sheet", event.data.sheetName, "was renamed to: ", event.data.newName
     );
+});
+
+{type: "rowDeleted", target: ExcelWorksheet};
+// Fired when a row has been deleted in the worksheet
+// Example:
+var sheet = workbook.getSheetByName("sheet1");
+sheet.addEventListener("rowDeleted", function(event) {
+    console.log("row", event.data.range);
+});
+
+{type: "rowInserted", target: ExcelWorksheet};
+// Fired when a row has been deleted in the worksheet
+// Example:
+var sheet = workbook.getSheetByName("sheet1");
+sheet.addEventListener("rowInserted", function(event) {
+    console.log("row", event.data.range);
 });
 
 ```
