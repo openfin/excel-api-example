@@ -1,5 +1,5 @@
+import { Application } from './ExcelApplication';
 import { RpcDispatcher } from './RpcDispatcher';
-import { ExcelApplication } from './ExcelApplication';
 /**
  * @class Class for interacting with the .NET ExcelService process
  */
@@ -13,7 +13,7 @@ export declare class ExcelService extends RpcDispatcher {
      * @public
      * @description Handle to the default application
      */
-    defaultApplicationObj: ExcelApplication;
+    defaultApplicationObj: Application;
     /**
      * @private
      * @description Checks whether the ExcelService is initialised
@@ -36,91 +36,91 @@ export declare class ExcelService extends RpcDispatcher {
     init(): Promise<void>;
     /**
      * @private
-     * @function processExcelServiceEvent Processes events coming from the Excel application
+     * @function processExcelServiceEvent Processes events coming from the Excel
+     * application
      * @param {any} data Payload passed from the Excel Service
      * @returns {Promise<void>} A promise
      */
-    private processExcelServiceEvent(data);
+    private processExcelServiceEvent;
     /**
      * @private
      * @function processExcelServiceResult Processes results from excel service
      * @param {any} result The result from the service
      * @returns {Promise<void>} A promise
      */
-    private processExcelServiceResult(result);
+    private processExcelServiceResult;
     /**
      * @private
-     * @function subscribeToServiceMessages function to subscribe to topics ExcelService will send to
+     * @function subscribeToServiceMessages function to subscribe to topics
+     * ExcelService will send to
      * @returns {Promise<[void, void]>} A list of promises
      */
-    private subscribeToServiceMessages();
+    private subscribeToServiceMessages;
     /**
      * @private
-     * @function monitorDisconnect Subscribes to the disconnected event and dispatches to the excel application
+     * @function monitorDisconnect Subscribes to the disconnected event and
+     * dispatches to the excel application
      * @returns {Promnise<void>} A promise
      */
-    private monitorDisconnect();
+    private monitorDisconnect;
     /**
      * @private
-     * @function registerWindowInstance This registers a new Excel instance to a new workbook domain
+     * @function registerWindowInstance This registers a new Excel instance to a
+     * new workbook domain
      * @returns {Promise<void>} A promise
      */
-    private registerWindowInstance();
+    private registerWindowInstance;
     /**
      * @private
-     * @function configureDefaultApplication Configures the default application when the application first starts
+     * @function configureDefaultApplication Configures the default application
+     * when the application first starts
      * @returns {Promise<void>} A promise
      */
-    private configureDefaultApplication();
+    private configureDefaultApplication;
     /**
      * @private
      * @function processExcelConnectedEvent Process the connected event
-     * @param {any} data payload that holds uuid of the connected application
+     * @param {ExcelConnectionEventData} data payload that holds uuid of the connected application
      * @returns {Promise<void>} A promise
      */
-    private processExcelConnectedEvent(data);
+    private processExcelConnectedEvent;
     /**
      * @public
-     * @function processExcelDisconnectedEvent Processes event when excel is disconnected
+     * @function processExcelDisconnectedEvent Processes event when excel is
+     * disconnected
      * @param data The data from excel
      * @returns {Promise<void>} A promise
      */
-    private processExcelDisconnectedEvent(data);
+    private processExcelDisconnectedEvent;
     /**
      * @private
      * @function processGetExcelInstancesResult Get Excel instance
      * @param {string[]} connectionUuids THe connection Uuids the Excel service is holding
      * @returns {Promise<void>} A promise
      */
-    private processGetExcelInstancesResult(connectionUuids);
+    private processGetExcelInstancesResult;
     /**
      * @public
      * @function install Installs the addin
-     * @returns {Promise<any>} A promise
+     * @returns {Promise<void>} A promise
      */
-    install(): Promise<any>;
+    install(): Promise<void>;
     /**
      * @public
      * @function getInstallationStatus Checks the installation status
-     * @returns {Promise<any>} A promise
+     * @returns {Promise<void>} A promise
      */
-    getInstallationStatus(): Promise<any>;
+    getInstallationStatus(): Promise<void>;
     /**
      * @public
      * @function getExcelInstances Returns all the excel instances that are open
-     * @returns {Promise<any>} A promsie
+     * @returns {Promise<void>} A promsie
      */
-    getExcelInstances(): Promise<any>;
-    /**
-     * @public
-     * @function getInitialized Returns whether or not the service has been initialised or not
-     * @returns {Promise<any>} A promise
-     */
-    getInitialized(): Promise<any>;
+    getExcelInstances(): Promise<void>;
     /**
      * @public
      * @function toObject Creates an empty object
      * @returns {object} An empty object
      */
-    toObject(): object;
+    toObject(): {};
 }

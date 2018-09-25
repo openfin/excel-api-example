@@ -434,7 +434,7 @@ fin.desktop.main(function () {
     // Excel Helper Functions
 
     function checkConnectionStatus() {
-        fin.desktop.Excel.getConnectionStatus(connected => {
+        fin.desktop.Excel.getConnectionStatus().then(connected => {
             if (connected) {
                 console.log('Already connected to Excel, synthetically raising event.');
                 onExcelConnected(fin.desktop.Excel);
@@ -629,10 +629,9 @@ fin.desktop.main(function () {
 
     /**
      * This function will be attached on click of the delete button and will insert a row above
-     * @param {any} event Click event
      * @returns {void}
      */
-    function insertRowDelegate(event) {
+    function insertRowDelegate() {
         let rowNumber = document.getElementsByClassName('rowNumberSelected')[0].innerText;
         insertRow(rowNumber);
         currentWorksheet.insertRow(rowNumber);
@@ -642,10 +641,9 @@ fin.desktop.main(function () {
 
     /**
      * This function will be attached on click of the delete button and will insert a row above
-     * @param {any} event Click event
      * @returns {void}
      */
-    function deleteRowDelegate(event) {
+    function deleteRowDelegate() {
         let rowNumber = document.getElementsByClassName('rowNumberSelected')[0].innerText;
         deleteRow(rowNumber);
         currentWorksheet.deleteRow(rowNumber);

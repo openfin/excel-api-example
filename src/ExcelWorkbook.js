@@ -19,18 +19,17 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function getDefaultMessage Gets the default message to be sent over the wire
+     * @function getDefaultMessage Gets the default message to be sent over the
+     * wire
      * @returns {any} An object with the workbook name in as default
      */
     getDefaultMessage() {
-        return {
-            workbook: this.mWorkbookName
-        };
+        return { workbook: this.mWorkbookName };
     }
     /**
      * @public
      * @property Worksheets tied to this workbook
-     * @returns {{ [worksheetName: string]: ExcelWorksheet }}
+     * @returns {Worksheets}
      */
     get worksheets() {
         return this.mWorksheets;
@@ -43,14 +42,14 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
      * @property workbookName property
      * @returns {string} The name of the workbook
      */
-    get workbookName() {
+    get name() {
         return this.mWorkbookName;
     }
     /**
      * @public
      * @property Sets the workbook name
      */
-    set workbookName(name) {
+    set name(name) {
         this.mWorkbookName = name;
     }
     /**
@@ -59,7 +58,7 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
      * @returns A promise with worksheets as the result
      */
     getWorksheets() {
-        return this.invokeExcelCall("getWorksheets", null);
+        return this.invokeExcelCall('getWorksheets', null);
     }
     /**
      * @public
@@ -68,7 +67,12 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
      * @returns {ExcelWorksheet} The excel worksheet with the specified name
      */
     getWorksheetByName(name) {
-        return this.worksheets[name];
+        const worksheet = this.worksheets[name];
+        if (!worksheet) {
+            console.error(`No worksheet found with the name: ${name}`);
+            return;
+        }
+        return this.worksheets[name].toObject();
     }
     /**
      * @public
@@ -76,7 +80,7 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
      * @returns {Promise<any>} A promise
      */
     addWorksheet() {
-        return this.invokeExcelCall("addSheet", null);
+        return this.invokeExcelCall('addSheet', null);
     }
     /**
      * @public
@@ -84,7 +88,7 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
      * @returns {Promise<any>} A promise
      */
     activate() {
-        return this.invokeExcelCall("activateWorkbook");
+        return this.invokeExcelCall('activateWorkbook');
     }
     /**
      * @public
@@ -92,7 +96,7 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
      * @returns {Promise<void>} A promise
      */
     save() {
-        return this.invokeExcelCall("saveWorkbook");
+        return this.invokeExcelCall('saveWorkbook');
     }
     /**
      * @public
@@ -100,24 +104,27 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
      * @returns {Promise<void>} A promise
      */
     close() {
-        return this.invokeExcelCall("closeWorkbook");
+        return this.invokeExcelCall('closeWorkbook');
     }
     /**
      * @public
      * @function toObject Returns only the methods exposed
-     * @returns {any} Returns only the methods exposed
+     * @returns {Workbook} Returns only the methods exposed
      */
     toObject() {
         return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
-            name: this.workbookName,
+            name: this.name,
             activate: this.activate.bind(this),
             addWorksheet: this.addWorksheet.bind(this),
             close: this.close.bind(this),
-            getWorksheetByName: name => this.getWorksheetByName(name).toObject(),
+            getWorksheetByName: (name) => {
+                return this.getWorksheetByName(name);
+            },
             getWorksheets: this.getWorksheets.bind(this),
-            save: this.save.bind(this)
+            save: this.save.bind(this),
+            toObject: this.toObject.bind(this)
         });
     }
 }

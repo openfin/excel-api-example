@@ -71,30 +71,30 @@
 /***/ (function(module, exports) {
 
 const logLevels = fin.desktop.System.logLevels;
-// This script exists to mimic the functionality that will ultimately be provided
-// by the OpenFin services API. It's primary purpose is to deploy the shared assets
-// needed by Excel to a common location, and to start the ExcelService process
+// This script exists to mimic the functionality that will ultimately be
+// provided by the OpenFin services API. It's primary purpose is to deploy the
+// shared assets needed by Excel to a common location, and to start the
+// ExcelService process
 fin.desktop.main(() => {
-    var consoleLog;
-    var consoleError;
-    var excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
-    var installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
-    var servicePath = 'OpenFin.ExcelService.exe';
-    var addInPath = 'OpenFin.ExcelApi-AddIn.xll';
-    var excelServiceEventTopic = 'excelServiceEvent';
+    let consoleLog;
+    let consoleError;
+    const excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
+    const installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
+    const servicePath = 'OpenFin.ExcelService.exe';
+    const excelServiceEventTopic = 'excelServiceEvent';
     // This promise resolves when the ExcelService is ready
-    var excelServicePromise = Promise.resolve()
+    Promise.resolve()
         .then(configureLogger)
         .then(assertServiceIsNotRunning)
         .then(() => Promise.resolve()
         .then(deploySharedAssets)
         .then(tryInstallAddIn)
         .then(startExcelService)
-        .catch(err => console.error(err)))
+        .catch(err => consoleError(err)))
         .catch(() => consoleLog('Service Already Running: Skipping Deployment and Registration'));
     function configureLogger() {
-        return new Promise(resolve => {
-            fin.desktop.System.getMinLogLevel(logLevel => {
+        return new Promise((resolve) => {
+            fin.desktop.System.getMinLogLevel((logLevel) => {
                 if (logLevel === logLevels.INFO) {
                     consoleLog = console.log;
                     consoleError = console.error;
@@ -109,12 +109,12 @@ fin.desktop.main(() => {
     }
     // Technically there is a small window of time between when the UUID is
     // registered as an external application and when the service is ready to
-    // receive commands. This edge-case will be best handled in the future 
+    // receive commands. This edge-case will be best handled in the future
     // with the availability of plugins and services from the fin API
     function assertServiceIsNotRunning() {
         return new Promise((resolve, reject) => {
-            fin.desktop.System.getAllExternalApplications(extApps => {
-                var excelServiceIndex = extApps.findIndex(extApp => extApp.uuid === excelServiceUuid);
+            fin.desktop.System.getAllExternalApplications((extApps) => {
+                const excelServiceIndex = extApps.findIndex((extApp) => extApp.uuid === excelServiceUuid);
                 if (excelServiceIndex >= 0) {
                     reject();
                 }
@@ -126,20 +126,20 @@ fin.desktop.main(() => {
     }
     function deploySharedAssets() {
         return new Promise((resolve, reject) => {
-            fin.desktop.Application.getCurrent().getManifest(manifest => {
+            fin.desktop.Application.getCurrent().getManifest((manifest) => {
                 fin.desktop.System.launchExternalProcess(Object.assign({
                     alias: 'excel-api-addin',
                     target: servicePath,
                     arguments: `-d "${installFolder}" -c ${manifest.runtime.version}`,
-                    listener: result => {
+                    listener: (result) => {
                         consoleLog(`Asset Deployment completed! Exit Code: ${result.exitCode}`);
                         resolve();
                     }
-                }), () => consoleLog('Deploying Shared Assets'), err => reject(err));
+                }), () => consoleLog('Deploying Shared Assets'), (err) => reject(err));
             });
         });
     }
-    function tryInstallAddIn(connected) {
+    function tryInstallAddIn() {
         const xllInstalledCookie = 'openfin-xll-installed';
         return new Promise((resolve, reject) => {
             if (document.cookie.includes(xllInstalledCookie)) {
@@ -172,29 +172,19 @@ fin.desktop.main(() => {
                 fin.desktop.InterApplicationBus.unsubscribe('*', excelServiceEventTopic, onExcelServiceEvent);
                 resolve();
             });
-            chrome.desktop.getDetails(function (details) {
+            chrome.desktop.getDetails((details) => {
                 fin.desktop.System.launchExternalProcess(Object.assign({
                     target: `${installFolder}\\${servicePath}`,
                     arguments: '-p ' + details.port,
                     uuid: excelServiceUuid,
-                }), process => {
+                }), (process) => {
                     consoleLog('Service Launched: ' + process.uuid);
-                }, error => {
+                }, () => {
                     reject('Error starting Excel service');
                 });
             });
         });
     }
-    // This is a very shallow polyfill for the services API
-    //(window as any).fin.desktop.Service = {
-    //    connect: serviceOpts => {
-    //        var serviceUuid = serviceOpts.uuid;
-    //        if (serviceUuid !== excelServiceUuid) {
-    //            console.error('Unknown service UUID!');
-    //        }
-    //        return excelServicePromise;
-    //    }
-    //};
 });
 //# sourceMappingURL=service-loader.js.map
 
