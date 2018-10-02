@@ -1,7 +1,7 @@
 import { Workbook } from './ExcelWorkbook';
 import { RpcDispatcher } from './RpcDispatcher';
 /**
- * Worksheet public functions
+ * @description Worksheet public functions
  */
 export interface Worksheet {
     addEventListener(type: string, listener: EventListenerOrEventListenerObject): void;
@@ -26,7 +26,7 @@ export interface Worksheet {
     toObject(): Worksheet;
 }
 /**
- * Information about the cell
+ * @description Information about the cell
  */
 export interface Cell extends CellValue {
     address: string;
@@ -34,32 +34,42 @@ export interface Cell extends CellValue {
     row: number;
 }
 /**
- * Value of the cell
+ * @description Value of the cell
  */
 export interface CellValue {
     formula: string;
     value: string | number;
 }
+/**
+ * @description Range of cells
+ */
 export interface CellArrayRange {
     arrayOfCells: CellValue[];
 }
 /**
- * Payload for set cells payload
+ * @description Payload for set cells function
  */
 export interface SetCellsPayload {
     offset: string;
     values: (string | number)[][];
 }
+/**
+ * @description Payload for get cells function
+ */
 export interface GetCellsPayload {
     start: string;
     offsetWidth: number;
     offsetHeight: number;
 }
+/**
+ * @description The address of the cell
+ */
 export interface CellAddress {
     address: string;
 }
 /**
- * @class Class that represents a worksheet
+ * @class
+ * @description Class that represents a worksheet
  */
 export declare class ExcelWorksheet extends RpcDispatcher implements Worksheet, EventTarget {
     /**
@@ -78,132 +88,166 @@ export declare class ExcelWorksheet extends RpcDispatcher implements Worksheet, 
      */
     private objectInstance;
     /**
-     * @constructor Constructor for the ExcelWorksheet class
-     * @param name The name of the worksheet
-     * @param workbook The ExcelWorkbook this worksheet is tied to
+     * @constructor
+     * @description Constructor for the ExcelWorksheet class
+     * @param {string} name The name of the worksheet
+     * @param {Workbook} workbook The ExcelWorkbook this worksheet is tied to
      */
     constructor(name: string, workbook: Workbook);
     /**
      * @protected
-     * @function getDefaultMessage Returns the default message
+     * @function getDefaultMessage
+     * @description Returns the default message
      * @returns {object} Returns the default message
      */
     protected getDefaultMessage(): object;
     /**
      * @public
-     * @property Returns worksheet name
+     * @property
+     * @description Returns worksheet name
      * @returns {string} The name of the worksheet
      */
     /**
     * @public
-    * @property Returns worksheet name
-    * @returns {string} The name of the worksheet
+    * @property
+    * @description Returns worksheet name
+    * @param {string} name The name of the worksheet
     */
     name: string;
+    /**
+     * @public
+     * @property
+     * @description Returns the workbook that this worksheet is tied to
+     * @returns {Workbook} Returns the workbook that this worksheet is tied to
+     */
     readonly workbook: Workbook;
     /**
      * @public
-     * @function setCells Sets the content for the cells
-     * @param values values for the cell
-     * @param offset The cell address
+     * @function setCells
+     * @description Sets the content for the cells
+     * @param {(string|number)[][]} values values for the cell
+     * @param {string} offset The cell address
+     * @returns {Promise<void>} A promise
      */
     setCells(values: (string | number)[][], offset: string): Promise<void>;
     /**
      * @public
-     * @function getCells Gets cell values from the range specified
-     * @param start The start cell address
-     * @param offsetWidth The number of columns in the openfin app
-     * @param offsetHeight The number of rows in the openfin app
+     * @function getCells
+     * @description Gets cell values from the range specified
+     * @param {string} start The start cell address
+     * @param {number} offsetWidth The number of columns in the openfin app
+     * @param {number} offsetHeight The number of rows in the openfin app
+     * @returns {Promise<(string | number)[][]>} A promise containing the cells
      */
     getCells(start: string, offsetWidth: number, offsetHeight: number): Promise<(string | number)[][]>;
     /**
-     * @function activateRow This mirrors the row selected in the openfin
+     * @public
+     * @function activateRow
+     * @description This mirrors the row selected in the openfin
      * application to Excel
      * @param {string} cellAddress THe address of the first cell of the row
+     * @returns {Promise<void>} A promise
      */
     activateRow(cellAddress: string): Promise<void>;
     /**
-     * @function insertRow This inserts a row just before the selected row
+     * @public
+     * @function insertRow
+     * @description This inserts a row just before the selected row
      * @param {number} rowNumber The address of the first cell in the row
      * @returns {Promise<void>} A promise
      */
     insertRow(rowNumber: number): Promise<void>;
     /**
-     * @function deleteRow This deletes the selected row
+     * @public
+     * @function deleteRow
+     * @description This deletes the selected row
      * @param {number} rowNumber The address of the first cell in the row
      * @returns {Promise<any>} A promise
      */
     deleteRow(rowNumber: number): Promise<void>;
     /**
      * @public
-     * @function activate Activates the current worksheet
+     * @function
+     * @description activate Activates the current worksheet
      * @returns {Promise<any>} A promise
      */
     activate(): Promise<void>;
     /**
      * @public
-     * @function activateCell Activates the selected cell
-     * @param cellAddress The address of the cell
+     * @function
+     * @description activateCell Activates the selected cell
+     * @param {string} cellAddress The address of the cell
      * @returns {Promise<void>} A promise
      */
     activateCell(cellAddress: string): Promise<void>;
     /**
      * @public
-     * @function clearRange Clear the range of formatting and content
-     * @param rangeCode The range selected
+     * @function clearRange
+     * @description Clear the range of formatting and content
+     * @param {string} rangeCode The range selected
+     * @returns {Promise<void>} A promise
      */
     clearRange(rangeCode: string): Promise<void>;
     /**
      * @public
-     * @function clearRangeContents Clears the contents in the specified range
-     * @param rangeCode The selected range
+     * @function clearRangeContents
+     * @description Clears the contents in the specified range
+     * @param {string} rangeCode The selected range
+     * @returns {Promise<void>} A promise
      */
     clearRangeContents(rangeCode: string): Promise<void>;
     /**
      * @public
-     * @function clearAllCells Clear all cells and their formatting
+     * @function clearAllCells
+     * @description Clear all cells and their formatting
      * @returns {Promise<any>} A promise
      */
     clearAllCells(): Promise<void>;
     /**
      * @public
-     * @function clearAllCellContents Clears all the cells content
+     * @function clearAllCellContents
+     * @description Clears all the cells content
      * @returns {Promise<void>} A promise
      */
     clearAllCellContents(): Promise<void>;
     /**
      * @public
-     * @function setCellName Sets a name for the cell address
-     * @param cellAddress The address of the cell e.g. A1
-     * @param cellName The name of the cell
+     * @function setCellName
+     * @description Sets a name for the cell address
+     * @param {string} cellAddress The address of the cell e.g. A1
+     * @param {string} cellName The name of the cell
      * @returns {Promise<any>} A promise
      */
     setCellName(cellAddress: string, cellName: string): Promise<void>;
     /**
      * @public
-     * @function calculate Calculates all formula on teh sheet
+     * @function calculate
+     * @description Calculates all formula on teh sheet
      * @returns {Promise<void>} A promise
      */
     calculate(): Promise<void>;
     /**
      * @public
-     * @function getCellByName Gets a cell by its name
-     * @param cellName The name of the cell
+     * @function getCellByName
+     * @description Gets a cell by its name
+     * @param {string} cellName The name of the cell
      * @returns {Promise<any>} A promise
      */
     getCellByName(cellName: string): Promise<Cell>;
     /**
      * @public
-     * @function protect Password protects the sheet
-     * @param password Password used to protect the sheet
+     * @function protect
+     * @description Password protects the sheet
+     * @param {string} password Password used to protect the sheet
      * @returns {Promise<any>} A promise
      */
     protect(password: string): Promise<void>;
     /**
      * @public
-     * @function toObject Returns only the functions that should be exposed by
+     * @function
+     * @description toObject Returns only the functions that should be exposed by
      * this class
-     * @returns {object} Public methods in ExcelWorksheet
+     * @returns {Worksheet} Public methods in ExcelWorksheet
      */
     toObject(): Worksheet;
 }

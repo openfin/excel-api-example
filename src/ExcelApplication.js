@@ -8,10 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const ExcelUtilities_1 = require("./ExcelUtilities");
 const ExcelWorkbook_1 = require("./ExcelWorkbook");
 const ExcelWorksheet_1 = require("./ExcelWorksheet");
 const RpcDispatcher_1 = require("./RpcDispatcher");
-const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
 /**
  * @class Represents the Excel application itself
  */
@@ -167,6 +167,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                 }
                 worksheet.dispatchEvent(eventType, { data });
             case 'afterCalculation':
+                break;
             default:
                 this.dispatchEvent(eventType);
                 break;
@@ -178,7 +179,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
      * @param result The result of the call being made in the excel application
      */
     processExcelResult(result) {
-        let callbackData = {};
+        let callbackData;
         const executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
         delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
         if (result.error) {
@@ -187,7 +188,6 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         }
         const workbook = this.workbooks[result.target.workbookName];
         const worksheets = workbook && workbook.worksheets;
-        const worksheet = worksheets && worksheets[result.target.worksheetName];
         const resultData = result.data;
         switch (result.action) {
             case 'getWorkbooks':
@@ -221,7 +221,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                 break;
             case 'addSheet':
                 const newWorksheetName = resultData;
-                const newWorksheet = workbook[newWorksheetName] ||
+                const newWorksheet = workbook.worksheets[newWorksheetName] ||
                     new ExcelWorksheet_1.ExcelWorksheet(newWorksheetName, workbook);
                 worksheets[newWorksheet.name] = newWorksheet;
                 callbackData = newWorksheet.toObject();
@@ -263,7 +263,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
      */
     monitorDisconnect() {
         return new Promise((resolve, reject) => {
-            const excelApplicationConnection = externalApplicationWrap(this.connectionUuid);
+            const excelApplicationConnection = ExcelUtilities_1.externalApplicationWrap(this.connectionUuid);
             let onDisconnect;
             excelApplicationConnection.addEventListener('disconnected', onDisconnect = () => {
                 excelApplicationConnection.removeEventListener('disconnected', onDisconnect);

@@ -30,7 +30,7 @@ export interface Application {
     calculateAll(): Promise<void>;
     getCalculationMode(): Promise<CalculationMode>;
     getConnectionStatus(): Promise<boolean>;
-    getWorkbookByName(name: string): Workbook;
+    getWorkbookByName(name: string): Workbook | undefined;
     getWorkbooks(): Promise<Workbooks>;
     openWorkbook(path: string): Promise<Workbook>;
     run(): Promise<void>;
@@ -146,7 +146,7 @@ export declare class ExcelApplication extends RpcDispatcher implements Applicati
      * name
      * @param name The name of the workbook
      */
-    getWorkbookByName(name: string): Workbook;
+    getWorkbookByName(name: string): Workbook | undefined;
     /**
      * @function addWorkbook adds a workbook to the Excel application
      * @returns {Promise<any>} A promise with a result

@@ -2,13 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = require("./RpcDispatcher");
 /**
- * @class Class that represents a workbook
+ * @class
+ * @description Class that represents a workbook
  */
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     /**
-     * @constructor Constructor for the ExcelWorkbook class
-     * @param application The Application this workbook belongs to
-     * @param name The name of the workbook
+     * @constructor
+     * @description Constructor for the ExcelWorkbook class
+     * @param {Application} application The Application this workbook belongs to
+     * @param {string}name The name of the workbook
      */
     constructor(application, name) {
         super();
@@ -16,30 +18,39 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
         this.application = application;
         this.mWorksheets = {};
         this.mWorkbookName = name;
+        this.objectInstance = null;
     }
     /**
      * @private
-     * @function getDefaultMessage Gets the default message to be sent over the
+     * @function getDefaultMessage
+     * @description Gets the default message to be sent over the
      * wire
-     * @returns {any} An object with the workbook name in as default
+     * @returns {object} An object with the workbook name in as default
      */
     getDefaultMessage() {
         return { workbook: this.mWorkbookName };
     }
     /**
      * @public
-     * @property Worksheets tied to this workbook
-     * @returns {Worksheets}
+     * @property
+     * @description Worksheets tied to this workbook
+     * @returns {Worksheets} The worksheets tied to this workbook
      */
     get worksheets() {
         return this.mWorksheets;
     }
+    /**
+     * @public
+     * @property
+     * @description Set the worksheets that are tied to this workbook
+     */
     set worksheets(worksheets) {
         this.mWorksheets = worksheets;
     }
     /**
      * @public
-     * @property workbookName property
+     * @property
+     * @description workbookName property
      * @returns {string} The name of the workbook
      */
     get name() {
@@ -47,23 +58,27 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @property Sets the workbook name
+     * @property
+     * @description Sets the workbook name
+     * @param {string} name Set the name of the workbook
      */
     set name(name) {
         this.mWorkbookName = name;
     }
     /**
      * @public
-     * @function getWorksheets Gets the worksheets tied to this workbook
-     * @returns A promise with worksheets as the result
+     * @function getWorksheets
+     * @description Gets the worksheets tied to this workbook
+     * @returns {Promise<Worksheets>} A promise with worksheets as the result
      */
     getWorksheets() {
         return this.invokeExcelCall('getWorksheets', null);
     }
     /**
      * @public
-     * @function getWorksheetByName Gets the worksheet by name
-     * @param name The name of the worksheet
+     * @function getWorksheetByName
+     * @description Gets the worksheet by name
+     * @param {string} name The name of the worksheet
      * @returns {ExcelWorksheet} The excel worksheet with the specified name
      */
     getWorksheetByName(name) {
@@ -77,22 +92,25 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     /**
      * @public
      * @function addWorksheet Adds a new worksheet to the workbook
-     * @returns {Promise<any>} A promise
+     * @description Adds a new worksheet to the workbook
+     * @returns {Promise<Worksheet>} A promise
      */
     addWorksheet() {
         return this.invokeExcelCall('addSheet', null);
     }
     /**
      * @public
-     * @function activate Activates the workbook
-     * @returns {Promise<any>} A promise
+     * @function activate
+     * @description Activates the workbook
+     * @returns {Promise<void>} A promise
      */
     activate() {
         return this.invokeExcelCall('activateWorkbook');
     }
     /**
      * @public
-     * @function save Save the workbook
+     * @function save
+     * @description Save the current workbook
      * @returns {Promise<void>} A promise
      */
     save() {
@@ -100,7 +118,8 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function close Closes the workbook
+     * @function close
+     * @description Closes the workbook
      * @returns {Promise<void>} A promise
      */
     close() {
@@ -108,7 +127,8 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function toObject Returns only the methods exposed
+     * @function toObject
+     * @description Returns only the methods exposed
      * @returns {Workbook} Returns only the methods exposed
      */
     toObject() {

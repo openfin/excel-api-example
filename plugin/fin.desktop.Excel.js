@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -75,10 +75,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @abstract
- * @class Top level class that communicates with the Excel application
+ * @class
+ * @description Top level class that communicates with the Excel application
  */
 class RpcDispatcher {
     constructor() {
+        /**
+         * @public
+         * @description The connectionUuid of the excel application
+         */
+        this.connectionUuid = '';
         /**
          * @private
          * @description Holds event listeners
@@ -89,8 +95,8 @@ class RpcDispatcher {
      * @public
      * @function addEventListener Adds event listener to listen to events coming
      * from Excel application
-     * @param type The type of the event to listen to
-     * @param listener The method to execute when the event has been fired
+     * @param {string} type The type of the event to listen to
+     * @param {EventListenerOrEventListenerObject} listener The method to execute when the event has been fired
      */
     addEventListener(type, listener) {
         if (this.hasEventListener(type, listener)) {
@@ -103,9 +109,10 @@ class RpcDispatcher {
     }
     /**
      * @public
-     * @function removeEventListener Removes the event from the local store
-     * @param type The type of the event to listen to
-     * @param listener The method to execute when the event has been fired
+     * @function removeEventListener
+     * @description Removes the event from the local store
+     * @param {string} type The type of the event to listen to
+     * @param {EventListenerOrEventListenerObject} listener The method to execute when the event has been fired
      */
     removeEventListener(type, listener) {
         if (!this.hasEventListener(type, listener)) {
@@ -116,10 +123,12 @@ class RpcDispatcher {
     }
     /**
      * @private
-     * @function hasEventListener Check whether an event listener has been
+     * @function hasEventListener
+     * @description Check whether an event listener has been
      * registered
-     * @param type The type of the event
-     * @param listener The method to execute when the event has been fired
+     * @param {string} type The type of the event
+     * @param {EventListenerOrEventListenerObject} listener The method to execute when the event has been fired
+     * @returns {boolean} True or false depending on if the listener exists
      */
     hasEventListener(type, listener) {
         if (!this.listeners[type]) {
@@ -132,10 +141,12 @@ class RpcDispatcher {
     }
     /**
      * @public
-     * @function dispatchEvent Sends event over to the correct entity e.g.
+     * @function dispatchEvent
+     * @description Sends event over to the correct entity e.g.
      * Workbook, worksheet
-     * @param evtOrTypeArg Pass either an event or event type as a string
-     * @param data The data to be passed to the receiving entity
+     * @param {string|Event} evtOrTypeArg Pass either an event or event type as a string
+     * @param {T} data The data to be passed to the receiving entity
+     * @returns {boolean} Whether or not the events default behaviour has been prevented
      */
     dispatchEvent(evtOrTypeArg, data) {
         let event;
@@ -158,7 +169,8 @@ class RpcDispatcher {
     }
     /**
      * @private
-     * @function getDefaultMessage Get the default message when invoking a remote
+     * @function getDefaultMessage
+     * @description Get the default message when invoking a remote
      * call
      * @returns {object} Returns an empty object to be populated
      */
@@ -167,9 +179,11 @@ class RpcDispatcher {
     }
     /**
      * @protected
-     * @function invokeExcelCall Invokes a call in excel application via RPC
-     * @param functionName The name of the function to invoke
-     * @param data Any data to be sent over as part of the invocation
+     * @function invokeExcelCall
+     * @description Invokes a call in excel application via RPC
+     * @param {string} functionName The name of the function to invoke
+     * @param {RemoteData?} data Any data to be sent over as part of the invocation
+     * @returns {Promise<T>} A Promise with generic data depending on which function calls it
      */
     invokeExcelCall(functionName, data) {
         return this.invokeRemoteCall('excelCall', functionName, data);
@@ -178,19 +192,21 @@ class RpcDispatcher {
      * @protected
      * @function invokeServiceCall Invokes a call in the excel service process via
      * RPC
-     * @param functionName The name of the function to invoke
-     * @param data Any data to be sent over as part of the invocation
+     * @param {string} functionName The name of the function to invoke
+     * @param {ExcelData|null} data Any data to be sent over as part of the invocation
+     * @returns {Promise<T>} A Promise with generic data depending on which function calls it
      */
     invokeServiceCall(functionName, data) {
         return this.invokeRemoteCall('excelServiceCall', functionName, data);
     }
     /**
      * @private
-     * @function invokeRemoteCall Invokes a remote procedure call
-     * @param topic Topic to send on
-     * @param functionName The name of the function to invoke
-     * @param data The data to be sent over as part of the invocation
-     * @param callback Callback to be applied to the promise
+     * @function invokeRemoteCall
+     * @description Invokes a remote procedure call
+     * @param {string} topic Topic to send on
+     * @param {string} functionName The name of the function to invoke
+     * @param {RemoteData?} data The data to be sent over as part of the invocation
+     * @returns {Promise<T>} A Promise with generic data depending on which function calls it
      */
     invokeRemoteCall(topic, functionName, data) {
         const message = this.getDefaultMessage();
@@ -250,6 +266,23 @@ exports.RpcDispatcher = RpcDispatcher;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * @description Gets the uuid of the current app
+ */
+exports.getUuid = fin.desktop.getUuid;
+/**
+ * @description Wraps an external application
+ */
+exports.externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
+//# sourceMappingURL=ExcelUtilities.js.map
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -259,32 +292,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ExcelApplication_1 = __webpack_require__(2);
+const ExcelApplication_1 = __webpack_require__(3);
+const ExcelUtilities_1 = __webpack_require__(1);
 const RpcDispatcher_1 = __webpack_require__(0);
-const getUuid = fin.desktop.getUuid;
-const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
 /**
  * @constant {string} excelServiceUuid Uuid for the excel service
  */
 const excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
 /**
- * @class Class for interacting with the .NET ExcelService process
+ * @class
+ * @description Class for interacting with the .NET ExcelService process
  */
 class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     /**
-     * @constructor Constructor for ExcelService
+     * @constructor
+     * @description Constructor for ExcelService
      */
     constructor() {
         super();
         this.connectionUuid = excelServiceUuid;
         this.mInitialized = false;
         this.mApplications = {};
-        this.mDefaultApplicationUuid = undefined;
-        this.defaultApplicationObj = undefined;
+        this.mDefaultApplicationUuid = '';
+        this.defaultApplicationObj = null;
     }
     /**
      * @public
-     * @function init Initialises the ExcelService
+     * @async
+     * @function init
+     * @description Initialises the ExcelService
      * @returns {Promise<void>} A promise
      */
     init() {
@@ -302,16 +338,18 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function processExcelServiceEvent Processes events coming from the Excel
+     * @async
+     * @function processExcelServiceEvent
+     * @description Processes events coming from the Excel
      * application
-     * @param {any} data Payload passed from the Excel Service
+     * @param {ExcelServiceEventData} data Payload passed from the Excel Service
      * @returns {Promise<void>} A promise
      */
     processExcelServiceEvent(data) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(data);
             const eventType = data.event;
-            let eventData;
+            let eventData = null;
             switch (eventType) {
                 case 'started':
                     break;
@@ -337,8 +375,10 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function processExcelServiceResult Processes results from excel service
-     * @param {any} result The result from the service
+     * @async
+     * @function processExcelServiceResult
+     * @description Processes results from excel service
+     * @param {ExcelResultData} result The result from the service
      * @returns {Promise<void>} A promise
      */
     processExcelServiceResult(result) {
@@ -366,8 +406,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function subscribeToServiceMessages function to subscribe to topics
-     * ExcelService will send to
+     * @function subscribeToServiceMessages
+     * @description function to subscribe to topics
      * @returns {Promise<[void, void]>} A list of promises
      */
     subscribeToServiceMessages() {
@@ -378,13 +418,14 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function monitorDisconnect Subscribes to the disconnected event and
+     * @function monitorDisconnect
+     * @description Subscribes to the disconnected event and
      * dispatches to the excel application
      * @returns {Promnise<void>} A promise
      */
     monitorDisconnect() {
         return new Promise((resolve, reject) => {
-            const excelServiceConnection = externalApplicationWrap(excelServiceUuid);
+            const excelServiceConnection = ExcelUtilities_1.externalApplicationWrap(excelServiceUuid);
             let onDisconnect;
             excelServiceConnection.addEventListener('disconnected', onDisconnect = () => {
                 excelServiceConnection.removeEventListener('disconnected', onDisconnect);
@@ -394,7 +435,9 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function registerWindowInstance This registers a new Excel instance to a
+     * @async
+     * @function registerWindowInstance
+     * @description This registers a new Excel instance to a
      * new workbook domain
      * @returns {Promise<void>} A promise
      */
@@ -405,7 +448,9 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function configureDefaultApplication Configures the default application
+     * @async
+     * @function configureDefaultApplication
+     * @description Configures the default application
      * when the application first starts
      * @returns {Promise<void>} A promise
      */
@@ -427,7 +472,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                 return;
             }
             if (defaultAppEntry === undefined) {
-                const disconnectedAppUuid = getUuid();
+                const disconnectedAppUuid = ExcelUtilities_1.getUuid();
                 const disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
                 yield disconnectedApp.init();
                 this.mApplications[disconnectedAppUuid] = disconnectedApp;
@@ -439,7 +484,9 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     // Internal Event Handlers
     /**
      * @private
-     * @function processExcelConnectedEvent Process the connected event
+     * @async
+     * @function processExcelConnectedEvent
+     * @description Process the connected event
      * @param {ExcelConnectionEventData} data payload that holds uuid of the connected application
      * @returns {Promise<void>} A promise
      */
@@ -457,9 +504,11 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function processExcelDisconnectedEvent Processes event when excel is
+     * @async
+     * @function processExcelDisconnectedEvent
+     * @description Processes event when excel is
      * disconnected
-     * @param data The data from excel
+     * @param {ExcelConnectionEventData} data The data from excel
      * @returns {Promise<void>} A promise
      */
     processExcelDisconnectedEvent(data) {
@@ -479,7 +528,9 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     // Internal API Handlers
     /**
      * @private
-     * @function processGetExcelInstancesResult Get Excel instance
+     * @async
+     * @function processGetExcelInstancesResult
+     * @description Gets Excel instance
      * @param {string[]} connectionUuids THe connection Uuids the Excel service is holding
      * @returns {Promise<void>} A promise
      */
@@ -505,7 +556,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     // API Calls
     /**
      * @public
-     * @function install Installs the addin
+     * @function install
+     * @description Get Excel instance
      * @returns {Promise<void>} A promise
      */
     install() {
@@ -513,7 +565,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function getInstallationStatus Checks the installation status
+     * @function getInstallationStatus
+     * @description Checks the installation status
      * @returns {Promise<void>} A promise
      */
     getInstallationStatus() {
@@ -521,7 +574,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function getExcelInstances Returns all the excel instances that are open
+     * @function getExcelInstances
+     * @description Returns all the excel instances that are open
      * @returns {Promise<void>} A promsie
      */
     getExcelInstances() {
@@ -529,7 +583,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function toObject Creates an empty object
+     * @function toObject
+     * @description Creates an empty object
      * @returns {object} An empty object
      */
     toObject() {
@@ -540,7 +595,7 @@ exports.ExcelService = ExcelService;
 //# sourceMappingURL=ExcelApi.js.map
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -554,10 +609,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ExcelWorkbook_1 = __webpack_require__(3);
-const ExcelWorksheet_1 = __webpack_require__(4);
+const ExcelUtilities_1 = __webpack_require__(1);
+const ExcelWorkbook_1 = __webpack_require__(4);
+const ExcelWorksheet_1 = __webpack_require__(5);
 const RpcDispatcher_1 = __webpack_require__(0);
-const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
 /**
  * @class Represents the Excel application itself
  */
@@ -713,6 +768,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                 }
                 worksheet.dispatchEvent(eventType, { data });
             case 'afterCalculation':
+                break;
             default:
                 this.dispatchEvent(eventType);
                 break;
@@ -724,7 +780,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
      * @param result The result of the call being made in the excel application
      */
     processExcelResult(result) {
-        let callbackData = {};
+        let callbackData;
         const executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
         delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
         if (result.error) {
@@ -733,7 +789,6 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         }
         const workbook = this.workbooks[result.target.workbookName];
         const worksheets = workbook && workbook.worksheets;
-        const worksheet = worksheets && worksheets[result.target.worksheetName];
         const resultData = result.data;
         switch (result.action) {
             case 'getWorkbooks':
@@ -767,7 +822,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                 break;
             case 'addSheet':
                 const newWorksheetName = resultData;
-                const newWorksheet = workbook[newWorksheetName] ||
+                const newWorksheet = workbook.worksheets[newWorksheetName] ||
                     new ExcelWorksheet_1.ExcelWorksheet(newWorksheetName, workbook);
                 worksheets[newWorksheet.name] = newWorksheet;
                 callbackData = newWorksheet.toObject();
@@ -809,7 +864,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
      */
     monitorDisconnect() {
         return new Promise((resolve, reject) => {
-            const excelApplicationConnection = externalApplicationWrap(this.connectionUuid);
+            const excelApplicationConnection = ExcelUtilities_1.externalApplicationWrap(this.connectionUuid);
             let onDisconnect;
             excelApplicationConnection.addEventListener('disconnected', onDisconnect = () => {
                 excelApplicationConnection.removeEventListener('disconnected', onDisconnect);
@@ -936,7 +991,7 @@ exports.ExcelApplication = ExcelApplication;
 //# sourceMappingURL=ExcelApplication.js.map
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -944,13 +999,15 @@ exports.ExcelApplication = ExcelApplication;
 Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = __webpack_require__(0);
 /**
- * @class Class that represents a workbook
+ * @class
+ * @description Class that represents a workbook
  */
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     /**
-     * @constructor Constructor for the ExcelWorkbook class
-     * @param application The Application this workbook belongs to
-     * @param name The name of the workbook
+     * @constructor
+     * @description Constructor for the ExcelWorkbook class
+     * @param {Application} application The Application this workbook belongs to
+     * @param {string}name The name of the workbook
      */
     constructor(application, name) {
         super();
@@ -958,30 +1015,39 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
         this.application = application;
         this.mWorksheets = {};
         this.mWorkbookName = name;
+        this.objectInstance = null;
     }
     /**
      * @private
-     * @function getDefaultMessage Gets the default message to be sent over the
+     * @function getDefaultMessage
+     * @description Gets the default message to be sent over the
      * wire
-     * @returns {any} An object with the workbook name in as default
+     * @returns {object} An object with the workbook name in as default
      */
     getDefaultMessage() {
         return { workbook: this.mWorkbookName };
     }
     /**
      * @public
-     * @property Worksheets tied to this workbook
-     * @returns {Worksheets}
+     * @property
+     * @description Worksheets tied to this workbook
+     * @returns {Worksheets} The worksheets tied to this workbook
      */
     get worksheets() {
         return this.mWorksheets;
     }
+    /**
+     * @public
+     * @property
+     * @description Set the worksheets that are tied to this workbook
+     */
     set worksheets(worksheets) {
         this.mWorksheets = worksheets;
     }
     /**
      * @public
-     * @property workbookName property
+     * @property
+     * @description workbookName property
      * @returns {string} The name of the workbook
      */
     get name() {
@@ -989,23 +1055,27 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @property Sets the workbook name
+     * @property
+     * @description Sets the workbook name
+     * @param {string} name Set the name of the workbook
      */
     set name(name) {
         this.mWorkbookName = name;
     }
     /**
      * @public
-     * @function getWorksheets Gets the worksheets tied to this workbook
-     * @returns A promise with worksheets as the result
+     * @function getWorksheets
+     * @description Gets the worksheets tied to this workbook
+     * @returns {Promise<Worksheets>} A promise with worksheets as the result
      */
     getWorksheets() {
         return this.invokeExcelCall('getWorksheets', null);
     }
     /**
      * @public
-     * @function getWorksheetByName Gets the worksheet by name
-     * @param name The name of the worksheet
+     * @function getWorksheetByName
+     * @description Gets the worksheet by name
+     * @param {string} name The name of the worksheet
      * @returns {ExcelWorksheet} The excel worksheet with the specified name
      */
     getWorksheetByName(name) {
@@ -1019,22 +1089,25 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     /**
      * @public
      * @function addWorksheet Adds a new worksheet to the workbook
-     * @returns {Promise<any>} A promise
+     * @description Adds a new worksheet to the workbook
+     * @returns {Promise<Worksheet>} A promise
      */
     addWorksheet() {
         return this.invokeExcelCall('addSheet', null);
     }
     /**
      * @public
-     * @function activate Activates the workbook
-     * @returns {Promise<any>} A promise
+     * @function activate
+     * @description Activates the workbook
+     * @returns {Promise<void>} A promise
      */
     activate() {
         return this.invokeExcelCall('activateWorkbook');
     }
     /**
      * @public
-     * @function save Save the workbook
+     * @function save
+     * @description Save the current workbook
      * @returns {Promise<void>} A promise
      */
     save() {
@@ -1042,7 +1115,8 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function close Closes the workbook
+     * @function close
+     * @description Closes the workbook
      * @returns {Promise<void>} A promise
      */
     close() {
@@ -1050,7 +1124,8 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function toObject Returns only the methods exposed
+     * @function toObject
+     * @description Returns only the methods exposed
      * @returns {Workbook} Returns only the methods exposed
      */
     toObject() {
@@ -1074,7 +1149,7 @@ exports.ExcelWorkbook = ExcelWorkbook;
 //# sourceMappingURL=ExcelWorkbook.js.map
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1082,23 +1157,27 @@ exports.ExcelWorkbook = ExcelWorkbook;
 Object.defineProperty(exports, "__esModule", { value: true });
 const RpcDispatcher_1 = __webpack_require__(0);
 /**
- * @class Class that represents a worksheet
+ * @class
+ * @description Class that represents a worksheet
  */
 class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     /**
-     * @constructor Constructor for the ExcelWorksheet class
-     * @param name The name of the worksheet
-     * @param workbook The ExcelWorkbook this worksheet is tied to
+     * @constructor
+     * @description Constructor for the ExcelWorksheet class
+     * @param {string} name The name of the worksheet
+     * @param {Workbook} workbook The ExcelWorkbook this worksheet is tied to
      */
     constructor(name, workbook) {
         super();
         this.connectionUuid = workbook.connectionUuid;
         this.mWorkbook = workbook;
         this.mWorksheetName = name;
+        this.objectInstance = null;
     }
     /**
      * @protected
-     * @function getDefaultMessage Returns the default message
+     * @function getDefaultMessage
+     * @description Returns the default message
      * @returns {object} Returns the default message
      */
     getDefaultMessage() {
@@ -1106,7 +1185,8 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @property Returns worksheet name
+     * @property
+     * @description Returns worksheet name
      * @returns {string} The name of the worksheet
      */
     get name() {
@@ -1114,20 +1194,29 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @property Returns worksheet name
-     * @returns {string} The name of the worksheet
+     * @property
+     * @description Returns worksheet name
+     * @param {string} name The name of the worksheet
      */
     set name(name) {
         this.mWorksheetName = name;
     }
+    /**
+     * @public
+     * @property
+     * @description Returns the workbook that this worksheet is tied to
+     * @returns {Workbook} Returns the workbook that this worksheet is tied to
+     */
     get workbook() {
         return this.mWorkbook;
     }
     /**
      * @public
-     * @function setCells Sets the content for the cells
-     * @param values values for the cell
-     * @param offset The cell address
+     * @function setCells
+     * @description Sets the content for the cells
+     * @param {(string|number)[][]} values values for the cell
+     * @param {string} offset The cell address
+     * @returns {Promise<void>} A promise
      */
     setCells(values, offset) {
         if (!offset) {
@@ -1138,26 +1227,33 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function getCells Gets cell values from the range specified
-     * @param start The start cell address
-     * @param offsetWidth The number of columns in the openfin app
-     * @param offsetHeight The number of rows in the openfin app
+     * @function getCells
+     * @description Gets cell values from the range specified
+     * @param {string} start The start cell address
+     * @param {number} offsetWidth The number of columns in the openfin app
+     * @param {number} offsetHeight The number of rows in the openfin app
+     * @returns {Promise<(string | number)[][]>} A promise containing the cells
      */
     getCells(start, offsetWidth, offsetHeight) {
         const payload = { start, offsetHeight, offsetWidth };
         return this.invokeExcelCall('getCells', payload);
     }
     /**
-     * @function activateRow This mirrors the row selected in the openfin
+     * @public
+     * @function activateRow
+     * @description This mirrors the row selected in the openfin
      * application to Excel
      * @param {string} cellAddress THe address of the first cell of the row
+     * @returns {Promise<void>} A promise
      */
     activateRow(cellAddress) {
         const payload = { address: cellAddress };
         return this.invokeExcelCall('activateRow', payload);
     }
     /**
-     * @function insertRow This inserts a row just before the selected row
+     * @public
+     * @function insertRow
+     * @description This inserts a row just before the selected row
      * @param {number} rowNumber The address of the first cell in the row
      * @returns {Promise<void>} A promise
      */
@@ -1165,7 +1261,9 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
         return this.invokeExcelCall('insertRow', { rowNumber });
     }
     /**
-     * @function deleteRow This deletes the selected row
+     * @public
+     * @function deleteRow
+     * @description This deletes the selected row
      * @param {number} rowNumber The address of the first cell in the row
      * @returns {Promise<any>} A promise
      */
@@ -1174,7 +1272,8 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function activate Activates the current worksheet
+     * @function
+     * @description activate Activates the current worksheet
      * @returns {Promise<any>} A promise
      */
     activate() {
@@ -1182,8 +1281,9 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function activateCell Activates the selected cell
-     * @param cellAddress The address of the cell
+     * @function
+     * @description activateCell Activates the selected cell
+     * @param {string} cellAddress The address of the cell
      * @returns {Promise<void>} A promise
      */
     activateCell(cellAddress) {
@@ -1220,16 +1320,20 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     //}
     /**
      * @public
-     * @function clearRange Clear the range of formatting and content
-     * @param rangeCode The range selected
+     * @function clearRange
+     * @description Clear the range of formatting and content
+     * @param {string} rangeCode The range selected
+     * @returns {Promise<void>} A promise
      */
     clearRange(rangeCode) {
         return this.invokeExcelCall('clearRange', { rangeCode });
     }
     /**
      * @public
-     * @function clearRangeContents Clears the contents in the specified range
-     * @param rangeCode The selected range
+     * @function clearRangeContents
+     * @description Clears the contents in the specified range
+     * @param {string} rangeCode The selected range
+     * @returns {Promise<void>} A promise
      */
     clearRangeContents(rangeCode) {
         return this.invokeExcelCall('clearRangeContents', { rangeCode });
@@ -1244,7 +1348,8 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     //}
     /**
      * @public
-     * @function clearAllCells Clear all cells and their formatting
+     * @function clearAllCells
+     * @description Clear all cells and their formatting
      * @returns {Promise<any>} A promise
      */
     clearAllCells() {
@@ -1252,7 +1357,8 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function clearAllCellContents Clears all the cells content
+     * @function clearAllCellContents
+     * @description Clears all the cells content
      * @returns {Promise<void>} A promise
      */
     clearAllCellContents() {
@@ -1268,9 +1374,10 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     //}
     /**
      * @public
-     * @function setCellName Sets a name for the cell address
-     * @param cellAddress The address of the cell e.g. A1
-     * @param cellName The name of the cell
+     * @function setCellName
+     * @description Sets a name for the cell address
+     * @param {string} cellAddress The address of the cell e.g. A1
+     * @param {string} cellName The name of the cell
      * @returns {Promise<any>} A promise
      */
     setCellName(cellAddress, cellName) {
@@ -1278,7 +1385,8 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function calculate Calculates all formula on teh sheet
+     * @function calculate
+     * @description Calculates all formula on teh sheet
      * @returns {Promise<void>} A promise
      */
     calculate() {
@@ -1286,8 +1394,9 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function getCellByName Gets a cell by its name
-     * @param cellName The name of the cell
+     * @function getCellByName
+     * @description Gets a cell by its name
+     * @param {string} cellName The name of the cell
      * @returns {Promise<any>} A promise
      */
     getCellByName(cellName) {
@@ -1295,18 +1404,20 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function protect Password protects the sheet
-     * @param password Password used to protect the sheet
+     * @function protect
+     * @description Password protects the sheet
+     * @param {string} password Password used to protect the sheet
      * @returns {Promise<any>} A promise
      */
     protect(password) {
-        return this.invokeExcelCall('protectSheet', { password: password ? password : null });
+        return this.invokeExcelCall('protectSheet', { password });
     }
     /**
      * @public
-     * @function toObject Returns only the functions that should be exposed by
+     * @function
+     * @description toObject Returns only the functions that should be exposed by
      * this class
-     * @returns {object} Public methods in ExcelWorksheet
+     * @returns {Worksheet} Public methods in ExcelWorksheet
      */
     toObject() {
         return this.objectInstance || (this.objectInstance = {
@@ -1337,14 +1448,14 @@ exports.ExcelWorksheet = ExcelWorksheet;
 //# sourceMappingURL=ExcelWorksheet.js.map
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 // This is the entry point of the Plugin script
-const ExcelApi_1 = __webpack_require__(1);
+const ExcelApi_1 = __webpack_require__(2);
 const excelService = new ExcelApi_1.ExcelService();
 // Attach ExcelService to the window
 window.fin.desktop.ExcelService = excelService;
