@@ -129,10 +129,10 @@ Note: to use this function, you need to call getWorkbooks at least once.
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 
 /*
-getConnectionStatus(callback);
+getConnectionStatus().then(callback);
 Passes true to the callback if its connected to Excel
 */
-fin.desktop.Excel.getConnectionStatus(function(isConnected){...});
+fin.desktop.Excel.getConnectionStatus().then(function(isConnected){...});
 
 /*
 getCalculationMode().then(callback);
@@ -343,11 +343,11 @@ sheet.setCells([["Column1", "Column2"], ["TRUE", "1"], ["TRUE", "2"],["FALSE", "
 sheet.setFilter("A1", 2, 4, 1, "TRUE");
 
 /*
-getCells(start, offsetWidth, offsetHeight, callback);
+getCells(start, offsetWidth, offsetHeight).then(callback);
 Passes a two dimensional array of objects that have following format {value: --, formula: --}
 */
 var sheet = workbook.getSheetByName("sheet1");
-sheet.getCells("A1", 3, 2, function(cells){ // cell: {value: --, formula: --}});
+sheet.getCells("A1", 3, 2).then(function(cells){...}) // cell: {value: --, formula: --}});
 
 /*
 activate();
@@ -431,12 +431,12 @@ sheet.calculate();
 
 
 /*
-getCellByName(name, callback);
+getCellByName(name).then(callback);
 returns cell info of the cell with the name provided.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.getCellByName("TheCellName", function(cellInfo){...});
+sheet.getCellByName("TheCellName").then(function(cellInfo){...});
 
 /*
 protect();
