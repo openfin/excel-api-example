@@ -167,6 +167,7 @@ class RpcDispatcher {
             });
         }
         else {
+            // @ts-ignore
             executor.reject(new Error('The target UUID of the remote call is undefined.'));
         }
         return promise;

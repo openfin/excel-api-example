@@ -172,7 +172,11 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
      */
     configureDefaultApplication() {
         return __awaiter(this, void 0, void 0, function* () {
-            const defaultAppObjUuid = this.defaultApplicationObj && this.defaultApplicationObj.connectionUuid;
+            if (!this.defaultApplicationObj) {
+                console.error('No default applciation object');
+                return;
+            }
+            const defaultAppObjUuid = this.defaultApplicationObj.connectionUuid;
             const defaultAppEntry = this.mApplications[defaultAppObjUuid];
             const defaultAppObjConnected = defaultAppEntry ? defaultAppEntry.connected : false;
             if (defaultAppObjConnected) {

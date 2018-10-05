@@ -240,6 +240,7 @@ class RpcDispatcher {
             });
         }
         else {
+            // @ts-ignore
             executor.reject(new Error('The target UUID of the remote call is undefined.'));
         }
         return promise;
@@ -456,7 +457,11 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
      */
     configureDefaultApplication() {
         return __awaiter(this, void 0, void 0, function* () {
-            const defaultAppObjUuid = this.defaultApplicationObj && this.defaultApplicationObj.connectionUuid;
+            if (!this.defaultApplicationObj) {
+                console.error('No default applciation object');
+                return;
+            }
+            const defaultAppObjUuid = this.defaultApplicationObj.connectionUuid;
             const defaultAppEntry = this.mApplications[defaultAppObjUuid];
             const defaultAppObjConnected = defaultAppEntry ? defaultAppEntry.connected : false;
             if (defaultAppObjConnected) {
@@ -631,10 +636,13 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         this.workbooks = {};
         this.connectionUuid = connectionUuid;
         this.mConnected = false;
+        this.initialized = false;
+        this.objectInstance = undefined;
     }
     /**
      * @public
-     * @property Flag to indicate whether excel is connected to openfin
+     * @property
+     * @description Flag to indicate whether excel is connected to openfin
      * @returns {boolean} Connected or not
      */
     get connected() {
@@ -642,7 +650,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function init Initialises the application
+     * @function init
+     * @description Initialises the application
      * @returns {Promise<void>} A promise
      */
     init() {
@@ -657,7 +666,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function release Release all connection from the excel application to the
+     * @function release
+     * @description Release all connection from the excel application to the
      * openfin app
      * @returns {Promise<void>} A promise
      */
@@ -672,9 +682,10 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function processExcelEvent Process events coming from excel to be handled
+     * @function processExcelEvent
+     * @description Process events coming from excel to be handled
      * by the openfin app
-     * @param data The data being sent over from the excel app
+     * @param {Readonly<Partial<ExcelEventData>>} data The data being sent over from the excel app
      */
     processExcelEvent(data) {
         const eventType = data.event;
@@ -767,6 +778,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                     return;
                 }
                 worksheet.dispatchEvent(eventType, { data });
+                break;
             case 'afterCalculation':
                 break;
             default:
@@ -776,8 +788,9 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function processExcelResult Process results coming from excel application
-     * @param result The result of the call being made in the excel application
+     * @function processExcelResult
+     * @description Process results coming from excel application
+     * @param {Readonly<ExcelResultData>} result The result of the call being made in the excel application
      */
     processExcelResult(result) {
         let callbackData;
@@ -806,11 +819,10 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                 const oldworksheets = worksheets;
                 workbook.worksheets = {};
                 worksheetNames.forEach((worksheetName) => {
-                    workbook.worksheets[worksheetName] = oldworksheets[worksheetName] ||
+                    worksheets[worksheetName] = oldworksheets[worksheetName] ||
                         new ExcelWorksheet_1.ExcelWorksheet(worksheetName, workbook);
                 });
-                callbackData = worksheetNames.map((worksheetName) => workbook.worksheets[worksheetName]
-                    .toObject());
+                callbackData = worksheetNames.map((worksheetName) => worksheets[worksheetName].toObject());
                 break;
             case 'addWorkbook':
             case 'openWorkbook':
@@ -822,7 +834,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                 break;
             case 'addSheet':
                 const newWorksheetName = resultData;
-                const newWorksheet = workbook.worksheets[newWorksheetName] ||
+                const newWorksheet = worksheets[newWorksheetName] ||
                     new ExcelWorksheet_1.ExcelWorksheet(newWorksheetName, workbook);
                 worksheets[newWorksheet.name] = newWorksheet;
                 callbackData = newWorksheet.toObject();
@@ -835,7 +847,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function subscribeToExelMessages Subscribes to messages from Excel
+     * @function subscribeToExelMessages
+     * @description Subscribes to messages from Excel
      * application
      * @returns {Promise<[void, void]>} A promise
      */
@@ -847,7 +860,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function unsubscribeToExcelMessages Unsubscribes from Excel application
+     * @function unsubscribeToExcelMessages
+     * @description Unsubscribes from Excel application
      * @returns {Promise<[void, void]>} A promise
      */
     unsubscribeToExcelMessages() {
@@ -858,7 +872,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @private
-     * @function monitorDisconnect Monitors disconnection event when openfin
+     * @function monitorDisconnect
+     * @description Monitors disconnection event when openfin
      * disconnects from excel
      * @returns {Promise<void>} A promise
      */
@@ -875,8 +890,9 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function run Runs Excel application
-     * @param callback The callback to be applied
+     * @function run
+     * @description Runs Excel application
+     * @returns {Promise<void>} A promise
      */
     run() {
         return this.connected ? Promise.resolve() : new Promise(resolve => {
@@ -896,17 +912,19 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function getWorkbooks Gets the workbooks within the excel application
-     * @returns {Promise<any>} A promise
+     * @function getWorkbooks
+     * @description Gets the workbooks within the excel application
+     * @returns {Promise<Workbooks>} A promise
      */
     getWorkbooks() {
         return this.invokeExcelCall('getWorkbooks', null);
     }
     /**
      * @public
-     * @function getWorkbookByName Gets the registered workbook with the specified
+     * @function getWorkbookByName
+     * @description Gets the registered workbook with the specified
      * name
-     * @param name The name of the workbook
+     * @param {string} name The name of the workbook
      */
     getWorkbookByName(name) {
         if (!this.workbooks[name]) {
@@ -916,15 +934,18 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         return this.workbooks[name].toObject();
     }
     /**
-     * @function addWorkbook adds a workbook to the Excel application
-     * @returns {Promise<any>} A promise with a result
+     * @public
+     * @function addWorkbook
+     * @description adds a workbook to the Excel application
+     * @returns {Promise<Workbook>} A promise with a result
      */
     addWorkbook() {
         return this.invokeExcelCall('addWorkbook', null);
     }
     /**
      * @public
-     * @function openWorkbook Opens the workbook specified at the path
+     * @function openWorkbook
+     * @description Opens the workbook specified at the path
      * @param {string} path The path of the workbook
      * @returns {Promise<void>} Returns a promise with a result
      */
@@ -933,35 +954,39 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     /**
      * @public
-     * @function getConnectionStatus Gets the connection status of of the Excel
+     * @function getConnectionStatus
+     * @description Gets the connection status of of the Excel
      * application
-     * @returns {Promise<any>} A promise with a result
+     * @returns {Promise<boolean>} A promise with a result
      */
     getConnectionStatus() {
         return Promise.resolve(this.connected);
     }
     /**
      * @public
-     * @function getCalculationMode Gets the calculation mode from Excel
+     * @function getCalculationMode
+     * @description Gets the calculation mode from Excel
      * application
-     * @returns {Promise<any>} A promise with a result
+     * @returns {Promise<CalculationMode>} A promise with a result
      */
     getCalculationMode() {
         return this.invokeExcelCall('getCalculationMode', null);
     }
     /**
      * @public
-     * @function calculateAll Calculates all formulas on the workbook
-     * @returns {Promise<any>} A promise with a result
+     * @function calculateAll
+     * @description Calculates all formulas on the workbook
+     * @returns {Promise<void>} A promise with a result
      */
     calculateAll() {
         return this.invokeExcelCall('calculateFull', null);
     }
     /**
      * @public
-     * @function toObject Returns an object with only the methods and properties
+     * @function toObject
+     * @description Returns an object with only the methods and properties
      * to be exposed
-     * @returns {any} An object with only the methods and properties to be exposed
+     * @returns {Application} An object with only the methods and properties to be exposed
      */
     toObject() {
         return this.objectInstance || (this.objectInstance = {
