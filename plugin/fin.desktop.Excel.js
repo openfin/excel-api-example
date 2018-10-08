@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -267,23 +267,6 @@ exports.RpcDispatcher = RpcDispatcher;
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * @description Gets the uuid of the current app
- */
-exports.getUuid = fin.desktop.getUuid;
-/**
- * @description Wraps an external application
- */
-exports.externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
-//# sourceMappingURL=ExcelUtilities.js.map
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -293,9 +276,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ExcelApplication_1 = __webpack_require__(3);
-const ExcelUtilities_1 = __webpack_require__(1);
+const ExcelApplication_1 = __webpack_require__(2);
 const RpcDispatcher_1 = __webpack_require__(0);
+/**
+ * @description Gets the uuid of the current app
+ */
+const getUuid = fin.desktop.getUuid;
+/**
+ * @description Wraps an external application
+ */
+const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
 /**
  * @constant {string} excelServiceUuid Uuid for the excel service
  */
@@ -426,7 +416,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
      */
     monitorDisconnect() {
         return new Promise((resolve, reject) => {
-            const excelServiceConnection = ExcelUtilities_1.externalApplicationWrap(excelServiceUuid);
+            const excelServiceConnection = externalApplicationWrap(excelServiceUuid);
             let onDisconnect;
             excelServiceConnection.addEventListener('disconnected', onDisconnect = () => {
                 excelServiceConnection.removeEventListener('disconnected', onDisconnect);
@@ -473,7 +463,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                 return;
             }
             if (defaultAppEntry === undefined) {
-                const disconnectedAppUuid = ExcelUtilities_1.getUuid();
+                const disconnectedAppUuid = getUuid();
                 const disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
                 yield disconnectedApp.init();
                 this.mApplications[disconnectedAppUuid] = disconnectedApp;
@@ -596,7 +586,7 @@ exports.ExcelService = ExcelService;
 //# sourceMappingURL=ExcelApi.js.map
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -610,10 +600,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ExcelUtilities_1 = __webpack_require__(1);
-const ExcelWorkbook_1 = __webpack_require__(4);
-const ExcelWorksheet_1 = __webpack_require__(5);
+const ExcelWorkbook_1 = __webpack_require__(3);
+const ExcelWorksheet_1 = __webpack_require__(4);
 const RpcDispatcher_1 = __webpack_require__(0);
+/**
+ * @description Wraps an external application
+ */
+const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
 /**
  * @class Represents the Excel application itself
  */
@@ -875,7 +868,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
      */
     monitorDisconnect() {
         return new Promise((resolve, reject) => {
-            const excelApplicationConnection = ExcelUtilities_1.externalApplicationWrap(this.connectionUuid);
+            const excelApplicationConnection = externalApplicationWrap(this.connectionUuid);
             let onDisconnect;
             excelApplicationConnection.addEventListener('disconnected', onDisconnect = () => {
                 excelApplicationConnection.removeEventListener('disconnected', onDisconnect);
@@ -1012,7 +1005,7 @@ exports.ExcelApplication = ExcelApplication;
 //# sourceMappingURL=ExcelApplication.js.map
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1170,7 +1163,7 @@ exports.ExcelWorkbook = ExcelWorkbook;
 //# sourceMappingURL=ExcelWorkbook.js.map
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1469,14 +1462,14 @@ exports.ExcelWorksheet = ExcelWorksheet;
 //# sourceMappingURL=ExcelWorksheet.js.map
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 // This is the entry point of the Plugin script
-const ExcelApi_1 = __webpack_require__(2);
+const ExcelApi_1 = __webpack_require__(1);
 const excelService = new ExcelApi_1.ExcelService();
 // Attach ExcelService to the window
 window.fin.desktop.ExcelService = excelService;

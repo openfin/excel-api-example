@@ -9,8 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ExcelApplication_1 = require("./ExcelApplication");
-const ExcelUtilities_1 = require("./ExcelUtilities");
 const RpcDispatcher_1 = require("./RpcDispatcher");
+/**
+ * @description Gets the uuid of the current app
+ */
+const getUuid = fin.desktop.getUuid;
+/**
+ * @description Wraps an external application
+ */
+const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
 /**
  * @constant {string} excelServiceUuid Uuid for the excel service
  */
@@ -141,7 +148,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
      */
     monitorDisconnect() {
         return new Promise((resolve, reject) => {
-            const excelServiceConnection = ExcelUtilities_1.externalApplicationWrap(excelServiceUuid);
+            const excelServiceConnection = externalApplicationWrap(excelServiceUuid);
             let onDisconnect;
             excelServiceConnection.addEventListener('disconnected', onDisconnect = () => {
                 excelServiceConnection.removeEventListener('disconnected', onDisconnect);
@@ -188,7 +195,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                 return;
             }
             if (defaultAppEntry === undefined) {
-                const disconnectedAppUuid = ExcelUtilities_1.getUuid();
+                const disconnectedAppUuid = getUuid();
                 const disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
                 yield disconnectedApp.init();
                 this.mApplications[disconnectedAppUuid] = disconnectedApp;

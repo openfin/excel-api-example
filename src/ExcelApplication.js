@@ -8,10 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ExcelUtilities_1 = require("./ExcelUtilities");
 const ExcelWorkbook_1 = require("./ExcelWorkbook");
 const ExcelWorksheet_1 = require("./ExcelWorksheet");
 const RpcDispatcher_1 = require("./RpcDispatcher");
+/**
+ * @description Wraps an external application
+ */
+const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
 /**
  * @class Represents the Excel application itself
  */
@@ -273,7 +276,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
      */
     monitorDisconnect() {
         return new Promise((resolve, reject) => {
-            const excelApplicationConnection = ExcelUtilities_1.externalApplicationWrap(this.connectionUuid);
+            const excelApplicationConnection = externalApplicationWrap(this.connectionUuid);
             let onDisconnect;
             excelApplicationConnection.addEventListener('disconnected', onDisconnect = () => {
                 excelApplicationConnection.removeEventListener('disconnected', onDisconnect);
