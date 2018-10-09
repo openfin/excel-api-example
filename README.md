@@ -3,6 +3,8 @@ This repo demonstrates the usage of JavaScript Excel API provided by Openfin.
 
 Note: This main source code for this demo is intentionally coded in plain JavaScript so that its easy to follow, without any need to understand other technologies/ frameworks. The API libraries are generated from TypeScript, and the end-product utilizes webpack to achieve a single-file web application.
 
+This demo uses [ExcelDna](https://github.com/Excel-DNA/ExcelDna) to create the Excel addin.
+
 # How to Run the Demo
 
 ## Quick Start
