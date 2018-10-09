@@ -104,22 +104,28 @@ Once included you will be able to use following API calls.
 
 ``` javascript
 /*
-getWorkbooks().then(function(workbook));
+init();
+this function is required to be executed before using the rest of the API.
+*/
+fin.desktop.init();
+
+/*
+getWorkbooks(callback);
 Retrieves currently opened workbooks from excel and passes an array of workbook objects as an argument to the callback.
 */
-fin.desktop.Excel.getWorkbooks().then(function(workbooks){...});
+fin.desktop.Excel.getWorkbooks(function(workbooks){...});
 
 /*
-addWorkbook().then(function(workbook));
+addWorkbook(callback);
 creates a new workbook in Excel
 */
-fin.desktop.Excel.addWorkbook().then(function(workbook){...});
+fin.desktop.Excel.addWorkbook(function(workbook){...});
 
 /*
-openWorkbook(path).then(function(workbook));
+openWorkbook(path, callback);
 opens workbook from the specified path and passes the workbook object to the callback
 */
-fin.desktop.Excel.openWorkbook(path).then(function(workbook){...});
+fin.desktop.Excel.openWorkbook(function(workbook){...});
 
 /*
 getWorkbookByName(name);
@@ -129,16 +135,16 @@ Note: to use this function, you need to call getWorkbooks at least once.
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 
 /*
-getConnectionStatus().then(callback);
+getConnectionStatus(callback);
 Passes true to the callback if its connected to Excel
 */
-fin.desktop.Excel.getConnectionStatus().then(function(isConnected){...});
+fin.desktop.Excel.getConnectionStatus(function(isConnected){...});
 
 /*
-getCalculationMode().then(callback);
+getCalculationMode(callback);
 Passes calculation mode information to the callback if its connected to Excel
 */
-fin.desktop.Excel.getCalculationMode().then(function(info){...});
+fin.desktop.Excel.getCalculationMode(function(info){...});
 
 /*
 calculateAll();
@@ -156,7 +162,7 @@ fin.desktop.Excel.addEventListener("workbookAdded", function(event){...})
 removeEventListener(type, listener);
 removes an attached event handler from Excel
 */
-fin.desktop.Excel.removeEventListener("workbookAdded", handler);
+removeEventListener("workbookAdded", handler);
 ```
 **events:**
 ```javascript
@@ -182,12 +188,6 @@ function(event){
     console.log("Workbook closed; Name:", event.workbook.name);
 });
 
-{type: "workbookSaved", workbook: ExcelWorkbook};
-// Is fired when a workbook is saved.
-fin.desktop.Excel.addEventListener("workbookSaved", function(event) {
-    console.log("Workbook saved; Name:", event.workbook.name);
-});
-
 {type: "afterCalculation"};
 //is fired when calculation is complete on any sheet.
 //Example:
@@ -206,33 +206,33 @@ Workbook objects can only be retrieved using API calls like fin.desktop.Excel.ge
 **properties:**
 ```javascript
 name: String // name of the workbook that the object represents.
-worksheets: { [worksheetName: string]: ExcelWorksheet } // Worksheets tied to the current workbook
 ```
 
 **methods:**
 ```javascript
 /*
-getWorksheets().then(callback);
+getWorksheets(callback);
 Passes an array of worksheet objects to the callback.
 */
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.getWorksheets().then(function(worksheets){...});
+workbook.getWorksheets(function(worksheets){...});
 
 /*
 getWorksheetByName(name);
 returns the worksheet object with the specified name.
 Note: you have to at least use getWorksheets() once before using this function.
 */
+
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
 var sheet = workbook.getWorksheetByName("sheet1");
 
 
 /*
-addWorksheet().then(callback);
+addWorksheet(callback);
 creates a new worksheet and passes the worksheet object to the callback
 */
 var workbook = fin.desktop.Excel.getWorkbookByName("workbook1");
-workbook.addWorksheet().then(function(sheet){...});
+workbook.addWorksheet(function(sheet){...});
 
 /*
 activate();
@@ -305,7 +305,8 @@ new sheets can be created only using workbook.addWorksheet() or existing sheet o
 
 **properties:**
 ```javascript
-worksheetName: String // name of the worksheet
+name: String // name of the worksheet
+workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to.
 ```
 **methods:**
 ```javascript
@@ -313,7 +314,8 @@ worksheetName: String // name of the worksheet
 setCells(values, offset);
 Populates the cells with the values that is a two dimensional array(array of rows) starting from the provided offset.
 */
-workbook.addWorksheet().then(function(sheet){
+workbook.addWorksheet(function(sheet){
+
    sheet.setCells([["a", "b", "c"], [1, 2, 3]], "A1");
 });
 
@@ -343,11 +345,11 @@ sheet.setCells([["Column1", "Column2"], ["TRUE", "1"], ["TRUE", "2"],["FALSE", "
 sheet.setFilter("A1", 2, 4, 1, "TRUE");
 
 /*
-getCells(start, offsetWidth, offsetHeight).then(callback);
+getCells(start, offsetWidth, offsetHeight, callback);
 Passes a two dimensional array of objects that have following format {value: --, formula: --}
 */
 var sheet = workbook.getSheetByName("sheet1");
-sheet.getCells("A1", 3, 2).then(function(cells){...}) // cell: {value: --, formula: --}});
+sheet.getCells("A1", 3, 2, function(cells){ // cell: {value: --, formula: --}});
 
 /*
 activate();
@@ -431,12 +433,12 @@ sheet.calculate();
 
 
 /*
-getCellByName(name).then(callback);
+getCellByName(name, callback);
 returns cell info of the cell with the name provided.
 */
 
 var sheet = workbook.getSheetByName("sheet1");
-sheet.getCellByName("TheCellName").then(function(cellInfo){...});
+sheet.getCellByName("TheCellName", function(cellInfo){...});
 
 /*
 protect();
@@ -518,21 +520,4 @@ function(event){
     );
 });
 
-{type: "rowDeleted", target: ExcelWorksheet};
-// Fired when a row has been deleted in the worksheet
-// Example:
-var sheet = workbook.getSheetByName("sheet1");
-sheet.addEventListener("rowDeleted", function(event) {
-    console.log("row", event.data.range);
-});
-
-{type: "rowInserted", target: ExcelWorksheet};
-// Fired when a row has been deleted in the worksheet
-// Example:
-var sheet = workbook.getSheetByName("sheet1");
-sheet.addEventListener("rowInserted", function(event) {
-    console.log("row", event.data.range);
-});
-
 ```
-
