@@ -8,109 +8,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ExcelApplication_1 = require("./ExcelApplication");
 const RpcDispatcher_1 = require("./RpcDispatcher");
-/**
- * @description Gets the uuid of the current app
- */
-const getUuid = fin.desktop.getUuid;
-/**
- * @description Wraps an external application
- */
-const externalApplicationWrap = fin.desktop.ExternalApplication.wrap;
-/**
- * @constant {string} excelServiceUuid Uuid for the excel service
- */
-const excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
-/**
- * @class
- * @description Class for interacting with the .NET ExcelService process
- */
+const ExcelApplication_1 = require("./ExcelApplication");
+const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
 class ExcelService extends RpcDispatcher_1.RpcDispatcher {
-    /**
-     * @constructor
-     * @description Constructor for ExcelService
-     */
     constructor() {
         super();
-        this.connectionUuid = excelServiceUuid;
-        this.mInitialized = false;
-        this.mApplications = {};
-        this.mDefaultApplicationUuid = '';
-        this.defaultApplicationObj = null;
-    }
-    /**
-     * @public
-     * @async
-     * @function init
-     * @description Initialises the ExcelService
-     * @returns {Promise<void>} A promise
-     */
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!this.mInitialized) {
-                yield this.subscribeToServiceMessages();
-                yield this.monitorDisconnect();
-                // await fin.desktop.Service.connect({ uuid: excelServiceUuid })
-                yield this.registerWindowInstance();
-                yield this.getExcelInstances();
-                this.mInitialized = true;
-            }
-            return;
-        });
-    }
-    /**
-     * @private
-     * @async
-     * @function processExcelServiceEvent
-     * @description Processes events coming from the Excel
-     * application
-     * @param {ExcelServiceEventData} data Payload passed from the Excel Service
-     * @returns {Promise<void>} A promise
-     */
-    processExcelServiceEvent(data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log(data);
-            const eventType = data.event;
-            let eventData = null;
-            switch (eventType) {
-                case 'started':
+        this.defaultApplicationUuid = undefined;
+        this.defaultApplicationObj = undefined;
+        this.applications = {};
+        this.processExcelServiceEvent = (data) => __awaiter(this, void 0, void 0, function* () {
+            var eventType = data.event;
+            var eventData;
+            switch (data.event) {
+                case "started":
                     break;
-                case 'registrationRollCall':
-                    if (this.mInitialized) {
+                case "registrationRollCall":
+                    if (this.initialized) {
                         this.registerWindowInstance();
                     }
                     break;
-                case 'excelConnected':
+                case "excelConnected":
                     yield this.processExcelConnectedEvent(data);
                     eventData = { connectionUuid: data.uuid };
                     break;
-                case 'excelDisconnected':
-                    yield this.processExcelDisconnectedEvent(data).catch(console.error);
+                case "excelDisconnected":
+                    yield this.processExcelDisconnectedEvent(data);
                     eventData = { connectionUuid: data.uuid };
-                    break;
-                default:
-                    console.error('Event type not supported: ' + eventType);
                     break;
             }
             this.dispatchEvent(eventType, eventData);
         });
-    }
-    /**
-     * @private
-     * @async
-     * @function processExcelServiceResult
-     * @description Processes results from excel service
-     * @param {ExcelResultData} result The result from the service
-     * @returns {Promise<void>} A promise
-     */
-    processExcelServiceResult(result) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
-            if (!executor) {
-                console.warn('No executors matching the messageId: ' + result.messageId, result);
-                return;
-            }
+        this.processExcelServiceResult = (result) => __awaiter(this, void 0, void 0, function* () {
+            var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
             delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
             if (result.error) {
                 executor.reject(result.error);
@@ -118,158 +48,105 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             }
             // Internal processing
             switch (result.action) {
-                case 'getExcelInstances':
+                case "getExcelInstances":
                     yield this.processGetExcelInstancesResult(result.data);
-                    break;
-                default:
                     break;
             }
             executor.resolve(result.data);
         });
+        this.registerWindowInstance = (callback) => {
+            return this.invokeServiceCall("registerOpenfinWindow", { domain: document.domain }, callback);
+        };
+        this.connectionUuid = excelServiceUuid;
     }
-    /**
-     * @private
-     * @function subscribeToServiceMessages
-     * @description function to subscribe to topics
-     * @returns {Promise<[void, void]>} A list of promises
-     */
-    subscribeToServiceMessages() {
-        return Promise.all([
-            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(excelServiceUuid, 'excelServiceEvent', this.processExcelServiceEvent.bind(this), resolve)),
-            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(excelServiceUuid, 'excelServiceCallResult', this.processExcelServiceResult.bind(this), resolve))
-        ]);
-    }
-    /**
-     * @private
-     * @function monitorDisconnect
-     * @description Subscribes to the disconnected event and
-     * dispatches to the excel application
-     * @returns {Promnise<void>} A promise
-     */
-    monitorDisconnect() {
-        return new Promise((resolve, reject) => {
-            const excelServiceConnection = externalApplicationWrap(excelServiceUuid);
-            let onDisconnect;
-            excelServiceConnection.addEventListener('disconnected', onDisconnect = () => {
-                excelServiceConnection.removeEventListener('disconnected', onDisconnect);
-                this.dispatchEvent('stopped');
-            }, resolve, reject);
-        });
-    }
-    /**
-     * @private
-     * @async
-     * @function registerWindowInstance
-     * @description This registers a new Excel instance to a
-     * new workbook domain
-     * @returns {Promise<void>} A promise
-     */
-    registerWindowInstance() {
+    init() {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.invokeServiceCall('registerOpenfinWindow', { domain: document.domain });
-        });
-    }
-    /**
-     * @private
-     * @async
-     * @function configureDefaultApplication
-     * @description Configures the default application
-     * when the application first starts
-     * @returns {Promise<void>} A promise
-     */
-    configureDefaultApplication() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const defaultAppObjUuid = this.defaultApplicationObj && this.defaultApplicationObj.connectionUuid;
-            const defaultAppEntry = this.mApplications[defaultAppObjUuid];
-            const defaultAppObjConnected = defaultAppEntry ? defaultAppEntry.connected : false;
-            if (defaultAppObjConnected) {
-                return;
-            }
-            const connectedAppUuid = Object.keys(this.mApplications)
-                .find((appUuid) => this.mApplications[appUuid]
-                .connected);
-            if (connectedAppUuid) {
-                delete this.mApplications[defaultAppObjUuid];
-                this.defaultApplicationObj =
-                    this.mApplications[connectedAppUuid].toObject();
-                return;
-            }
-            if (defaultAppEntry === undefined) {
-                const disconnectedAppUuid = getUuid();
-                const disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
-                yield disconnectedApp.init();
-                this.mApplications[disconnectedAppUuid] = disconnectedApp;
-                this.defaultApplicationObj = disconnectedApp.toObject();
+            if (!this.initialized) {
+                yield this.subscribeToServiceMessages();
+                yield this.monitorDisconnect();
+                yield this.registerWindowInstance();
+                yield this.getExcelInstances();
+                this.initialized = true;
             }
             return;
         });
     }
+    subscribeToServiceMessages() {
+        return Promise.all([
+            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(excelServiceUuid, "excelServiceEvent", this.processExcelServiceEvent, resolve)),
+            new Promise(resolve => fin.desktop.InterApplicationBus.subscribe(excelServiceUuid, "excelServiceCallResult", this.processExcelServiceResult, resolve))
+        ]);
+    }
+    monitorDisconnect() {
+        return new Promise((resolve, reject) => {
+            var excelServiceConnection = fin.desktop.ExternalApplication.wrap(excelServiceUuid);
+            var onDisconnect;
+            excelServiceConnection.addEventListener("disconnected", onDisconnect = () => {
+                excelServiceConnection.removeEventListener("disconnected", onDisconnect);
+                this.dispatchEvent("stopped");
+            }, resolve, reject);
+        });
+    }
+    configureDefaultApplication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var defaultAppObjUuid = this.defaultApplicationObj && this.defaultApplicationObj.connectionUuid;
+            var defaultAppEntry = this.applications[defaultAppObjUuid];
+            var defaultAppObjConnected = defaultAppEntry ? defaultAppEntry.connected : false;
+            if (defaultAppObjConnected) {
+                return;
+            }
+            var connectedAppUuid = Object.keys(this.applications).find(appUuid => this.applications[appUuid].connected);
+            if (connectedAppUuid) {
+                delete this.applications[defaultAppObjUuid];
+                this.defaultApplicationObj = this.applications[connectedAppUuid].toObject();
+                return;
+            }
+            if (defaultAppEntry === undefined) {
+                var disconnectedAppUuid = fin.desktop.getUuid();
+                var disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
+                yield disconnectedApp.init();
+                this.applications[disconnectedAppUuid] = disconnectedApp;
+                this.defaultApplicationObj = disconnectedApp.toObject();
+            }
+        });
+    }
     // Internal Event Handlers
-    /**
-     * @private
-     * @async
-     * @function processExcelConnectedEvent
-     * @description Process the connected event
-     * @param {ExcelConnectionEventData} data payload that holds uuid of the connected application
-     * @returns {Promise<void>} A promise
-     */
     processExcelConnectedEvent(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const applicationInstance = this.mApplications[data.uuid] ||
-                new ExcelApplication_1.ExcelApplication(data.uuid);
+            var applicationInstance = this.applications[data.uuid] || new ExcelApplication_1.ExcelApplication(data.uuid);
             yield applicationInstance.init();
-            this.mApplications[data.uuid] = applicationInstance;
+            this.applications[data.uuid] = applicationInstance;
             // Synthetically raise connected event
-            applicationInstance.processExcelEvent({ event: 'connected' });
+            applicationInstance.processExcelEvent({ event: "connected" }, data.uuid);
             yield this.configureDefaultApplication();
             return;
         });
     }
-    /**
-     * @public
-     * @async
-     * @function processExcelDisconnectedEvent
-     * @description Processes event when excel is
-     * disconnected
-     * @param {ExcelConnectionEventData} data The data from excel
-     * @returns {Promise<void>} A promise
-     */
     processExcelDisconnectedEvent(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const applicationInstance = this.mApplications[data.uuid];
+            var applicationInstance = this.applications[data.uuid];
             if (applicationInstance === undefined) {
                 return;
             }
-            delete this.mApplications[data.uuid];
-            console.log('configuring default application in disconnect event');
-            this.configureDefaultApplication()
-                .then(applicationInstance.release)
-                .catch(console.error);
-            return;
+            delete this.applications[data.uuid];
+            yield this.configureDefaultApplication();
+            yield applicationInstance.release();
         });
     }
     // Internal API Handlers
-    /**
-     * @private
-     * @async
-     * @function processGetExcelInstancesResult
-     * @description Gets Excel instance
-     * @param {string[]} connectionUuids THe connection Uuids the Excel service is holding
-     * @returns {Promise<void>} A promise
-     */
     processGetExcelInstancesResult(connectionUuids) {
         return __awaiter(this, void 0, void 0, function* () {
-            const existingInstances = this.mApplications;
-            this.mApplications = {};
+            var existingInstances = this.applications;
+            this.applications = {};
             yield Promise.all(connectionUuids.map((connectionUuid) => __awaiter(this, void 0, void 0, function* () {
-                const existingInstance = existingInstances[connectionUuid];
+                var existingInstance = existingInstances[connectionUuid];
                 if (existingInstance === undefined) {
                     // Assume that since the ExcelService is aware of the instance it,
                     // is connected and to simulate the the connection event
-                    yield this.processExcelServiceEvent({ event: 'excelConnected', uuid: connectionUuid });
+                    yield this.processExcelServiceEvent({ event: "excelConnected", uuid: connectionUuid });
                 }
                 else {
-                    this.mApplications[connectionUuid] = existingInstance;
+                    this.applications[connectionUuid] = existingInstance;
                 }
                 return;
             })));
@@ -277,42 +154,19 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
         });
     }
     // API Calls
-    /**
-     * @public
-     * @function install
-     * @description Get Excel instance
-     * @returns {Promise<void>} A promise
-     */
-    install() {
-        return this.invokeServiceCall('install', null);
+    install(callback) {
+        return this.invokeServiceCall("install", null, callback);
     }
-    /**
-     * @public
-     * @function getInstallationStatus
-     * @description Checks the installation status
-     * @returns {Promise<void>} A promise
-     */
-    getInstallationStatus() {
-        return this.invokeServiceCall('getInstallationStatus', null);
+    getInstallationStatus(callback) {
+        return this.invokeServiceCall("getInstallationStatus", null, callback);
     }
-    /**
-     * @public
-     * @function getExcelInstances
-     * @description Returns all the excel instances that are open
-     * @returns {Promise<void>} A promsie
-     */
-    getExcelInstances() {
-        return this.invokeServiceCall('getExcelInstances', null);
+    getExcelInstances(callback) {
+        return this.invokeServiceCall("getExcelInstances", null, callback);
     }
-    /**
-     * @public
-     * @function toObject
-     * @description Creates an empty object
-     * @returns {object} An empty object
-     */
     toObject() {
         return {};
     }
 }
+ExcelService.instance = new ExcelService();
 exports.ExcelService = ExcelService;
 //# sourceMappingURL=ExcelApi.js.map
