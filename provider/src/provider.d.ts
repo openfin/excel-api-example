@@ -3,7 +3,6 @@ declare namespace fin.desktop {
     var InterApplicationBus: any;
     var ExternalApplication: any;
     var System: any;
-    var Service: any;
     var main: any;
 }
 declare var chrome: any;

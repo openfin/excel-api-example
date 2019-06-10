@@ -1,32 +1,32 @@
 {
-    "devtools_port": 9090,
-    "startup_app": {
-        "name": "Excel-API-Example",
-        "url": "http://localhost:8080/demo/",
-        "uuid": "excel-api-example",
-        "applicationIcon": "http://localhost:8080/demo/openfin.ico",
-        "autoShow": true,
-        "defaultWidth": 760,
-        "defaultHeight": 704,
-        "defaultTop": 100,
-        "defaultLeft": 100,
-        "frame": true
-    },
-    "runtime": {
-        "arguments": "",
-        "version": "stable"
-    },
-    "splashScreenImage": "http://localhost:8080/demo/splash_excel.png",
-    "shortcut": {
-        "company": "OpenFin",
-        "description": "excel-api-example",
-        "icon": "http://localhost:8080/demo/openfin.ico",
-        "name": "excel-api-example"
-    },
-    "services": [
-        {
-            "name": "openfin-excel",
-            "manifestUrl": "http://localhost:8080/provider/dev-app.json"
-        }
-    ]
+  "devtools_port": 9090,
+  "startup_app": {
+    "name": "Excel-API-Example",
+    "url": "http://localhost:8080/demo/",
+    "uuid": "excel-api-example",
+    "applicationIcon": "http://localhost:8080/demo/openfin.ico",
+    "autoShow": true,
+    "defaultWidth": 760,
+    "defaultHeight": 704,
+    "defaultTop": 100,
+    "defaultLeft": 100,
+    "frame": true
+  },
+  "runtime": {
+    "arguments": "",
+    "version": "stable"
+  },
+  "splashScreenImage": "http://localhost:8080/demo/splash_excel.png",
+  "shortcut": {
+    "company": "OpenFin",
+    "description": "excel-api-example",
+    "icon": "http://localhost:8080/demo/openfin.ico",
+    "name": "excel-api-example"
+  },
+  "services": [
+    {
+      "name": "openfin-excel",
+      "manifestUrl": "http://localhost:8080/provider/dev-app.json"
+    }
+  ]
 }
