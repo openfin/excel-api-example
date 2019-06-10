@@ -1,40 +1,31 @@
 {
   "startup_app": {
     "name": "Excel-API-Example",
-    "url": "http://openfin.github.io/excel-api-example/web/",
+    "url": "http://openfin.github.io/excel-api-example/demo/",
     "uuid": "excel-api-example",
-    "applicationIcon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
+    "applicationIcon": "http://openfin.github.io/excel-api-example/demo/openfin.ico",
     "autoShow": true,
     "defaultWidth": 760,
     "defaultHeight": 704,
     "defaultTop": 100,
     "defaultLeft": 100,
-    "frame": true,
-    "preload": [
-      {
-        "url": "http://openfin.github.io/excel-api-example/plugin/service-loader.js"
-      },
-      {
-        "url": "http://openfin.github.io/excel-api-example/plugin/fin.desktop.Excel.js"
-      }
-    ]
+    "frame": true
   },
   "runtime": {
     "arguments": "",
-    "version": "8.56.27.75"
+    "version": "stable"
   },
-  "splashScreenImage": "http://openfin.github.io/excel-api-example/web/splash_excel.png",
+  "splashScreenImage": "http://openfin.github.io/excel-api-example/demo/splash_excel.png",
   "shortcut": {
     "company": "OpenFin",
     "description": "excel-api-example",
-    "icon": "http://openfin.github.io/excel-api-example/web/openfin.ico",
+    "icon": "http://openfin.github.io/excel-api-example/demo/openfin.ico",
     "name": "excel-api-example"
   },
-  "appAssets": [
+  "services": [
     {
-      "src": "http://openfin.github.io/excel-api-example/plugin/add-in.zip",
-      "alias": "excel-api-addin",
-      "version": "2.0.0"
+      "name": "openfin-excel",
+      "manifestUrl": "http://openfin.github.io/excel-api-example/provider/app.json"
     }
   ]
 }

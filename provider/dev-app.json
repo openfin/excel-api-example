@@ -1,0 +1,20 @@
+{
+  "startup_app": {
+    "name": "Excel-API-Provider",
+    "url": "http://localhost:8080/provider/provider.html",
+    "uuid": "excel-provider",
+    "autoShow": true
+  },
+  "runtime": {
+    "arguments": "",
+    "version": "stable"
+  },
+  "appAssets": [
+    {
+      "src": "http://localhost:8080/provider/add-in.zip",
+      "alias": "excel-api-addin",
+      "version": "1.7.2",
+      "forceDownload": true
+    }
+  ]
+}
