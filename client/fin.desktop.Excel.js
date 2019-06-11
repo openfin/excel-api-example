@@ -255,7 +255,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             if (!this.initialized) {
                 yield this.subscribeToServiceMessages();
                 yield this.monitorDisconnect();
-                yield fin.desktop.Service.connect({ uuid: excelServiceUuid });
+                yield fin.desktop.InterApplicationBus.Channel.connect(excelServiceUuid);
                 yield this.registerWindowInstance();
                 yield this.getExcelInstances();
                 this.initialized = true;
@@ -806,7 +806,7 @@ window.fin.desktop.ExcelService = ExcelApi_1.ExcelService.instance;
 Object.defineProperty(window.fin.desktop, 'Excel', {
     get() { return ExcelApi_1.ExcelService.instance.defaultApplicationObj; }
 });
-//# sourceMappingURL=plugin.js.map
+//# sourceMappingURL=index.js.map
 
 /***/ })
 /******/ ]);

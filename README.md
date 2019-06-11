@@ -3,12 +3,14 @@ This repo demonstrates the usage of JavaScript Excel API provided by Openfin.
 
 Note: This main source code for this demo is intentionally coded in plain JavaScript so that its easy to follow, without any need to understand other technologies/ frameworks. The API libraries are generated from TypeScript, and the end-product utilizes webpack to achieve a single-file web application.
 
+This demo uses [ExcelDna](https://github.com/Excel-DNA/ExcelDna) to create the Excel addin.
+
 # How to Run the Demo
 
 ## Quick Start
 
 1) Download and run the installer.
-[openfin installer download](https://dl.openfin.co/services/download?fileName=excel-api-example-installer&config=http://openfin.github.io/excel-api-example/app.json)
+[openfin installer download](https://install.openfin.co/download/?config=http%3A%2F%2Fopenfin.github.io%2Fexcel-api-example%2Fapp.json&fileName=excel-api-example-installer)
 
 2) After the installer runs, the OpenFin application should launch and automatically start Excel. At this point you should be able to interact with eith either application (create workbooks, worksheets, update cells, etc.) and see it mirrored on the other side.
 
@@ -577,4 +579,15 @@ function(event){
 });
 
 ```
+## License
+MIT
 
+The code in this repository is covered by the included license.
+
+However, if you run this code, it may call on the OpenFin RVM or OpenFin Runtime, which are covered by OpenFin’s Developer, Community, and Enterprise licenses. You can learn more about OpenFin licensing at the links listed below or just email us at support@openfin.co with questions.
+
+https://openfin.co/developer-agreement/ <br/>
+https://openfin.co/licensing/
+
+## Support
+Please enter an issue in the repo for any questions or problems. Alternatively, please contact us at support@openfin.co 
