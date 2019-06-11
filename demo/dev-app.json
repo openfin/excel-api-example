@@ -1,10 +1,11 @@
 {
+  "licenseKey": "64605fac-add3-48a0-8710-64b38e96a2dd",
   "devtools_port": 9090,
   "startup_app": {
     "name": "Excel-API-Example",
-    "url": "http://localhost:8080/demo/",
+    "url": "http://localhost:8080/demo/index.html",
     "uuid": "excel-api-example",
-    "applicationIcon": "http://localhost:8080/demo/openfin.ico",
+    "applicationIcon": "http://localhost:8080/demo/openfin-excel.ico",
     "autoShow": true,
     "defaultWidth": 760,
     "defaultHeight": 704,
@@ -14,18 +15,18 @@
   },
   "runtime": {
     "arguments": "",
-    "version": "stable"
+    "version": "10.66.41.18"
   },
   "splashScreenImage": "http://localhost:8080/demo/splash_excel.png",
   "shortcut": {
     "company": "OpenFin",
     "description": "excel-api-example",
-    "icon": "http://localhost:8080/demo/openfin.ico",
+    "icon": "http://localhost:8080/demo/openfin-excel.ico",
     "name": "excel-api-example"
   },
   "services": [
     {
-      "name": "openfin-excel",
+      "name": "excel",
       "manifestUrl": "http://localhost:8080/provider/dev-app.json"
     }
   ]

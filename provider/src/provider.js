@@ -1,43 +1,69 @@
-// This script exists to mimic the functionality that will ultimately be provided
-// by the OpenFin services API. It's primary purpose is to deploy the shared assets
-// needed by Excel to a common location, and to start the ExcelService process
-fin.desktop.main(() => {
-    var excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
-    var installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
-    var servicePath = 'OpenFin.ExcelService.exe';
-    var addInPath = 'OpenFin.ExcelApi-AddIn.xll';
-    var excelServiceEventTopic = 'excelServiceEvent';
-    // This promise resolves when the ExcelService is ready
-    var excelServicePromise = Promise.resolve()
-        .then(assertServiceIsNotRunning)
-        .then(() => Promise.resolve()
-        .then(deploySharedAssets)
-        .then(tryInstallAddIn)
-        .then(startExcelService)
-        .catch(err => console.error(err)))
-        .catch(() => console.log('Service Already Running: Skipping Deployment and Registration'));
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+// This script determines if the .NET OpenFin.ExcelService is running and if the
+// XLL Add-In has been installed. If not, it will perform the deployment, registration,
+// and start the service process
+fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
+    const excelAssetAlias = 'excel-api-addin';
+    const excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
+    const installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
+    const servicePath = 'OpenFin.ExcelService.exe';
+    const addInPath = 'OpenFin.ExcelApi-AddIn.xll';
+    const excelServiceEventTopic = 'excelServiceEvent';
+    try {
+        let serviceIsRunning = yield isServiceRunning();
+        let assetInfo = yield getAppAssetInfo();
+        if (serviceIsRunning) {
+            console.log('Service Already Running: Skipping Deployment and Registration');
+            return;
+        }
+        if (assetInfo.version === localStorage.installedAssetVersion && !assetInfo.forceDownload) {
+            console.log('Current Add-In version previously installed: Skipping Deployment and Registration');
+        }
+        else {
+            yield deploySharedAssets();
+            yield tryInstallAddIn();
+            localStorage.installedAssetVersion = assetInfo.version;
+        }
+        yield startExcelService();
+        console.log('Excel Service Started');
+    }
+    catch (err) {
+        console.error(err);
+    }
     // Technically there is a small window of time between when the UUID is
     // registered as an external application and when the service is ready to
     // receive commands. This edge-case will be best handled in the future 
     // with the availability of plugins and services from the fin API
-    function assertServiceIsNotRunning() {
+    function isServiceRunning() {
         return new Promise((resolve, reject) => {
             fin.desktop.System.getAllExternalApplications(extApps => {
                 var excelServiceIndex = extApps.findIndex(extApp => extApp.uuid === excelServiceUuid);
                 if (excelServiceIndex >= 0) {
-                    reject();
+                    resolve(true);
                 }
                 else {
-                    resolve();
+                    resolve(false);
                 }
             });
+        });
+    }
+    function getAppAssetInfo() {
+        return new Promise((resolve, reject) => {
+            fin.desktop.System.getAppAssetInfo({ alias: excelAssetAlias }, resolve, reject);
         });
     }
     function deploySharedAssets() {
         return new Promise((resolve, reject) => {
             fin.desktop.Application.getCurrent().getManifest(manifest => {
                 fin.desktop.System.launchExternalProcess({
-                    alias: 'excel-api-addin',
+                    alias: excelAssetAlias,
                     target: servicePath,
                     arguments: `-d "${installFolder}" -c ${manifest.runtime.version}`,
                     listener: result => {
@@ -48,7 +74,7 @@ fin.desktop.main(() => {
             });
         });
     }
-    function tryInstallAddIn(connected) {
+    function tryInstallAddIn() {
         return new Promise((resolve, reject) => {
             fin.desktop.System.launchExternalProcess({
                 path: `${installFolder}\\${servicePath}`,
@@ -56,11 +82,11 @@ fin.desktop.main(() => {
                 listener: result => {
                     if (result.exitCode === 0) {
                         console.log('Add-In Installed');
-                        resolve();
                     }
                     else {
-                        reject(new Error(`Installation failed. Exit code: ${result.exitCode}`));
+                        console.warn(`Installation failed. Exit code: ${result.exitCode}`);
                     }
+                    resolve();
                 }
             }, () => console.log('Installing Add-In'), err => reject(err));
         });
@@ -69,7 +95,6 @@ fin.desktop.main(() => {
         return new Promise((resolve, reject) => {
             var onExcelServiceEvent;
             fin.desktop.InterApplicationBus.subscribe('*', excelServiceEventTopic, onExcelServiceEvent = () => {
-                console.log('Excel Service Alive');
                 fin.desktop.InterApplicationBus.unsubscribe('*', excelServiceEventTopic, onExcelServiceEvent);
                 // The channel provider should eventually move into the .NET app
                 // but for now it only being used for signalling
@@ -89,5 +114,5 @@ fin.desktop.main(() => {
             });
         });
     }
-});
+}));
 //# sourceMappingURL=provider.js.map
