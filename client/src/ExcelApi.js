@@ -64,7 +64,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             if (!this.initialized) {
                 yield this.subscribeToServiceMessages();
                 yield this.monitorDisconnect();
-                yield fin.desktop.Service.connect({ uuid: excelServiceUuid });
+                yield fin.desktop.InterApplicationBus.Channel.connect(excelServiceUuid);
                 yield this.registerWindowInstance();
                 yield this.getExcelInstances();
                 this.initialized = true;

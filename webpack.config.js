@@ -12,16 +12,16 @@
 };
 
 var pluginConfig = Object.assign({}, config, {
-    entry: './src/plugin.js',
+    entry: './client/src/index.js',
     output: {
-        filename: './plugin/fin.desktop.Excel.js'
+        filename: './client/fin.desktop.Excel.js'
     }
 });
 
 var loaderConfig = Object.assign({}, config, {
-    entry: './src/service-loader.js',
+    entry: './provider/src/provider.js',
     output: {
-        filename: './plugin/service-loader.js'
+        filename: './provider/provider.js'
     }
 });
 
