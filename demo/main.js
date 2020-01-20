@@ -509,7 +509,7 @@ fin.desktop.main(function () {
     function onWorksheetRemoved(event) {
         var worksheet = event.worksheet;
 
-        if (worksheet.workbook === currentWorkbook) {
+        if (event.target === currentWorkbook) {
             worksheet.removeEventListener("sheetChanged", onSheetChanged);
             worksheet.removeEventListener("selectionChanged", onSelectionChanged);
             worksheet.removeEventListener("sheetActivated", onSheetActivated);
