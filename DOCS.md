@@ -1,8 +1,8 @@
 # OpenFin Service API Documentation
 
-The Excel API is composition based object model. Where Excel is the top most level which has workbooks which have worksheets and worksheets have cells.
-To use the API you will need to include ExcelAPI.js in your project and it will extend Openfin API with Excel API included.
-Once included you will be able to use following API calls.
+The Excel API is composition-based object model. Where Excel is the top most level that has workbooks that have worksheets and worksheets have cells.
+To use the API, you will need to include `ExcelAPI.js` in your project and it will extend Openfin API with Excel API included.
+Once included, you will be able to use following API calls.
 
 ## fin.desktop.ExcelService
 
@@ -11,8 +11,8 @@ Represents the helper service which manages OpenFin connections to running insta
 ### Properties
 
 ```
-connected: Boolean // indicates that OpenFin is connected to the helper service
-initialized: Boolean // indicates that the current window is subscribed to Excel service events
+`connected`: Boolean // indicates that OpenFin is connected to the helper service
+`initialized`: Boolean // indicates that the current window is subscribed to Excel service events
 ```
 
 ### Functions
@@ -136,8 +136,8 @@ function(event){
 
 Represents an Excel workbook.
 
-Note: New workbooks are not supposed to be created using new or Object.create().
-Workbook objects can only be retrieved using API calls like fin.desktop.Excel.getWorkbooks() fin.desktop.Excel.getWorkbookByName() and fin.desktop.Excel.addWorkbook() etc.
+Note: New workbooks are not supposed to be created using new or `Object.create()`.
+Workbook objects can only be retrieved using API calls like `fin.desktop.Excel.getWorkbooks()`, `fin.desktop.Excel.getWorkbookByName()`,  and `fin.desktop.Excel.addWorkbook()`, etc.
 
 ### Properties
 
@@ -241,8 +241,8 @@ function(event){
 ## fin.desktop.ExcelWorksheet:
 
 Represents a worksheet in Excel.
-Note: New sheets are not supposed to be created using new or Object.create().
-new sheets can be created only using workbook.addWorksheet() or existing sheet objects can be retrieved using workbook.getWorksheets() and workbook.getWorksheetByName();
+Note: New sheets are not supposed to be created using `new` or `Object.create()`.
+new sheets can be created only using workbook.addWorksheet() or existing sheet objects can be retrieved using `workbook.getWorksheets()`  and `workbook.getWorksheetByName();`
 
 ### Properties
 
