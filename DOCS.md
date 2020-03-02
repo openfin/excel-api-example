@@ -11,8 +11,8 @@ Represents the helper service which manages OpenFin connections to running insta
 ### Properties
 
 ```
-`connected`: Boolean // indicates that OpenFin is connected to the helper service
-`initialized`: Boolean // indicates that the current window is subscribed to Excel service events
+connected: Boolean // indicates that OpenFin is connected to the helper service
+initialized: Boolean // indicates that the current window is subscribed to Excel service events
 ```
 
 ### Functions
