@@ -15,7 +15,7 @@ export declare class ExcelApplication extends RpcDispatcher {
     processExcelResult: (result: any) => void;
     subscribeToExcelMessages(): Promise<[void, void]>;
     unsubscribeToExcelMessages(): Promise<[void, void]>;
-    monitorDisconnect(): Promise<{}>;
+    monitorDisconnect(): Promise<unknown>;
     run(callback?: Function): Promise<any>;
     getWorkbooks(callback?: Function): Promise<any>;
     getWorkbookByName(name: string): ExcelWorkbook;

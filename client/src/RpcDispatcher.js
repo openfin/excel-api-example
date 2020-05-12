@@ -106,7 +106,7 @@ class RpcDispatcher {
         return promise;
     }
 }
+exports.RpcDispatcher = RpcDispatcher;
 RpcDispatcher.messageId = 1;
 RpcDispatcher.promiseExecutors = {};
-exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map
