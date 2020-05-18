@@ -13,7 +13,7 @@ export declare class ExcelService extends RpcDispatcher {
     processExcelServiceEvent: (data: any) => Promise<void>;
     processExcelServiceResult: (result: any) => Promise<void>;
     subscribeToServiceMessages(): Promise<[void, void]>;
-    monitorDisconnect(): Promise<{}>;
+    monitorDisconnect(): Promise<unknown>;
     registerWindowInstance: (callback?: Function) => Promise<any>;
     configureDefaultApplication(): Promise<void>;
     processExcelConnectedEvent(data: any): Promise<void>;

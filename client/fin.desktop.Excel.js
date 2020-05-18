@@ -179,9 +179,9 @@ class RpcDispatcher {
         return promise;
     }
 }
+exports.RpcDispatcher = RpcDispatcher;
 RpcDispatcher.messageId = 1;
 RpcDispatcher.promiseExecutors = {};
-exports.RpcDispatcher = RpcDispatcher;
 //# sourceMappingURL=RpcDispatcher.js.map
 
 /***/ }),
@@ -191,10 +191,11 @@ exports.RpcDispatcher = RpcDispatcher;
 "use strict";
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -233,6 +234,10 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
         this.processExcelServiceResult = (result) => __awaiter(this, void 0, void 0, function* () {
             var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
             delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            //TODO: Somehow received a result not in the callback map
+            if (!executor) {
+                return;
+            }
             if (result.error) {
                 executor.reject(result.error);
                 return;
@@ -359,8 +364,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
         return {};
     }
 }
-ExcelService.instance = new ExcelService();
 exports.ExcelService = ExcelService;
+ExcelService.instance = new ExcelService();
 //# sourceMappingURL=ExcelApi.js.map
 
 /***/ }),
@@ -370,10 +375,11 @@ exports.ExcelService = ExcelService;
 "use strict";
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -470,6 +476,10 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
             var callbackData = {};
             var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
             delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            //TODO: Somehow received a result not in the callback map
+            if (!executor) {
+                return;
+            }
             if (result.error) {
                 executor.reject(result.error);
                 return;
@@ -614,8 +624,8 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
         });
     }
 }
-ExcelApplication.defaultInstance = undefined;
 exports.ExcelApplication = ExcelApplication;
+ExcelApplication.defaultInstance = undefined;
 //# sourceMappingURL=ExcelApplication.js.map
 
 /***/ }),
@@ -763,6 +773,9 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     protect(password) {
         return this.invokeExcelCall("protectSheet", { password: password ? password : null });
     }
+    renameSheet(name) {
+        return this.invokeExcelCall("renameSheet", { worksheetName: name });
+    }
     toObject() {
         return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
@@ -784,6 +797,7 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             getColumn: this.getColumn.bind(this),
             getRow: this.getRow.bind(this),
             protect: this.protect.bind(this),
+            renameSheet: this.renameSheet.bind(this),
             setCellName: this.setCellName.bind(this),
             setCells: this.setCells.bind(this),
             setFilter: this.setFilter.bind(this)

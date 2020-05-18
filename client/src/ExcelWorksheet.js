@@ -82,6 +82,9 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     protect(password) {
         return this.invokeExcelCall("protectSheet", { password: password ? password : null });
     }
+    renameSheet(name) {
+        return this.invokeExcelCall("renameSheet", { worksheetName: name });
+    }
     toObject() {
         return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),
@@ -103,6 +106,7 @@ class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
             getColumn: this.getColumn.bind(this),
             getRow: this.getRow.bind(this),
             protect: this.protect.bind(this),
+            renameSheet: this.renameSheet.bind(this),
             setCellName: this.setCellName.bind(this),
             setCells: this.setCells.bind(this),
             setFilter: this.setFilter.bind(this)

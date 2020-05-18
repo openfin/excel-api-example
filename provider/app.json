@@ -3,17 +3,22 @@
   "startup_app": {
     "name": "Excel-Service-Manager",
     "url": "http://openfin.github.io/excel-api-example/provider/provider.html",
-    "uuid": "excel-service-manager"
+    "uuid": "excel-service-manager",
+    "permissions": {
+      "System": {
+        "launchExternalProcess": true
+      }
+    }
   },
   "runtime": {
     "arguments": "",
-    "version": "10.66.41.18"
+    "version": "13.76.43.31"
   },
   "appAssets": [
     {
       "src": "http://openfin.github.io/excel-api-example/provider/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "2.1.0"
+      "version": "2.1.1"
     }
   ]
 }

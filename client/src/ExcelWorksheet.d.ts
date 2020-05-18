@@ -25,5 +25,6 @@ export declare class ExcelWorksheet extends RpcDispatcher {
     calculate(): Promise<any>;
     getCellByName(cellName: string, callback: Function): Promise<any>;
     protect(password: string): Promise<any>;
+    renameSheet(name: string): Promise<any>;
     toObject(): any;
 }
