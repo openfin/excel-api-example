@@ -10,11 +10,16 @@
     "defaultHeight": 704,
     "defaultTop": 100,
     "defaultLeft": 100,
-    "frame": true
+    "frame": true,
+    "permissions": {
+      "System": {
+        "launchExternalProcess": true
+      }
+    }
   },
   "runtime": {
     "arguments": "",
-    "version": "10.66.41.18"
+    "version": "13.76.43.31"
   },
   "splashScreenImage": "http://openfin.github.io/excel-api-example/demo/splash_excel.png",
   "shortcut": {

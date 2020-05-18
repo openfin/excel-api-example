@@ -4,17 +4,22 @@
     "name": "Excel-Service-Manager",
     "url": "http://localhost:8080/provider/provider.html",
     "uuid": "excel-service-manager",
+    "permissions": {
+      "System": {
+        "launchExternalProcess": true
+      }
+    },
     "autoShow": true
   },
   "runtime": {
     "arguments": "",
-    "version": "10.66.41.18"
+    "version": "13.76.43.31"
   },
   "appAssets": [
     {
       "src": "http://localhost:8080/provider/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "forceDownload": true
     }
   ]
