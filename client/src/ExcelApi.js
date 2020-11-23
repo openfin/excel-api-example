@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExcelService = void 0;
 const RpcDispatcher_1 = require("./RpcDispatcher");
 const ExcelApplication_1 = require("./ExcelApplication");
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";

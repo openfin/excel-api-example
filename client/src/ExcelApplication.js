@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExcelApplication = void 0;
 const RpcDispatcher_1 = require("./RpcDispatcher");
 const ExcelWorkbook_1 = require("./ExcelWorkbook");
 const ExcelWorksheet_1 = require("./ExcelWorksheet");

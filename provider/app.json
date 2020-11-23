@@ -12,13 +12,13 @@
   },
   "runtime": {
     "arguments": "",
-    "version": "13.76.43.31"
+    "version": "14.*"
   },
   "appAssets": [
     {
       "src": "http://openfin.github.io/excel-api-example/provider/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "2.1.1"
+      "version": "3.0.1"
     }
   ]
 }
