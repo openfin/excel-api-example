@@ -73,6 +73,7 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RpcDispatcher = void 0;
 class RpcDispatcher {
     constructor() {
         this.listeners = {};
@@ -200,6 +201,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExcelService = void 0;
 const RpcDispatcher_1 = __webpack_require__(0);
 const ExcelApplication_1 = __webpack_require__(2);
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
@@ -384,6 +386,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExcelApplication = void 0;
 const RpcDispatcher_1 = __webpack_require__(0);
 const ExcelWorkbook_1 = __webpack_require__(3);
 const ExcelWorksheet_1 = __webpack_require__(4);
@@ -635,6 +638,7 @@ ExcelApplication.defaultInstance = undefined;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExcelWorkbook = void 0;
 const RpcDispatcher_1 = __webpack_require__(0);
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
@@ -691,6 +695,7 @@ exports.ExcelWorkbook = ExcelWorkbook;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExcelWorksheet = void 0;
 const RpcDispatcher_1 = __webpack_require__(0);
 class ExcelWorksheet extends RpcDispatcher_1.RpcDispatcher {
     constructor(name, workbook) {
