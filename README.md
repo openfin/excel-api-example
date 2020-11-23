@@ -10,8 +10,9 @@ This demo uses [ExcelDna](https://github.com/Excel-DNA/ExcelDna) to create the E
 
 ## Quick Start
 
-1) Download and run the installer.
-[openfin installer download](https://install.openfin.co/download/?config=http%3A%2F%2Fopenfin.github.io%2Fexcel-api-example%2Fprovider%2Fdemo%2Fapp.json&fileName=excel-api-example-installer)
+1) Download and run the installer:
+
+[openfin installer download](https://install.openfin.co/download/?config=http%3A%2F%2Fopenfin.github.io%2Fexcel-api-example%2Fdemo%2Fapp.json&fileName=excel-api-example-installer)
 
 2) After the installer runs, the OpenFin application should launch and either connect to Excel if it already running or present the option to launch Excel.
 
