@@ -378,7 +378,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
         return this.invokeServiceCall("getExcelInstances", null, callback);
     }
     createRtd(providerName) {
-        return ExcelRtd_1.ExcelRtd2.create(providerName);
+        return ExcelRtd_1.ExcelRtd.create(providerName);
     }
     toObject() {
         return {};
@@ -665,7 +665,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExcelRtd2 = exports.ExcelRtd = void 0;
+exports.ExcelRtd = void 0;
 const EventEmitter_1 = __webpack_require__(1);
 class ExcelRtd extends EventEmitter_1.EventEmitter {
     constructor(providerName) {
@@ -682,44 +682,7 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.provider = yield fin.InterApplicationBus.Channel.create(`excelRtd/${this.providerName}`);
-            this.provider.register('topicRegistered', topic => this.onTopicRegistered(topic));
-            this.provider.register('topicUnregistered', topic => this.onTopicUnregistered(topic));
-            fin.InterApplicationBus.subscribe({ uuid: '*' }, `excelRtd/${this.providerName}`, () => { });
-            this.initialized = true;
-        });
-    }
-    onTopicRegistered(topic) {
-        this.dispatchEvent('connected', { topic });
-    }
-    onTopicUnregistered(topic) {
-        this.dispatchEvent('disconnected', { topic });
-    }
-    setValue(topic, value) {
-        //should be:
-        //this.provider.publish(topic, value);
-        fin.InterApplicationBus.publish(`excelRtd/${this.providerName}/${topic}`, value);
-    }
-    toObject() {
-        return this;
-    }
-}
-exports.ExcelRtd = ExcelRtd;
-class ExcelRtd2 extends EventEmitter_1.EventEmitter {
-    constructor(providerName) {
-        super();
-        this.listeners = {};
-        this.providerName = providerName;
-    }
-    static create(providerName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const instance = new ExcelRtd2(providerName);
-            yield instance.init();
-            return instance;
-        });
-    }
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
+            // A channel is created to ensure it is a singleton
             this.provider = yield fin.InterApplicationBus.Channel.create(`excelRtd/${this.providerName}`);
             fin.desktop.InterApplicationBus.addSubscribeListener((_, topic) => this.onSubscribe(topic));
             fin.desktop.InterApplicationBus.addUnsubscribeListener((_, topic) => this.onUnsubscribe(topic));
@@ -748,7 +711,7 @@ class ExcelRtd2 extends EventEmitter_1.EventEmitter {
         return this;
     }
 }
-exports.ExcelRtd2 = ExcelRtd2;
+exports.ExcelRtd = ExcelRtd;
 //# sourceMappingURL=ExcelRtd.js.map
 
 /***/ }),

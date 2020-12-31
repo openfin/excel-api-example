@@ -1,6 +1,6 @@
 import { RpcDispatcher } from './RpcDispatcher';
 import { ExcelApplication } from './ExcelApplication';
-import { ExcelRtd2 as ExcelRtd } from './ExcelRtd';
+import { ExcelRtd } from './ExcelRtd';
 export declare class ExcelService extends RpcDispatcher {
     static instance: ExcelService;
     defaultApplicationUuid: string;
