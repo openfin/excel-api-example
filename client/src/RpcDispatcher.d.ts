@@ -1,4 +1,5 @@
-export declare abstract class RpcDispatcher implements EventTarget {
+import { EventEmitter } from './EventEmitter';
+export declare abstract class RpcDispatcher extends EventEmitter {
     protected static messageId: number;
     protected static promiseExecutors: {
         [messageId: number]: {
@@ -7,14 +8,6 @@ export declare abstract class RpcDispatcher implements EventTarget {
         };
     };
     connectionUuid: string;
-    listeners: {
-        [eventType: string]: Function[];
-    };
-    addEventListener(type: string, listener: (data?: any) => any): void;
-    removeEventListener(type: string, listener: (data?: any) => any): void;
-    private hasEventListener;
-    dispatchEvent(evt: Event): boolean;
-    dispatchEvent(typeArg: string, data?: any): boolean;
     getDefaultMessage(): any;
     protected invokeExcelCall(functionName: string, data?: any, callback?: Function): Promise<any>;
     protected invokeServiceCall(functionName: string, data?: any, callback?: Function): Promise<any>;

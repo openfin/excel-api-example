@@ -1,5 +1,6 @@
 import { RpcDispatcher } from './RpcDispatcher';
 import { ExcelApplication } from './ExcelApplication';
+import { ExcelRtd2 as ExcelRtd } from './ExcelRtd';
 export declare class ExcelService extends RpcDispatcher {
     static instance: ExcelService;
     defaultApplicationUuid: string;
@@ -22,5 +23,6 @@ export declare class ExcelService extends RpcDispatcher {
     install(callback?: Function): Promise<any>;
     getInstallationStatus(callback?: Function): Promise<any>;
     getExcelInstances(callback?: Function): Promise<any>;
+    createRtd(providerName: string): Promise<ExcelRtd>;
     toObject(): any;
 }
