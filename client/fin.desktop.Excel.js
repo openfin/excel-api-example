@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,51 +74,8 @@
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RpcDispatcher = void 0;
-class RpcDispatcher {
-    constructor() {
-        this.listeners = {};
-    }
-    addEventListener(type, listener) {
-        if (this.hasEventListener(type, listener)) {
-            return;
-        }
-        if (!this.listeners[type]) {
-            this.listeners[type] = [];
-        }
-        this.listeners[type].push(listener);
-    }
-    removeEventListener(type, listener) {
-        if (!this.hasEventListener(type, listener)) {
-            return;
-        }
-        var callbacksOfType = this.listeners[type];
-        callbacksOfType.splice(callbacksOfType.indexOf(listener), 1);
-    }
-    hasEventListener(type, listener) {
-        if (!this.listeners[type]) {
-            return false;
-        }
-        if (!listener) {
-            return true;
-        }
-        return (this.listeners[type].indexOf(listener) >= 0);
-    }
-    dispatchEvent(evtOrTypeArg, data) {
-        var event;
-        if (typeof evtOrTypeArg == "string") {
-            event = Object.assign({
-                target: this.toObject(),
-                type: evtOrTypeArg,
-                defaultPrevented: false
-            }, data);
-        }
-        else {
-            event = evtOrTypeArg;
-        }
-        var callbacks = this.listeners[event.type] || [];
-        callbacks.forEach(callback => callback(event));
-        return event.defaultPrevented;
-    }
+const EventEmitter_1 = __webpack_require__(1);
+class RpcDispatcher extends EventEmitter_1.EventEmitter {
     getDefaultMessage() {
         return {};
     }
@@ -191,6 +148,63 @@ RpcDispatcher.promiseExecutors = {};
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EventEmitter = void 0;
+class EventEmitter {
+    constructor() {
+        this.listeners = {};
+    }
+    addEventListener(type, listener) {
+        if (this.hasEventListener(type, listener)) {
+            return;
+        }
+        if (!this.listeners[type]) {
+            this.listeners[type] = [];
+        }
+        this.listeners[type].push(listener);
+    }
+    removeEventListener(type, listener) {
+        if (!this.hasEventListener(type, listener)) {
+            return;
+        }
+        var callbacksOfType = this.listeners[type];
+        callbacksOfType.splice(callbacksOfType.indexOf(listener), 1);
+    }
+    hasEventListener(type, listener) {
+        if (!this.listeners[type]) {
+            return false;
+        }
+        if (!listener) {
+            return true;
+        }
+        return (this.listeners[type].indexOf(listener) >= 0);
+    }
+    dispatchEvent(evtOrTypeArg, data) {
+        var event;
+        if (typeof evtOrTypeArg == "string") {
+            event = Object.assign({
+                target: this.toObject(),
+                type: evtOrTypeArg,
+                defaultPrevented: false
+            }, data);
+        }
+        else {
+            event = evtOrTypeArg;
+        }
+        var callbacks = this.listeners[event.type] || [];
+        callbacks.forEach(callback => callback(event));
+        return event.defaultPrevented;
+    }
+}
+exports.EventEmitter = EventEmitter;
+//# sourceMappingURL=EventEmitter.js.map
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -203,7 +217,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExcelService = void 0;
 const RpcDispatcher_1 = __webpack_require__(0);
-const ExcelApplication_1 = __webpack_require__(2);
+const ExcelApplication_1 = __webpack_require__(3);
+const ExcelRtd_1 = __webpack_require__(4);
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
 class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
@@ -362,6 +377,9 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     getExcelInstances(callback) {
         return this.invokeServiceCall("getExcelInstances", null, callback);
     }
+    createRtd(providerName) {
+        return ExcelRtd_1.ExcelRtd.create(providerName);
+    }
     toObject() {
         return {};
     }
@@ -371,7 +389,7 @@ ExcelService.instance = new ExcelService();
 //# sourceMappingURL=ExcelApi.js.map
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -388,8 +406,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExcelApplication = void 0;
 const RpcDispatcher_1 = __webpack_require__(0);
-const ExcelWorkbook_1 = __webpack_require__(3);
-const ExcelWorksheet_1 = __webpack_require__(4);
+const ExcelWorkbook_1 = __webpack_require__(5);
+const ExcelWorksheet_1 = __webpack_require__(6);
 class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     constructor(connectionUuid) {
         super();
@@ -632,7 +650,72 @@ ExcelApplication.defaultInstance = undefined;
 //# sourceMappingURL=ExcelApplication.js.map
 
 /***/ }),
-/* 3 */
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExcelRtd = void 0;
+const EventEmitter_1 = __webpack_require__(1);
+class ExcelRtd extends EventEmitter_1.EventEmitter {
+    constructor(providerName) {
+        super();
+        this.listeners = {};
+        this.providerName = providerName;
+    }
+    static create(providerName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const instance = new ExcelRtd(providerName);
+            yield instance.init();
+            return instance;
+        });
+    }
+    init() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // A channel is created to ensure it is a singleton
+            this.provider = yield fin.InterApplicationBus.Channel.create(`excelRtd/${this.providerName}`);
+            fin.desktop.InterApplicationBus.addSubscribeListener((_, topic) => this.onSubscribe(topic));
+            fin.desktop.InterApplicationBus.addUnsubscribeListener((_, topic) => this.onUnsubscribe(topic));
+            yield fin.InterApplicationBus.subscribe({ uuid: '*' }, `excelRtd/pong/${this.providerName}`, rtdTopic => this.onSubscribe(`excelRtd/data/${this.providerName}/${rtdTopic}`));
+            yield fin.InterApplicationBus.publish(`excelRtd/ping/${this.providerName}`, true);
+        });
+    }
+    setValue(topic, value) {
+        fin.InterApplicationBus.publish(`excelRtd/data/${this.providerName}/${topic}`, value);
+    }
+    onSubscribe(topic) {
+        let match = topic.match(`excelRtd/data/${this.providerName}/(.+)`);
+        if (match && match.length === 2) {
+            let rtdTopic = match[1];
+            this.dispatchEvent('connected', { topic: rtdTopic });
+        }
+    }
+    onUnsubscribe(topic) {
+        let match = topic.match(`excelRtd/data/${this.providerName}/(.+)`);
+        if (match && match.length === 2) {
+            let rtdTopic = match[1];
+            this.dispatchEvent('disconnected', { topic: rtdTopic });
+        }
+    }
+    toObject() {
+        return this;
+    }
+}
+exports.ExcelRtd = ExcelRtd;
+//# sourceMappingURL=ExcelRtd.js.map
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -689,7 +772,7 @@ exports.ExcelWorkbook = ExcelWorkbook;
 //# sourceMappingURL=ExcelWorkbook.js.map
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -813,14 +896,14 @@ exports.ExcelWorksheet = ExcelWorksheet;
 //# sourceMappingURL=ExcelWorksheet.js.map
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 // This is the entry point of the Plugin script
-const ExcelApi_1 = __webpack_require__(1);
+const ExcelApi_1 = __webpack_require__(2);
 window.fin.desktop.ExcelService = ExcelApi_1.ExcelService.instance;
 Object.defineProperty(window.fin.desktop, 'Excel', {
     get() { return ExcelApi_1.ExcelService.instance.defaultApplicationObj; }

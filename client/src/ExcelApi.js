@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExcelService = void 0;
 const RpcDispatcher_1 = require("./RpcDispatcher");
 const ExcelApplication_1 = require("./ExcelApplication");
+const ExcelRtd_1 = require("./ExcelRtd");
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
 class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
@@ -169,6 +170,9 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     getExcelInstances(callback) {
         return this.invokeServiceCall("getExcelInstances", null, callback);
+    }
+    createRtd(providerName) {
+        return ExcelRtd_1.ExcelRtd.create(providerName);
     }
     toObject() {
         return {};
