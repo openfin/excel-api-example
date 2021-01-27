@@ -462,3 +462,103 @@ function(event){
 });
 
 ```
+
+### Excel RTD Functionality (New in 3.1.1) 
+
+You can create an RTD Connection in JavaScript:
+
+```javascript
+const rtd = await fin.desktop.ExcelService.createRtd('Provider1');
+
+// you can then listen to when an excel sheet connects by adding the following
+// example to a cell: =OpenFinRTD("Provider1", "Topic1")
+rtd.addEventListener('connected', console.dir);
+
+// the connected event will included the topic id that has been assigned
+
+// Your application can listen to the disconnected event
+// The event will have topic: "Topic1", type: "disconnected" and your application can react.
+rtd.addEventListener('disconnected', console.dir);
+
+// if the webapp refreshes or is closed and loses connection then the excel sheet wipes away the value with #N/A to ensure no stale data is shown.
+
+// You can push values to excel cells as follows
+rtd.setValue('Topic1', 'Hello');
+rtd.setValue('Topic1', true);
+rtd.setValue('Topic1', 123.55);
+
+// with this functionality you can listen to multiple cells (each with a specific topic) and return a single value or apply updates on an interval as the application value changes.
+
+```
+
+### Excel Self Hosting
+
+You may wish to control the version of the excel service you are using and self host it.
+
+This would involve having your own server to host the assets.
+
+An example can be seen in our demo by looking at the **dev-app.json** file within the /demo folder.
+
+#### Scenario: You are hosting the assets in a versioned excel folder on your server https://yourserver/excel/x.x.x/ (x.x.x represents the version you are using throughout this example)
+
+The excel setup is made up of the following:
+
+1. Your app references a service through it's manifest (and this is where you can specify your own service manifest url):  
+  
+```javascript
+"services": [
+   {
+     "name": "excel",
+     "manifestUrl": "https://yourserver/excel/x.x.x/provider/app.json"
+   }
+ ]
+```
+2. Your app references adds a script tag (or bundles) the excel client script e.g. 
+
+```javascript
+<script src="https://yourserver/excel/x.x.x/client/fin.desktop.Excel.js"></script>
+```
+
+3. The provider folder that is hosted by you has an updated app.json file to reflect your host:
+
+```javascript
+{
+  "licenseKey": "Your License Key",
+  "startup_app": {
+    "name": "Excel-Service-Manager",
+    "url": "https://yourserver/excel/x.x.x/provider/provider.html",
+    "uuid": "excel-service-manager",
+    "permissions": {
+      "System": {
+        "launchExternalProcess": true
+      }
+    }
+  },
+  "runtime": {
+    "arguments": "",
+    "version": "14.78.48.16"
+  },
+  "appAssets": [
+    {
+      "src": "https://yourserver/excel/x.x.x/provider/add-in.zip",
+      "alias": "excel-api-addin",
+      "version": "x.x.x"
+    }
+  ]
+}
+```
+
+#### Why do this?
+
+This is to control the version of the scripts/service you are using (rather than pointing to the latest version).
+
+#### Anything to be aware of?
+
+The excel service acts as a singleton so the first version that is spun up is the active version (for scenarios where you have multiple apps using excel).
+
+#### What if I want more features/control over my excel integration?
+
+OpenFin have a .Net Adapter that allows you to launch OpenFin applications/windows as well as communicate on the OpenFin Message Bus. This in combination with ExcelDNA will give you the two pieces you need to create your own custom experience.
+
+* .NET Adapter: https://developers.openfin.co/docs/net-api
+* Excel DNA: https://excel-dna.net/
