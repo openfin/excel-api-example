@@ -12,7 +12,7 @@ This demo uses [ExcelDna](https://github.com/Excel-DNA/ExcelDna) to create the E
 
 1) Download and run the installer:
 
-[openfin installer download](https://install.openfin.co/download/?config=http%3A%2F%2Fopenfin.github.io%2Fexcel-api-example%2Fdemo%2Fapp.json&fileName=excel-api-example-installer)
+[openfin installer download](https://install.openfin.co/download/?config=http%3A%2F%2Fcdn.openfin.co/release/exceljs/3.0.1/%2Fexcel-api-example%2Fdemo%2Fapp.json&fileName=excel-api-example-installer)
 
 2) After the installer runs, the OpenFin application should launch and either connect to Excel if it already running or present the option to launch Excel.
 
@@ -67,7 +67,7 @@ Declare the Excel Service by including the following declaration in your applica
 Unlike other services, currently the Excel API client is only provided as a script tag. Include the following script tag on each page that requires API access:
 
 ```
-<script src="https://openfin.github.io/excel-api-example/client/fin.desktop.Excel.js"></script>
+<script src="https://cdn.openfin.co/release/exceljs/3.0.1//excel-api-example/client/fin.desktop.Excel.js"></script>
 ```
 
 ## Waiting for the Excel Service to be Running
