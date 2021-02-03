@@ -67,7 +67,7 @@ Declare the Excel Service by including the following declaration in your applica
 Unlike other services, currently the Excel API client is only provided as a script tag. Include the following script tag on each page that requires API access:
 
 ```
-<script src="https://openfin.github.io/excel-api-example/client/fin.desktop.Excel.js"></script>
+<script src="https://cdn.openfin.co/release/exceljs/3.1.1/client/fin.desktop.Excel.js"></script>
 ```
 
 ## Waiting for the Excel Service to be Running
