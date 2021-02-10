@@ -112,9 +112,11 @@ class RpcDispatcher extends EventEmitter_1.EventEmitter {
         var currentMessageId = RpcDispatcher.messageId;
         RpcDispatcher.messageId++;
         if (this.connectionUuid !== undefined) {
+            RpcDispatcher.promiseExecutors[currentMessageId] = executor;
             fin.desktop.InterApplicationBus.send(this.connectionUuid, topic, message, ack => {
-                RpcDispatcher.promiseExecutors[currentMessageId] = executor;
+                // TODO: log once we support configurable logging.
             }, nak => {
+                delete RpcDispatcher.promiseExecutors[currentMessageId];
                 executor.reject(new Error(nak));
             });
         }
