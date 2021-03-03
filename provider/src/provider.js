@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 // XLL Add-In has been installed. If not, it will perform the deployment, registration,
 // and start the service process
 fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
+    const providerVersion = "[EXCEL_CLIENT_VERSION]";
+    const buildVersion = "[EXCEL_BUILD_VERSION]";
     const excelAssetAlias = 'excel-api-addin';
     const excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
     const installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
@@ -18,8 +20,10 @@ fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
     const addInPath = 'OpenFin.ExcelApi-AddIn.xll';
     const excelServiceEventTopic = 'excelServiceEvent';
     try {
+        console.log("Starting up excel provider: " + providerVersion + " build: " + buildVersion);
         let serviceIsRunning = yield isServiceRunning();
         let assetInfo = yield getAppAssetInfo();
+        console.log("Provider Configured Asset Info: " + JSON.stringify(assetInfo));
         if (serviceIsRunning) {
             console.log('Service Already Running: Skipping Deployment and Registration');
             return;
@@ -30,6 +34,7 @@ fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
         else {
             yield deploySharedAssets();
             yield tryInstallAddIn();
+            console.log("Updating locally stored version number to: " + assetInfo.version);
             localStorage.installedAssetVersion = assetInfo.version;
         }
         yield startExcelService();
@@ -44,12 +49,15 @@ fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
     // with the availability of plugins and services from the fin API
     function isServiceRunning() {
         return new Promise((resolve, reject) => {
+            console.log("Performing check to see if Excel .NET Exe is running: " + excelServiceUuid);
             fin.desktop.System.getAllExternalApplications(extApps => {
                 var excelServiceIndex = extApps.findIndex(extApp => extApp.uuid === excelServiceUuid);
                 if (excelServiceIndex >= 0) {
+                    console.log("Excel .NET Exe uuid found in list of external applications.");
                     resolve(true);
                 }
                 else {
+                    console.log("Excel .NET Exe uuid found in list of external applications.");
                     resolve(false);
                 }
             });
@@ -57,29 +65,37 @@ fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
     }
     function getAppAssetInfo() {
         return new Promise((resolve, reject) => {
+            console.log("Getting app asset info for alias: " + excelAssetAlias);
             fin.desktop.System.getAppAssetInfo({ alias: excelAssetAlias }, resolve, reject);
         });
     }
     function deploySharedAssets() {
         return new Promise((resolve, reject) => {
+            console.log("Deploying Shared Assets.");
             fin.desktop.Application.getCurrent().getManifest(manifest => {
+                let arguments = `-d "${installFolder}" -c ${manifest.runtime.version}`;
+                console.log("Manifest retrieved: " + JSON.stringify(manifest));
+                console.log(`Launching external process. Alias: ${excelAssetAlias}  target:  ${servicePath} arguments: ${arguments}`);
                 fin.desktop.System.launchExternalProcess({
                     alias: excelAssetAlias,
                     target: servicePath,
-                    arguments: `-d "${installFolder}" -c ${manifest.runtime.version}`,
+                    arguments: arguments,
                     listener: result => {
                         console.log(`Asset Deployment completed! Exit Code: ${result.exitCode}`);
                         resolve();
                     }
-                }, () => console.log('Deploying Shared Assets'), err => reject(err));
+                }, () => console.log('Deploying Shared Assets. Launch External Process executed.'), err => reject(err));
             });
         });
     }
     function tryInstallAddIn() {
         return new Promise((resolve, reject) => {
+            let path = `${installFolder}\\${servicePath}`;
+            let arguments = `-i "${installFolder}"`;
+            console.log(`Installing Excel Addin. Path: ${path} arguments: ${arguments}`);
             fin.desktop.System.launchExternalProcess({
-                path: `${installFolder}\\${servicePath}`,
-                arguments: `-i "${installFolder}"`,
+                path: path,
+                arguments: arguments,
                 listener: result => {
                     if (result.exitCode === 0) {
                         console.log('Add-In Installed');
@@ -89,23 +105,48 @@ fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
                     }
                     resolve();
                 }
-            }, () => console.log('Installing Add-In'), err => reject(err));
+            }, () => console.log('Installing Add-In. Launch External Process executed.'), err => reject(err));
         });
     }
     function startExcelService() {
         return new Promise((resolve, reject) => {
-            var onExcelServiceEvent;
-            fin.desktop.InterApplicationBus.subscribe('*', excelServiceEventTopic, onExcelServiceEvent = () => {
-                fin.desktop.InterApplicationBus.unsubscribe('*', excelServiceEventTopic, onExcelServiceEvent);
+            console.log("Starting Excel .NET Exe Service");
+            console.log(`Subscribing to: ${excelServiceEventTopic}`);
+            let onMessageReceived;
+            let connected = false;
+            fin.desktop.InterApplicationBus.subscribe('*', excelServiceEventTopic, onMessageReceived = () => {
+                console.log("Received message from .NET Exe Service on topic: " + excelServiceEventTopic + ". Unsubscribing now that we have received notification.");
+                if (connected) {
+                    console.log("We have already recieved a message from the exe indicating connected. Resolve promise.");
+                    resolve();
+                    return;
+                }
+                connected = true;
+                fin.desktop.InterApplicationBus.unsubscribe('*', excelServiceEventTopic, onMessageReceived, () => {
+                    console.log("Unsubscribed from topic: " + excelServiceEventTopic);
+                }, err => {
+                    console.log("Error while trying to unsubscribe from " + excelServiceEventTopic + " Error: ", err);
+                });
                 // The channel provider should eventually move into the .NET app
-                // but for now it only being used for signalling
-                fin.desktop.InterApplicationBus.Channel.create(excelServiceUuid);
+                // but for now it only being used for signalling and providing provider version
+                console.log("Creating Channel for client script to connect to: " + excelServiceUuid + " and providing a getVersion function.");
+                fin.desktop.InterApplicationBus.Channel.create(excelServiceUuid).then(channel => {
+                    channel.register('getVersion', () => {
+                        return {
+                            providerVersion, buildVersion
+                        };
+                    });
+                });
                 resolve();
             });
+            console.log("Getting system details to get port.");
             chrome.desktop.getDetails(function (details) {
+                let target = `${installFolder}\\${servicePath}`;
+                let arguments = '-p ' + details.port;
+                console.log(`Details retrieved. Launching external process. Target: ${target} Arguments: ${arguments} UUID: ${excelServiceUuid}`);
                 fin.desktop.System.launchExternalProcess({
-                    target: `${installFolder}\\${servicePath}`,
-                    arguments: '-p ' + details.port,
+                    target: target,
+                    arguments: arguments,
                     uuid: excelServiceUuid,
                 }, process => {
                     console.log('Service Launched: ' + process.uuid);

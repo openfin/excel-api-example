@@ -4,7 +4,7 @@ export declare abstract class EventEmitter implements EventTarget {
     };
     addEventListener(type: string, listener: (data?: any) => any): void;
     removeEventListener(type: string, listener: (data?: any) => any): void;
-    private hasEventListener;
+    protected hasEventListener(type: string, listener: () => any): boolean;
     dispatchEvent(evt: Event): boolean;
     dispatchEvent(typeArg: string, data?: any): boolean;
     abstract toObject(): any;

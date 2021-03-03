@@ -1,4 +1,5 @@
 import { EventEmitter } from './EventEmitter';
+import { ILog } from './ILog';
 export declare abstract class RpcDispatcher extends EventEmitter {
     protected static messageId: number;
     protected static promiseExecutors: {
@@ -7,6 +8,8 @@ export declare abstract class RpcDispatcher extends EventEmitter {
             reject: Function;
         };
     };
+    logger: ILog;
+    constructor(logger: ILog);
     connectionUuid: string;
     getDefaultMessage(): any;
     protected invokeExcelCall(functionName: string, data?: any, callback?: Function): Promise<any>;

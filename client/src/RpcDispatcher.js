@@ -2,7 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RpcDispatcher = void 0;
 const EventEmitter_1 = require("./EventEmitter");
+const NoOpLogger_1 = require("./NoOpLogger");
 class RpcDispatcher extends EventEmitter_1.EventEmitter {
+    constructor(logger) {
+        super();
+        this.logger = new NoOpLogger_1.NoOpLogger();
+        if (logger !== undefined) {
+            this.logger = logger;
+        }
+    }
     getDefaultMessage() {
         return {};
     }
@@ -59,7 +67,7 @@ class RpcDispatcher extends EventEmitter_1.EventEmitter {
                 callback(result);
                 return result;
             }).catch(err => {
-                console.error(err);
+                this.logger.error("unable to apply callback to promise", err);
             });
             promise = undefined;
         }

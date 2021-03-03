@@ -13,22 +13,35 @@ exports.ExcelService = void 0;
 const RpcDispatcher_1 = require("./RpcDispatcher");
 const ExcelApplication_1 = require("./ExcelApplication");
 const ExcelRtd_1 = require("./ExcelRtd");
+const DefaultLogger_1 = require("./DefaultLogger");
+const NoOpLogger_1 = require("./NoOpLogger");
 const excelServiceUuid = "886834D1-4651-4872-996C-7B2578E953B9";
 class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     constructor() {
-        super();
+        super(new NoOpLogger_1.NoOpLogger());
         this.defaultApplicationUuid = undefined;
         this.defaultApplicationObj = undefined;
+        this.logger = new NoOpLogger_1.NoOpLogger();
+        this.loggerName = "ExcelService";
         this.applications = {};
+        this.version = {
+            buildVersion: "0.0.0.0", "providerVersion": "0.0.0"
+        };
         this.processExcelServiceEvent = (data) => __awaiter(this, void 0, void 0, function* () {
             var eventType = data.event;
+            this.logger.debug(this.loggerName + ": Received event for data...");
+            this.logger.debug(JSON.stringify(data));
             var eventData;
             switch (data.event) {
                 case "started":
                     break;
                 case "registrationRollCall":
                     if (this.initialized) {
+                        this.logger.debug(this.loggerName + ": Initialized, about to register window instance.");
                         this.registerWindowInstance();
+                    }
+                    else {
+                        this.logger.debug(this.loggerName + ": NOT initialized. Window will not be registered.");
                     }
                     break;
                 case "excelConnected":
@@ -45,11 +58,14 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
         this.processExcelServiceResult = (result) => __awaiter(this, void 0, void 0, function* () {
             var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
             delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            this.logger.debug(this.loggerName + `: Received an ExcelService result with messageId ${result.messageId}.`);
             //TODO: Somehow received a result not in the callback map
             if (!executor) {
+                this.logger.debug(this.loggerName + `: Received an ExcelService result for messageId ${result.messageId} that doesnt have an associated promise executor.`);
                 return;
             }
             if (result.error) {
+                this.logger.debug(this.loggerName + `: Received a result with error ${result.error}.`);
                 executor.reject(result.error);
                 return;
             }
@@ -59,6 +75,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                     yield this.processGetExcelInstancesResult(result.data);
                     break;
             }
+            this.logger.debug(this.loggerName + `: Calling resolver for message ${result.messageId} with data ${JSON.stringify(result.data)}.`);
             executor.resolve(result.data);
         });
         this.registerWindowInstance = (callback) => {
@@ -66,12 +83,61 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
         };
         this.connectionUuid = excelServiceUuid;
     }
-    init() {
+    init(logger) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.initialized) {
+                if (logger !== undefined) {
+                    if (typeof logger === "boolean") {
+                        if (logger) {
+                            let defaultLogger = new DefaultLogger_1.DefaultLogger("Excel Adapter");
+                            this.logger = defaultLogger;
+                        }
+                    }
+                    else {
+                        let defaultLogger = new DefaultLogger_1.DefaultLogger(logger.name || "Excel Adapter");
+                        this.logger = Object.assign({}, logger);
+                        if (this.logger.name === undefined) {
+                            this.logger.name === defaultLogger.name;
+                        }
+                        if (this.logger.trace === undefined) {
+                            this.logger.trace = defaultLogger.trace;
+                        }
+                        if (this.logger.debug === undefined) {
+                            this.logger.debug = defaultLogger.debug;
+                        }
+                        if (this.logger.info === undefined) {
+                            this.logger.info = defaultLogger.info;
+                        }
+                        if (this.logger.warn === undefined) {
+                            this.logger.warn = defaultLogger.warn;
+                        }
+                        if (this.logger.error === undefined) {
+                            this.logger.error = defaultLogger.error;
+                        }
+                        if (this.logger.fatal === undefined) {
+                            this.logger.fatal = defaultLogger.fatal;
+                        }
+                    }
+                }
+                this.logger.info(this.loggerName + ": Initialised called.");
+                this.logger.debug(this.loggerName + ": Subscribing to Service Messages.");
                 yield this.subscribeToServiceMessages();
+                this.logger.debug(this.loggerName + ": Ensuring monitor is not conencted before connecting to channel.");
                 yield this.monitorDisconnect();
-                yield fin.desktop.InterApplicationBus.Channel.connect(excelServiceUuid);
+                try {
+                    this.logger.debug(this.loggerName + ": Connecting to channel: " + excelServiceUuid);
+                    let providerChannel = yield fin.desktop.InterApplicationBus.Channel.connect(excelServiceUuid);
+                    this.logger.debug(this.loggerName + ": Setting service provider version by requesting it from channel.");
+                    this.version = yield providerChannel.dispatch('getVersion');
+                    this.logger.debug(this.loggerName + `: Service provider version set to: ${JSON.stringify(this.version)}.`);
+                }
+                catch (err) {
+                    let errorMessage;
+                    if (err !== undefined && err.message !== undefined) {
+                        errorMessage = "Error: " + err.message;
+                    }
+                    this.logger.warn(this.loggerName + ": Error connecting or fetching version to/from provider. The version of the provider is likely older than the script version.", errorMessage);
+                }
                 yield this.registerWindowInstance();
                 yield this.getExcelInstances();
                 this.initialized = true;
@@ -97,31 +163,40 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     }
     configureDefaultApplication() {
         return __awaiter(this, void 0, void 0, function* () {
+            this.logger.debug(this.loggerName + ": Configuring Default Excel Application.");
             var defaultAppObjUuid = this.defaultApplicationObj && this.defaultApplicationObj.connectionUuid;
             var defaultAppEntry = this.applications[defaultAppObjUuid];
             var defaultAppObjConnected = defaultAppEntry ? defaultAppEntry.connected : false;
             if (defaultAppObjConnected) {
+                this.logger.debug(this.loggerName + ": Already connected to Default Excel Application: " + defaultAppObjUuid);
                 return;
             }
+            else {
+                this.logger.debug(this.loggerName + ": Default Excel Application: " + defaultAppObjUuid + " not connected.");
+            }
+            this.logger.debug(this.loggerName + ": As Default Excel Application not connected checking for existing connected instance.");
             var connectedAppUuid = Object.keys(this.applications).find(appUuid => this.applications[appUuid].connected);
             if (connectedAppUuid) {
+                this.logger.debug(this.loggerName + ": Found connected Excel Application: " + connectedAppUuid + " setting it as default instance.");
                 delete this.applications[defaultAppObjUuid];
                 this.defaultApplicationObj = this.applications[connectedAppUuid].toObject();
                 return;
             }
             if (defaultAppEntry === undefined) {
                 var disconnectedAppUuid = fin.desktop.getUuid();
-                var disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid);
+                this.logger.debug(this.loggerName + ": No default Excel Application. Creating one with id: " + disconnectedAppUuid + " and setting it as default instance.");
+                var disconnectedApp = new ExcelApplication_1.ExcelApplication(disconnectedAppUuid, this.logger);
                 yield disconnectedApp.init();
                 this.applications[disconnectedAppUuid] = disconnectedApp;
                 this.defaultApplicationObj = disconnectedApp.toObject();
+                this.logger.debug(this.loggerName + ": Default Excel Application with id: " + disconnectedAppUuid + " set as default instance.");
             }
         });
     }
     // Internal Event Handlers
     processExcelConnectedEvent(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            var applicationInstance = this.applications[data.uuid] || new ExcelApplication_1.ExcelApplication(data.uuid);
+            var applicationInstance = this.applications[data.uuid] || new ExcelApplication_1.ExcelApplication(data.uuid, this.logger);
             yield applicationInstance.init();
             this.applications[data.uuid] = applicationInstance;
             // Synthetically raise connected event
@@ -172,7 +247,7 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
         return this.invokeServiceCall("getExcelInstances", null, callback);
     }
     createRtd(providerName) {
-        return ExcelRtd_1.ExcelRtd.create(providerName);
+        return ExcelRtd_1.ExcelRtd.create(providerName, this.logger);
     }
     toObject() {
         return {};
