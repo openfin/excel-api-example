@@ -72,13 +72,42 @@ Unlike other services, currently the Excel API client is only provided as a scri
 
 ## Waiting for the Excel Service to be Running
 
-During startup, an application which wishes to utilize the Excel Service should ensure the service is running and ready to receive commands by invoking:
+During startup, an application which wishes to utilize the Excel Service should ensure the service is running and ready to receive commands by doing *two* things:
+
+### Setup event listeners so you are notified when Excel is connected/disconnected before trying to interact with Excel
+```
+async function onExcelConnected(data) {
+  console.log("Excel Connected: " + data.connectionUuid);
+  let connected = await window.fin.desktop.Excel.getConnectionStatus();
+  console.log("Connected: " + connected);
+
+  // do some work with the excel api
+}
+
+async function onExcelDisconnected(data) {
+  console.log("Excel Disconnected: " + data.connectionUuid);
+}
+
+function initializeExcelEvents() {
+  console.log("Initialising excel connected/disconnected events");
+  fin.desktop.ExcelService.addEventListener("excelConnected", onExcelConnected);
+  fin.desktop.ExcelService.addEventListener("excelDisconnected", onExcelDisconnected);
+}
+initializeExcelEvents();
+```
+
+### Invoke the Excel service after setting up your listeners by invoking:
 
 ```
 await fin.desktop.ExcelService.init();
 ```
 
 It is advisable to place this call before any calls on the `fin.desktop.Excel` namespace.
+
+## New Support Capabilities from Version 4.0+
+
+- [Logging](LOGS.md)
+- [Versioning Information](VERSIONS.md)
 
 # Getting Started with the API
 

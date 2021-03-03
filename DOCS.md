@@ -10,14 +10,14 @@ Represents the helper service which manages OpenFin connections to running insta
 
 ### Properties
 
-```
+```javascript
 connected: Boolean // indicates that OpenFin is connected to the helper service
 initialized: Boolean // indicates that the current window is subscribed to Excel service events
 ```
 
 ### Functions
 
-```
+```javascript
 /*
 init();
 Returns a promise which resolves when the Excel helper service is running and initialized.
@@ -32,7 +32,7 @@ Represents a single instance of an Excel application.
 
 ### Functions
 
-```
+```javascript
 
 /*
 getWorkbooks();
@@ -101,7 +101,7 @@ removeEventListener("workbookAdded", handler);
 
 ### Events
 
-```
+```javascript
 {type: "connected"};
 // is fired when excel connects to Openfin.
 //Example:
@@ -147,7 +147,7 @@ name: String // name of the workbook that the object represents.
 
 ### Functions
 
-```
+```javascript
 /*
 getWorksheets();
 Returns a promise which resolves an array of worksheets in the current workbook.
@@ -199,7 +199,7 @@ await workbook.close();
 
 ### Events
 
-```
+```javascript
 {type: "sheetAdded", target: ExcelWorkbook, worksheet: ExcelWorksheet};
 //fired when a new sheet is added to the workbook
 //Example:
@@ -253,7 +253,7 @@ workbook: fin.desktop.ExcelWorkbook // workbook object that worksheet belongs to
 
 ### Functions
 
-```
+```javascript
 /*
 setCells(values, offset);
 Asynchronously populates the cells with the values starting from the provided cell reference and returns a promise which resolves when the operation is complete.
@@ -414,7 +414,7 @@ await sheet.formatRange("A1:E:10", {
 
 ### Events
 
-```
+```javascript
 {type: "sheetChanged", target: ExcelWorksheet,  data: {column: int, row: int, formula: String, sheetName: String, value:String}};
 //fired when any cell value in the sheet has changed.
 //Example:
@@ -488,6 +488,23 @@ rtd.setValue('Topic1', true);
 rtd.setValue('Topic1', 123.55);
 
 // with this functionality you can listen to multiple cells (each with a specific topic) and return a single value or apply updates on an interval as the application value changes.
+
+```
+
+### Excel RTD Functionality (New in 4.0.0)
+
+From version 4.0 you can dispose the rtd instance that you created. You have the option of specifying whether or not you want pushed values cleared (as you may want some rtd instances to behave differently). You should call dispose if your application is closing or if you no longer need the functionality.
+
+```javascript
+const rtd = await fin.desktop.ExcelService.createRtd('Provider1');
+
+// Will stop listening to excel and will tell excel to clear all values in the connected topics
+ await rtd.dispose();
+
+// OR
+
+// Will stop listening to excel and but will NOT tell excel to clear all values in the connected topics
+ await rtd.dispose(false);
 
 ```
 
