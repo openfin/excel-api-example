@@ -55,7 +55,7 @@ This will start a simple HTTP server on port 8080 and launch the OpenFin App aut
 
 Declare the Excel Service by including the following declaration in your application manifest:
 
-```
+```javascript
 "services":
 [
    { "name": "excel" }
@@ -66,7 +66,7 @@ Declare the Excel Service by including the following declaration in your applica
 
 Unlike other services, currently the Excel API client is only provided as a script tag. Include the following script tag on each page that requires API access:
 
-```
+```javascript
 <script src="https://openfin.github.io/excel-api-example/client/fin.desktop.Excel.js"></script>
 ```
 
@@ -75,7 +75,7 @@ Unlike other services, currently the Excel API client is only provided as a scri
 During startup, an application which wishes to utilize the Excel Service should ensure the service is running and ready to receive commands by doing *two* things:
 
 ### Setup event listeners so you are notified when Excel is connected/disconnected before trying to interact with Excel
-```
+```javascript
 async function onExcelConnected(data) {
   console.log("Excel Connected: " + data.connectionUuid);
   let connected = await window.fin.desktop.Excel.getConnectionStatus();
@@ -98,7 +98,7 @@ initializeExcelEvents();
 
 ### Invoke the Excel service after setting up your listeners by invoking:
 
-```
+```javascript
 await fin.desktop.ExcelService.init();
 ```
 
@@ -115,7 +115,7 @@ It is advisable to place this call before any calls on the `fin.desktop.Excel` n
 
 After a connection has been established between Excel and the OpenFin application, pushing data to a spreadsheet and reading back the calculated values can be performed as follows:
 
-```
+```javascript
 var sheet1 = fin.desktop.Excel.getWorkbookByName('Book1').getWorksheetByName('Sheet1');
 
 // A little fun with Pythagorean triples:
@@ -139,7 +139,7 @@ sheet1.getCells("C2", 0, 2, cells => {
 
 Monitoring various application, workbook, and sheet events are done via the `addEventListener` functions on their respective objects. For example:
 
-```
+```javascript
 sheet1.getCells("C2", 0, 2, cells => {
   var lastValue = cells[0][0].value;
   
@@ -161,7 +161,7 @@ Version 1 of the Demo API utilized callbacks to handle asynchronous actions and 
 
 All functions which return promises can also take a callback as the final argument. The following three calls are identical:
 
-```
+```javascript
 // Version 1 - Callback style [deprecated]
 fin.desktop.Excel.getWorkbooks(workbooks => {
   console.log('Number of open workbooks: ', workbooks.length);
