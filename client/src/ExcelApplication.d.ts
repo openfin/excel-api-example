@@ -1,5 +1,6 @@
 import { RpcDispatcher } from './RpcDispatcher';
 import { ExcelWorkbook } from './ExcelWorkbook';
+import { ILog } from './ILog';
 export declare class ExcelApplication extends RpcDispatcher {
     static defaultInstance: ExcelApplication;
     workbooks: {
@@ -7,8 +8,13 @@ export declare class ExcelApplication extends RpcDispatcher {
     };
     connected: boolean;
     initialized: boolean;
+    version: {
+        clientVersion: string;
+        buildVersion: string;
+    };
+    loggerName: string;
     private objectInstance;
-    constructor(connectionUuid: string);
+    constructor(connectionUuid: string, logger?: ILog);
     init(): Promise<void>;
     release(): Promise<void>;
     processExcelEvent: (data: any, uuid: string) => void;

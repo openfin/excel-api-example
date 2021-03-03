@@ -9,6 +9,7 @@
         "launchExternalProcess": true
       }
     },
+    "enableAppLogging": true,
     "autoShow": true
   },
   "runtime": {
@@ -19,7 +20,7 @@
     {
       "src": "http://localhost:8080/provider/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "3.1.2",
+      "version": "4.0.0",
       "forceDownload": true
     }
   ]

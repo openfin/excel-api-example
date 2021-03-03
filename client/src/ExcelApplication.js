@@ -14,21 +14,27 @@ const RpcDispatcher_1 = require("./RpcDispatcher");
 const ExcelWorkbook_1 = require("./ExcelWorkbook");
 const ExcelWorksheet_1 = require("./ExcelWorksheet");
 class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
-    constructor(connectionUuid) {
-        super();
+    constructor(connectionUuid, logger) {
+        super(logger);
         this.workbooks = {};
+        this.version = { clientVersion: "[EXCEL_CLIENT_VERSION]", buildVersion: "[EXCEL_BUILD_VERSION]" };
+        this.loggerName = "ExcelApplication";
         this.processExcelEvent = (data, uuid) => {
             var eventType = data.event;
+            this.logger.debug(this.loggerName + `: ExcelApplication.processExcelEvent received from ${uuid} with data ${JSON.stringify(data)}.`);
             var workbook = this.workbooks[data.workbookName];
             var worksheets = workbook && workbook.worksheets;
             var worksheet = worksheets && worksheets[data.sheetName];
             switch (eventType) {
                 case "connected":
+                    this.logger.debug(this.loggerName + ": Received Excel Connected Event.");
                     this.connected = true;
                     this.dispatchEvent(eventType);
                     break;
                 case "sheetChanged":
+                    this.logger.debug(this.loggerName + ": Received Sheet Changed Event.");
                     if (worksheet) {
+                        this.logger.debug(this.loggerName + ": Worksheet Exists, dispatching event.");
                         worksheet.dispatchEvent(eventType, { data: data });
                     }
                     break;
@@ -36,6 +42,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                     var oldWorksheetName = data.oldSheetName;
                     var newWorksheetName = data.sheetName;
                     worksheet = worksheets && worksheets[oldWorksheetName];
+                    this.logger.debug(this.loggerName + ": Sheet renamed: Old name:" + oldWorksheetName + " New name: " + newWorksheetName);
                     if (worksheet) {
                         delete worksheets[oldWorksheetName];
                         worksheet.worksheetName = newWorksheetName;
@@ -44,12 +51,14 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                     }
                     break;
                 case "selectionChanged":
+                    this.logger.debug(this.loggerName + ": Selection Changed.");
                     if (worksheet) {
                         worksheet.dispatchEvent(eventType, { data: data });
                     }
                     break;
                 case "sheetActivated":
                 case "sheetDeactivated":
+                    this.logger.debug(this.loggerName + ": Sheet Deactivated");
                     if (worksheet) {
                         worksheet.dispatchEvent(eventType);
                     }
@@ -102,11 +111,14 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
             var callbackData = {};
             var executor = RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
             delete RpcDispatcher_1.RpcDispatcher.promiseExecutors[result.messageId];
+            this.logger.debug(this.loggerName + `: Received an Excel result with messageId ${result.messageId}.`);
             //TODO: Somehow received a result not in the callback map
             if (!executor) {
+                this.logger.debug(this.loggerName + `: Received an Excel result for messageId ${result.messageId} that doesnt have an associated promise executor.`);
                 return;
             }
             if (result.error) {
+                this.logger.debug(this.loggerName + `: Received an Excel result with error ${result.error}.`);
                 executor.reject(result.error);
                 return;
             }
@@ -150,6 +162,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                     callbackData = resultData;
                     break;
             }
+            this.logger.debug(this.loggerName + `: Calling resolver for Excel message ${result.messageId} with data ${callbackData}.`);
             executor.resolve(callbackData);
         };
         this.connectionUuid = connectionUuid;
@@ -157,17 +170,22 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
+            this.logger.info(this.loggerName + ": Init called.");
             if (!this.initialized) {
+                this.logger.info(this.loggerName + ": Not initialised...Initialising.");
                 yield this.subscribeToExcelMessages();
                 yield this.monitorDisconnect();
                 this.initialized = true;
+                this.logger.info(this.loggerName + ": initialised.");
             }
             return;
         });
     }
     release() {
         return __awaiter(this, void 0, void 0, function* () {
+            this.logger.info(this.loggerName + ": Release called.");
             if (this.initialized) {
+                this.logger.info(this.loggerName + ": Calling unsubscribe as we are currently intialised.");
                 yield this.unsubscribeToExcelMessages();
                 //TODO: Provide external means to stop monitoring disconnect
             }
@@ -237,6 +255,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     toObject() {
         return this.objectInstance || (this.objectInstance = {
             connectionUuid: this.connectionUuid,
+            version: this.version,
             addEventListener: this.addEventListener.bind(this),
             removeEventListener: this.removeEventListener.bind(this),
             addWorkbook: this.addWorkbook.bind(this),

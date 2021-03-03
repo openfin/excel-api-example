@@ -4,7 +4,7 @@ exports.ExcelWorkbook = void 0;
 const RpcDispatcher_1 = require("./RpcDispatcher");
 class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     constructor(application, name) {
-        super();
+        super(application.logger);
         this.worksheets = {};
         this.connectionUuid = application.connectionUuid;
         this.application = application;
