@@ -1,13 +1,13 @@
 {
   "name": "excel-api-example",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Excel integration for OpenFin",
   "main": "main.js",
   "dependencies": {},
   "devDependencies": {
     "http-server": "*",
     "openfin-cli": "*",
-    "webpack": "^5.24.3"
+    "webpack": "^2.5.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
