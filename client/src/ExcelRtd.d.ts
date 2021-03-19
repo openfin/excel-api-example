@@ -19,7 +19,7 @@ export declare class ExcelRtd extends EventEmitter {
     get isDisposed(): boolean;
     get isInitialized(): boolean;
     setValue(topic: any, value: any): void;
-    dispose(clearValues?: boolean): Promise<void>;
+    dispose(): Promise<void>;
     addEventListener(type: string, listener: (data?: any) => any): void;
     dispatchEvent(evt: Event): boolean;
     dispatchEvent(typeArg: string, data?: any): boolean;

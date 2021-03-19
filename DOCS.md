@@ -493,18 +493,15 @@ rtd.setValue('Topic1', 123.55);
 
 ### Excel RTD Functionality (New in 4.0.0)
 
-From version 4.0 you can dispose the rtd instance that you created. You have the option of specifying whether or not you want pushed values cleared (as you may want some rtd instances to behave differently). You should call dispose if your application is closing or if you no longer need the functionality.
+From version 4.0 you can dispose the rtd instance that you created. You should call dispose if your application is closing or if you no longer need the functionality.
 
 ```javascript
 const rtd = await fin.desktop.ExcelService.createRtd('Provider1');
 
 // Will stop listening to excel and will tell excel to clear all values in the connected topics
+// When the excel provider service closes we will clear the cells as well but that won't happen if another application 
+// is still using the excel service so you should always try and tidy up and dispose when your application is about to close. 
  await rtd.dispose();
-
-// OR
-
-// Will stop listening to excel and but will NOT tell excel to clear all values in the connected topics
- await rtd.dispose(false);
 
 ```
 
