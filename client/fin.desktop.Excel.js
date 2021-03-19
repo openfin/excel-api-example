@@ -558,7 +558,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     constructor(connectionUuid, logger) {
         super(logger);
         this.workbooks = {};
-        this.version = { clientVersion: "4.0.1", buildVersion: "4.0.1.0" };
+        this.version = { clientVersion: "4.0.2", buildVersion: "4.0.2.0" };
         this.loggerName = "ExcelApplication";
         this.processExcelEvent = (data, uuid) => {
             var eventType = data.event;
@@ -890,11 +890,11 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
         this.logger.trace(this.loggerName + `: Publishing on rtdTopic: ${topic} and provider: ${this.providerName} value: ${JSON.stringify(value)}`);
         fin.InterApplicationBus.publish(`excelRtd/data/${this.providerName}/${topic}`, value);
     }
-    dispose(clearValues = true) {
+    dispose() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.disposed) {
-                this.logger.debug(this.loggerName + `: dispose called with clearValues: ${clearValues} for this provider (${this.providerName}).`);
-                this.clear(clearValues);
+                this.logger.debug(this.loggerName + `: dispose called. Will send message to clear values for this provider (${this.providerName}).`);
+                this.clear();
                 if (this.provider !== undefined) {
                     try {
                         yield this.provider.destroy();
@@ -989,12 +989,10 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
         this.logger.debug(this.loggerName + `: Unsubscribe for rtdTopic ${topic}. Dispatching disconnected event for rtdTopic.`);
         this.dispatchEvent(this.disconnectedKey, { topic });
     }
-    clear(clearValues) {
-        if (clearValues) {
-            let path = `excelRtd/clear/${this.providerName}`;
-            this.logger.debug(this.loggerName + `: Clear called specifying clear values: ${clearValues}. Publishing to excel on topic: ${path} `);
-            fin.InterApplicationBus.publish(`excelRtd/clear/${this.providerName}`, clearValues);
-        }
+    clear() {
+        let path = `excelRtd/clear/${this.providerName}`;
+        this.logger.debug(this.loggerName + `: Clear called. Publishing to excel on topic: ${path} `);
+        fin.InterApplicationBus.publish(`excelRtd/clear/${this.providerName}`, true);
     }
 }
 exports.ExcelRtd = ExcelRtd;
