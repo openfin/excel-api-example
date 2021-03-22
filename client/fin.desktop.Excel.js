@@ -558,7 +558,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     constructor(connectionUuid, logger) {
         super(logger);
         this.workbooks = {};
-        this.version = { clientVersion: "4.0.2", buildVersion: "4.0.2.0" };
+        this.version = { clientVersion: "4.0.3", buildVersion: "4.0.3.0" };
         this.loggerName = "ExcelApplication";
         this.processExcelEvent = (data, uuid) => {
             var eventType = data.event;
@@ -639,6 +639,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                         delete this.workbooks[oldWorkbookName];
                         workbook.workbookName = newWorkbookName;
                         this.workbooks[workbook.workbookName] = workbook;
+                        workbook.refreshObject();
                         this.dispatchEvent(eventType, { workbook: workbook.toObject(), oldWorkbookName: oldWorkbookName });
                     }
                     break;
@@ -1037,6 +1038,10 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     }
     close() {
         return this.invokeExcelCall("closeWorkbook");
+    }
+    refreshObject() {
+        this.objectInstance = null;
+        this.toObject();
     }
     toObject() {
         return this.objectInstance || (this.objectInstance = {
