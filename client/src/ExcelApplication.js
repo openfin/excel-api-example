@@ -98,6 +98,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
                         delete this.workbooks[oldWorkbookName];
                         workbook.workbookName = newWorkbookName;
                         this.workbooks[workbook.workbookName] = workbook;
+                        workbook.refreshObject();
                         this.dispatchEvent(eventType, { workbook: workbook.toObject(), oldWorkbookName: oldWorkbookName });
                     }
                     break;

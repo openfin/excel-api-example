@@ -33,6 +33,10 @@ class ExcelWorkbook extends RpcDispatcher_1.RpcDispatcher {
     close() {
         return this.invokeExcelCall("closeWorkbook");
     }
+    refreshObject() {
+        this.objectInstance = null;
+        this.toObject();
+    }
     toObject() {
         return this.objectInstance || (this.objectInstance = {
             addEventListener: this.addEventListener.bind(this),

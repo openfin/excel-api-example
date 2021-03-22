@@ -16,5 +16,6 @@ export declare class ExcelWorkbook extends RpcDispatcher {
     activate(): Promise<any>;
     save(): Promise<any>;
     close(): Promise<any>;
+    refreshObject(): void;
     toObject(): any;
 }
