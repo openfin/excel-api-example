@@ -2,7 +2,7 @@
   "licenseKey": "64605fac-add3-48a0-8710-64b38e96a2dd",
   "startup_app": {
     "name": "Excel-Service-Manager",
-    "url": "https://cdn.openfin.co/release/exceljs/4.0.3/provider/provider.html",
+    "url": "https://cdn.openfin.co/release/exceljs/4.0.4/provider/provider.html",
     "uuid": "excel-service-manager",
     "permissions": {
       "System": {
@@ -17,9 +17,9 @@
   },
   "appAssets": [
     {
-      "src": "https://cdn.openfin.co/release/exceljs/4.0.3/provider/add-in.zip",
+      "src": "https://cdn.openfin.co/release/exceljs/4.0.4/provider/add-in.zip",
       "alias": "excel-api-addin",
-      "version": "4.0.3"
+      "version": "4.0.4"
     }
   ]
 }
