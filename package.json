@@ -1,6 +1,6 @@
 {
   "name": "excel-api-example",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "Excel integration for OpenFin",
   "main": "main.js",
   "dependencies": {},

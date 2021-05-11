@@ -489,8 +489,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     getExcelInstances(callback) {
         return this.invokeServiceCall("getExcelInstances", null, callback);
     }
-    createRtd(providerName) {
-        return ExcelRtd_1.ExcelRtd.create(providerName, this.logger);
+    createRtd(providerName, heartbeatIntervalInMilliseconds = 10000) {
+        return ExcelRtd_1.ExcelRtd.create(providerName, this.logger, heartbeatIntervalInMilliseconds);
     }
     toObject() {
         return {};
@@ -558,7 +558,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     constructor(connectionUuid, logger) {
         super(logger);
         this.workbooks = {};
-        this.version = { clientVersion: "4.0.4", buildVersion: "4.0.4.0" };
+        this.version = { clientVersion: "4.0.5", buildVersion: "4.0.5.0" };
         this.loggerName = "ExcelApplication";
         this.processExcelEvent = (data, uuid) => {
             var eventType = data.event;
@@ -834,8 +834,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExcelRtd = void 0;
 const EventEmitter_1 = __webpack_require__(1);
 class ExcelRtd extends EventEmitter_1.EventEmitter {
-    constructor(providerName, logger) {
+    constructor(providerName, logger, heartbeatIntervalInMilliseconds = 10000) {
         super();
+        this.heartbeatIntervalInMilliseconds = heartbeatIntervalInMilliseconds;
         this.listeners = {};
         this.connectedTopics = {};
         this.connectedKey = 'connected';
@@ -843,14 +844,19 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
         this.loggerName = "ExcelRtd";
         this.initialized = false;
         this.disposed = false;
+        var minimumDefaultHeartbeat = 10000;
+        if (this.heartbeatIntervalInMilliseconds < minimumDefaultHeartbeat) {
+            logger.warn(`heartbeatIntervalInMilliseconds cannot be less than ${minimumDefaultHeartbeat}. Setting heartbeatIntervalInMilliseconds to ${minimumDefaultHeartbeat}.`);
+            this.heartbeatIntervalInMilliseconds = minimumDefaultHeartbeat;
+        }
         this.providerName = providerName;
         this.logger = logger;
         logger.debug(this.loggerName + ": instance created for provider: " + providerName);
     }
-    static create(providerName, logger) {
+    static create(providerName, logger, heartbeatIntervalInMilliseconds = 10000) {
         return __awaiter(this, void 0, void 0, function* () {
             logger.debug("ExcelRtd: create called to create provider: " + providerName);
-            const instance = new ExcelRtd(providerName, logger);
+            const instance = new ExcelRtd(providerName, logger, heartbeatIntervalInMilliseconds);
             yield instance.init();
             if (!instance.isInitialized) {
                 return undefined;
@@ -877,6 +883,7 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
             yield fin.InterApplicationBus.subscribe({ uuid: '*' }, `excelRtd/ping-request/${this.providerName}`, this.ping.bind(this));
             yield fin.InterApplicationBus.subscribe({ uuid: '*' }, `excelRtd/unsubscribed/${this.providerName}`, this.onUnsubscribe.bind(this));
             yield this.ping();
+            this.establishHeartbeat();
             this.logger.debug(this.loggerName + `: initialisation for provider (${this.providerName}) finished.`);
             this.initialized = true;
         });
@@ -895,6 +902,9 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.disposed) {
                 this.logger.debug(this.loggerName + `: dispose called. Will send message to clear values for this provider (${this.providerName}).`);
+                if (this.heartbeatToken) {
+                    clearInterval(this.heartbeatToken);
+                }
                 this.clear();
                 if (this.provider !== undefined) {
                     try {
@@ -971,16 +981,22 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
     }
     ping(topic) {
         return __awaiter(this, void 0, void 0, function* () {
-            let pingPath;
             if (topic !== undefined) {
-                pingPath = `excelRtd/ping/${this.providerName}/${topic}`;
+                this.pingPath = `excelRtd/ping/${this.providerName}/${topic}`;
             }
             else {
-                pingPath = `excelRtd/ping/${this.providerName}`;
+                this.pingPath = `excelRtd/ping/${this.providerName}`;
             }
-            this.logger.debug(this.loggerName + `: Publishing ping message for this provider (${this.providerName}) to excel on topic: ${pingPath}.`);
-            yield fin.InterApplicationBus.publish(`${pingPath}`, true);
+            this.logger.debug(this.loggerName + `: Publishing ping message for this provider (${this.providerName}) to excel on topic: ${this.pingPath}.`);
+            yield fin.InterApplicationBus.publish(`${this.pingPath}`, true);
         });
+    }
+    establishHeartbeat() {
+        this.heartbeatPath = `excelRtd/heartbeat/${this.providerName}`;
+        this.heartbeatToken = setInterval(() => {
+            this.logger.debug(`Heartbeating for ${this.heartbeatPath}.`);
+            fin.InterApplicationBus.publish(`${this.heartbeatPath}`, this.heartbeatIntervalInMilliseconds);
+        }, this.heartbeatIntervalInMilliseconds);
     }
     onSubscribe(topic) {
         this.logger.debug(this.loggerName + `: Subscription for rtdTopic ${topic} found. Dispatching connected event for rtdTopic.`);
