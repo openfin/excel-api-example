@@ -30,6 +30,6 @@ export declare class ExcelService extends RpcDispatcher {
     install(callback?: Function): Promise<any>;
     getInstallationStatus(callback?: Function): Promise<any>;
     getExcelInstances(callback?: Function): Promise<any>;
-    createRtd(providerName: string): Promise<ExcelRtd>;
+    createRtd(providerName: string, heartbeatIntervalInMilliseconds?: number): Promise<ExcelRtd>;
     toObject(): any;
 }

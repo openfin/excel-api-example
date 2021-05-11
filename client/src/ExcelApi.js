@@ -246,8 +246,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
     getExcelInstances(callback) {
         return this.invokeServiceCall("getExcelInstances", null, callback);
     }
-    createRtd(providerName) {
-        return ExcelRtd_1.ExcelRtd.create(providerName, this.logger);
+    createRtd(providerName, heartbeatIntervalInMilliseconds = 10000) {
+        return ExcelRtd_1.ExcelRtd.create(providerName, this.logger, heartbeatIntervalInMilliseconds);
     }
     toObject() {
         return {};

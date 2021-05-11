@@ -1,20 +1,24 @@
 import { EventEmitter } from './EventEmitter';
 import { ILog } from './ILog';
 export declare class ExcelRtd extends EventEmitter {
+    private heartbeatIntervalInMilliseconds;
     providerName: string;
     provider: any;
     logger: ILog;
     listeners: {
         [eventType: string]: Function[];
     };
+    pingPath: string;
+    heartbeatPath: string;
     connectedTopics: {};
     connectedKey: string;
     disconnectedKey: string;
     loggerName: string;
     private initialized;
     private disposed;
-    static create(providerName: any, logger: ILog): Promise<ExcelRtd>;
-    constructor(providerName: any, logger: ILog);
+    heartbeatToken: number;
+    static create(providerName: any, logger: ILog, heartbeatIntervalInMilliseconds?: number): Promise<ExcelRtd>;
+    constructor(providerName: any, logger: ILog, heartbeatIntervalInMilliseconds?: number);
     init(): Promise<void>;
     get isDisposed(): boolean;
     get isInitialized(): boolean;
@@ -25,6 +29,7 @@ export declare class ExcelRtd extends EventEmitter {
     dispatchEvent(typeArg: string, data?: any): boolean;
     toObject(): this;
     private ping;
+    private establishHeartbeat;
     private onSubscribe;
     private onUnsubscribe;
     private clear;
