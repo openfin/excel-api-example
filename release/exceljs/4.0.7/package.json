@@ -1,0 +1,31 @@
+{
+  "name": "excel-api-example",
+  "version": "4.0.7",
+  "description": "Excel integration for OpenFin",
+  "main": "main.js",
+  "dependencies": {},
+  "devDependencies": {
+    "openfin-cli": "*",
+    "http-server": "*",
+    "webpack": "^2.5.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "start node node_modules\\http-server\\bin\\http-server -p 8080 -c-1 & node node_modules\\openfin-cli\\cli.js -l -c demo\\dev-app.json",
+    "webpack": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openfin/excel-api-example.git"
+  },
+  "keywords": [
+    "OpenFin",
+    "Excel"
+  ],
+  "author": "OpenFin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/openfin/excel-api-example/issues"
+  },
+  "homepage": "https://github.com/openfin/excel-api-example#readme"
+}
