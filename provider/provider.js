@@ -83,8 +83,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 // XLL Add-In has been installed. If not, it will perform the deployment, registration,
 // and start the service process
 fin.desktop.main(() => __awaiter(this, void 0, void 0, function* () {
-    const providerVersion = "4.0.6";
-    const buildVersion = "4.0.6.0";
+    const providerVersion = "4.0.7";
+    const buildVersion = "4.0.7.0";
     const excelAssetAlias = 'excel-api-addin';
     const excelServiceUuid = '886834D1-4651-4872-996C-7B2578E953B9';
     const installFolder = '%localappdata%\\OpenFin\\shared\\assets\\excel-api-addin';
