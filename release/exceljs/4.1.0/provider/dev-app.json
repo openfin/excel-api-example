@@ -1,0 +1,27 @@
+{
+  "licenseKey": "64605fac-add3-48a0-8710-64b38e96a2dd",
+  "startup_app": {
+    "name": "Excel-Service-Manager",
+    "url": "http://localhost:8080/provider/provider.html",
+    "uuid": "excel-service-manager",
+    "permissions": {
+      "System": {
+        "launchExternalProcess": true
+      }
+    },
+    "enableAppLogging": true,
+    "autoShow": true
+  },
+  "runtime": {
+    "arguments": "",
+    "version": "14.78.48.16"
+  },
+  "appAssets": [
+    {
+      "src": "http://localhost:8080/provider/add-in.zip",
+      "alias": "excel-api-addin",
+      "version": "4.1.0",
+      "forceDownload": true
+    }
+  ]
+}
