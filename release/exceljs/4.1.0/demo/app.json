@@ -1,0 +1,37 @@
+{
+  "licenseKey": "64605fac-add3-48a0-8710-64b38e96a2dd",
+  "startup_app": {
+    "name": "Excel-API-Example",
+    "url": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.0/demo/index.html",
+    "uuid": "excel-api-example",
+    "applicationIcon": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.0/demo/openfin-excel.ico",
+    "autoShow": true,
+    "defaultWidth": 760,
+    "defaultHeight": 704,
+    "defaultTop": 100,
+    "defaultLeft": 100,
+    "frame": true,
+    "permissions": {
+      "System": {
+        "launchExternalProcess": true
+      }
+    }
+  },
+  "runtime": {
+    "arguments": "",
+    "version": "14.78.48.16"
+  },
+  "splashScreenImage": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.0/demo/splash_excel.png",
+  "shortcut": {
+    "company": "OpenFin",
+    "description": "excel-api-example",
+    "icon": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.0/demo/openfin-excel.ico",
+    "name": "excel-api-example"
+  },
+  "services": [
+    {
+      "name": "excel",
+      "manifestUrl": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.0/provider/app.json"
+    }
+  ]
+}
