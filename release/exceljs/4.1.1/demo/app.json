@@ -4,7 +4,7 @@
     "name": "Excel-API-Example",
     "url": "https://cdn.openfin.co/release/exceljs/4.1.1/demo/index.html",
     "uuid": "excel-api-example",
-    "applicationIcon": "https://cdn.openfin.co/release/exceljs/4.1.1/demo/openfin-excel.ico",
+    "applicationIcon": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.1/demo/openfin-excel.ico",
     "autoShow": true,
     "defaultWidth": 760,
     "defaultHeight": 704,
@@ -21,17 +21,17 @@
     "arguments": "",
     "version": "14.78.48.16"
   },
-  "splashScreenImage": "https://cdn.openfin.co/release/exceljs/4.1.1/demo/splash_excel.png",
+  "splashScreenImage": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.1/demo/splash_excel.png",
   "shortcut": {
     "company": "OpenFin",
     "description": "excel-api-example",
-    "icon": "https://cdn.openfin.co/release/exceljs/4.1.1/demo/openfin-excel.ico",
+    "icon": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.1/demo/openfin-excel.ico",
     "name": "excel-api-example"
   },
   "services": [
     {
       "name": "excel",
-      "manifestUrl": "https://cdn.openfin.co/release/exceljs/4.1.1/provider/app.json"
+      "manifestUrl": "http://openfin.github.io/excel-api-example/release/exceljs/4.1.1/provider/app.json"
     }
   ]
 }
