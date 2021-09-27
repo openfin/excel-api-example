@@ -274,6 +274,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             var eventType = data.event;
             this.logger.debug(this.loggerName + ": Received event for data...");
             this.logger.debug(JSON.stringify(data));
+            const mainChannelCreated = yield this.mainChannelCreated;
+            this.logger.debug(this.loggerName + `: Main Channel created... ${mainChannelCreated}`);
             var eventData;
             switch (data.event) {
                 case "started":
@@ -325,6 +327,13 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
             return this.invokeServiceCall("registerOpenfinWindow", { domain: document.domain }, callback);
         };
         this.connectionUuid = excelServiceUuid;
+        this.setMainChanelCreated();
+    }
+    setMainChanelCreated() {
+        this.mainChannelCreated = new Promise((resolve, reject) => {
+            this.mainChannelResolve = resolve;
+            this.mainChannelReject = reject;
+        });
     }
     init(logger) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -370,6 +379,8 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                 try {
                     this.logger.debug(this.loggerName + ": Connecting to channel: " + excelServiceUuid);
                     let providerChannel = yield fin.desktop.InterApplicationBus.Channel.connect(excelServiceUuid);
+                    this.logger.debug(this.loggerName + ": Channel connected: " + excelServiceUuid);
+                    this.logger.debug(this.loggerName + ": Flagging that mainChannelIs connected: " + excelServiceUuid);
                     this.logger.debug(this.loggerName + ": Setting service provider version by requesting it from channel.");
                     this.version = yield providerChannel.dispatch('getVersion');
                     this.logger.debug(this.loggerName + `: Service provider version set to: ${JSON.stringify(this.version)}.`);
@@ -379,11 +390,13 @@ class ExcelService extends RpcDispatcher_1.RpcDispatcher {
                     if (err !== undefined && err.message !== undefined) {
                         errorMessage = "Error: " + err.message;
                     }
+                    this.mainChannelReject(`${this.loggerName}: Error connecting or fetching version to/from provider. The version of the provider is likely older than the script version. ${errorMessage}`);
                     this.logger.warn(this.loggerName + ": Error connecting or fetching version to/from provider. The version of the provider is likely older than the script version.", errorMessage);
                 }
+                this.initialized = true;
+                this.mainChannelResolve(true);
                 yield this.registerWindowInstance();
                 yield this.getExcelInstances();
-                this.initialized = true;
             }
             return;
         });
@@ -558,7 +571,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     constructor(connectionUuid, logger) {
         super(logger);
         this.workbooks = {};
-        this.version = { clientVersion: "4.1.0", buildVersion: "4.1.0.0" };
+        this.version = { clientVersion: "4.1.1", buildVersion: "4.1.1.0" };
         this.loggerName = "ExcelApplication";
         this.processExcelEvent = (data, uuid) => {
             var eventType = data.event;
@@ -918,7 +931,7 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
                 this.logger.debug(this.loggerName + `: UnSubscribing to messages to this provider (${this.providerName}) from excel.`);
                 yield fin.InterApplicationBus.unsubscribe({ uuid: '*' }, `excelRtd/pong/${this.providerName}`, this.onSubscribe.bind(this));
                 yield fin.InterApplicationBus.unsubscribe({ uuid: '*' }, `excelRtd/ping-request/${this.providerName}`, this.ping.bind(this));
-                yield fin.InterApplicationBus.subscribe({ uuid: '*' }, `excelRtd/unsubscribed/${this.providerName}`, this.onUnsubscribe.bind(this));
+                yield fin.InterApplicationBus.unsubscribe({ uuid: '*' }, `excelRtd/unsubscribed/${this.providerName}`, this.onUnsubscribe.bind(this));
                 this.disposed = true;
                 this.initialized = false;
             }
