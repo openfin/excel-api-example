@@ -96,7 +96,7 @@ class ExcelRtd extends EventEmitter_1.EventEmitter {
                 this.logger.debug(this.loggerName + `: UnSubscribing to messages to this provider (${this.providerName}) from excel.`);
                 yield fin.InterApplicationBus.unsubscribe({ uuid: '*' }, `excelRtd/pong/${this.providerName}`, this.onSubscribe.bind(this));
                 yield fin.InterApplicationBus.unsubscribe({ uuid: '*' }, `excelRtd/ping-request/${this.providerName}`, this.ping.bind(this));
-                yield fin.InterApplicationBus.subscribe({ uuid: '*' }, `excelRtd/unsubscribed/${this.providerName}`, this.onUnsubscribe.bind(this));
+                yield fin.InterApplicationBus.unsubscribe({ uuid: '*' }, `excelRtd/unsubscribed/${this.providerName}`, this.onUnsubscribe.bind(this));
                 this.disposed = true;
                 this.initialized = false;
             }

@@ -9,6 +9,7 @@ export declare class ExcelService extends RpcDispatcher {
     logger: ILog;
     loggerName: string;
     initialized: boolean;
+    mainChannelCreated: Promise<boolean>;
     applications: {
         [connectionUuid: string]: ExcelApplication;
     };
@@ -16,7 +17,10 @@ export declare class ExcelService extends RpcDispatcher {
         buildVersion: string;
         providerVersion: string;
     };
+    mainChannelResolve: (value: boolean | PromiseLike<boolean>) => void;
+    mainChannelReject: (reason?: any) => void;
     constructor();
+    private setMainChanelCreated;
     init(logger: ILog | boolean): Promise<void>;
     processExcelServiceEvent: (data: any) => Promise<void>;
     processExcelServiceResult: (result: any) => Promise<void>;

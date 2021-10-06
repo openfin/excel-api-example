@@ -571,7 +571,7 @@ class ExcelApplication extends RpcDispatcher_1.RpcDispatcher {
     constructor(connectionUuid, logger) {
         super(logger);
         this.workbooks = {};
-        this.version = { clientVersion: "4.1.1", buildVersion: "4.1.1.0" };
+        this.version = { clientVersion: "4.1.2", buildVersion: "4.1.2.0" };
         this.loggerName = "ExcelApplication";
         this.processExcelEvent = (data, uuid) => {
             var eventType = data.event;
