@@ -1,3 +1,5 @@
+> **IMPORTANT NOTE**: The code in this repo has now been **deprecated** as it has been replaced by our new Excel integration. Please refer to the [developer docs](https://developers.openfin.co/of-docs/docs/excel-integration) for more information.
+
 # Excel Service API Demo
 
 This repo provides a demonstration of the OpenFin Excel Service and its JavaScript API.
